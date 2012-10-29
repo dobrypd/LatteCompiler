@@ -11,3 +11,5 @@ test
 Latte
 *.bak
 *.output
+*.l
+testLatte
