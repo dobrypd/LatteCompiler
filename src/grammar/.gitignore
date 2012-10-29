@@ -9,3 +9,5 @@ Makefile
 *.ps
 test
 Latte
+*.bak
+*.output

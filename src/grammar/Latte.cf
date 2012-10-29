@@ -1,28 +1,28 @@
 -- programs ------------------------------------------------
 
-entrypoints Program ;
+entrypoints Prog ;
 
-Program.   Program ::= [TopDef] ;
+Program.   Prog ::= [TopDef] ;
 
-FnDef.	   TopDef ::= Type Ident "(" [Arg] ")" StmBlock ;
+FnDef.	   TopDef ::= Type Ident "(" [Arg] ")" Blk ;
 
 separator nonempty TopDef "" ;
 
-Arg. 	   Arg ::= Type Ident;
+Argument. 	   Arg ::= Type Ident;
 
 separator  Arg "," ;
 
 -- statements ----------------------------------------------
 
-StmBlock.   Block ::= "{" [Stmt] "}" ;
+StmBlock.     Blk ::= "{" [Stmt] "}" ;
 
-separator   Stmt "" ;
+separator  Stmt "" ;
 
-StmEmpty.   Stmt ::= ";" ;
+StmEmpty.     Stmt ::= ";" ;
 
-StmBStmt.   Stmt ::= StmBlock ;
+StmBStmt.     Stmt ::= Blk ;
 
-StmDecl.    Stmt ::= Type [Item] ";" ;
+StmDecl.      Stmt ::= Type [Item] ";" ;
 
 StmNoInit.    Item ::= Ident ; 
 
@@ -96,27 +96,27 @@ separator  Expr "," ;
 
 -- operators -----------------------------------------------
 
-OpPlus.      AddOp ::= "+" ;
+Plus.      AddOp ::= "+" ;
 
-OpMinus.     AddOp ::= "-" ;
+Minus.     AddOp ::= "-" ;
 
-OpTimes.     MulOp ::= "*" ;
+Times.     MulOp ::= "*" ;
 
-OpDiv.       MulOp ::= "/" ;
+Div.       MulOp ::= "/" ;
 
-OpMod.       MulOp ::= "%" ;
+Mod.       MulOp ::= "%" ;
 
-OpLTH.       RelOp ::= "<" ;
+LTH.       RelOp ::= "<" ;
 
-OpLE.        RelOp ::= "<=" ;
+LE.        RelOp ::= "<=" ;
 
-OpGTH.       RelOp ::= ">" ;
+GTH.       RelOp ::= ">" ;
 
-OpGE.        RelOp ::= ">=" ;
+GE.        RelOp ::= ">=" ;
 
-OpEQU.       RelOp ::= "==" ;
+EQU.       RelOp ::= "==" ;
 
-OpNE.        RelOp ::= "!=" ;
+NE.        RelOp ::= "!=" ;
 
 -- comments ------------------------------------------------
 
