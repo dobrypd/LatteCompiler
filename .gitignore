@@ -1,0 +1,7 @@
+*~
+*.swp
+*.o
+Latte
+*.ps
+*.pdf
+*/bin/*

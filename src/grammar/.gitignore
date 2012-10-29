@@ -1,0 +1,11 @@
+*.[CH]
+*.[oa]
+*.log
+*.aux
+Makefile
+*.y
+*.tex
+*.dvi
+*.ps
+test
+Latte
