@@ -2,51 +2,51 @@
 
 entrypoints Prog ;
 
-Program.   Prog ::= [TopDef] ;
+Program.    Prog ::= [TopDef] ;
 
-FnDef.	   TopDef ::= Type Ident "(" [Arg] ")" Blk ;
+FnDef.      TopDef ::= Type Ident "(" [Arg] ")" Blk ;
 
 separator nonempty TopDef "" ;
 
-Argument. 	   Arg ::= Type Ident;
+Argument.   Arg ::= Type Ident;
 
-separator  Arg "," ;
+separator   Arg "," ;
 
 -- statements ----------------------------------------------
 
-StmBlock.     Blk ::= "{" [Stmt] "}" ;
+StmBlock.   Blk ::= "{" [Stmt] "}" ;
 
-separator  Stmt "" ;
+separator   Stmt "" ;
 
-StmEmpty.     Stmt ::= ";" ;
+StmEmpty.   Stmt ::= ";" ;
 
-StmBStmt.     Stmt ::= Blk ;
+StmBStmt.   Stmt ::= Blk ;
 
-StmDecl.      Stmt ::= Type [Item] ";" ;
+StmDecl.    Stmt ::= Type [Item] ";" ;
 
-StmNoInit.    Item ::= Ident ; 
+StmNoInit.  Item ::= Ident ; 
 
-StmInit.      Item ::= Ident "=" Expr ;
+StmInit.    Item ::= Ident "=" Expr ;
 
 separator nonempty Item "," ;
 
-StmAss.       Stmt ::= Ident "=" Expr  ";" ;
+StmAss.     Stmt ::= Ident "=" Expr  ";" ;
 
-StmIncr.      Stmt ::= Ident "++"  ";" ;
+StmIncr.    Stmt ::= Ident "++"  ";" ;
 
-StmDecr.      Stmt ::= Ident "--"  ";" ;
+StmDecr.    Stmt ::= Ident "--"  ";" ;
 
-StmRet.       Stmt ::= "return" Expr ";" ;
+StmRet.     Stmt ::= "return" Expr ";" ;
 
-StmVRet.      Stmt ::= "return" ";" ;
+StmVRet.    Stmt ::= "return" ";" ;
 
-StmCond.      Stmt ::= "if" "(" Expr ")" Stmt  ;
+StmCond.    Stmt ::= "if" "(" Expr ")" Stmt  ;
 
 StmCondElse.  Stmt ::= "if" "(" Expr ")" Stmt "else" Stmt  ;
 
-StmWhile.     Stmt ::= "while" "(" Expr ")" Stmt ;
+StmWhile.   Stmt ::= "while" "(" Expr ")" Stmt ;
 
-StmSExp.      Stmt ::= Expr  ";" ;
+StmSExp.    Stmt ::= Expr  ";" ;
 
 -- Types ---------------------------------------------------
 
