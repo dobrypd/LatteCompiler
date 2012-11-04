@@ -1,27 +1,36 @@
 #!/bin/bash
 
-# FLAG, 1 if you dont want program oututs
+echo "Run only from tests directory"
+
+# FLAG, 1 if you dont want program outputs
 DELETE_OUTPUTS=1
-# FLAG IF want Kappa to show debug informations
+# FLAG IF want Latte to show debug informations
 DEBUG_OUT=1
 
-for i in `dir -d *.test`
+
+PROJECT_DIR=`pwd`/../
+TESTS_IN_DIR=$PROJECT_DIR./tests/
+BIN=$PROJECT_DIR/bin/
+LATTE=$BIN/Latte
+
+
+for i in `find  $TESTS_IN_DIR -iname "*.lat"`
 do
-    echo -en "\033[38m\033[32mKappa runned on file : \033[0m"$i"\n"
+    echo -en "\033[38m\033[32mLatte runned on file : \033[0m"$i"\n"
     if [ $DEBUG_OUT == 0 ]
     then
-        ../Kappa $i 2> /dev/null 1>./$i.out.PROUT
+        $LATTE $i 2> /dev/null 1 > $i.output.PROUT
     else
-        ../Kappa $i 1>./$i.out.PROUT
+        $LATTE $i 1> $i.output.PROUT
     fi
 done
 
 #check
 
-for i in `dir -d *.out`
+for i in `find $TESTS_IN_DIR -iname "*.output"`
 do
     echo -en "\033[38m\033[33mChecking outputs for: \033[0m"$i"\n"
-    if diff ./$i.PROUT ./$i
+    if diff $i.PROUT $i
     then
         echo -en "\033[38m\033[32mOK\033[0m\n"
     else

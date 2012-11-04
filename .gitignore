@@ -5,3 +5,4 @@ Latte
 *.ps
 *.pdf
 */bin/*
+*PROUT
