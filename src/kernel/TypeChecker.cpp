@@ -174,7 +174,7 @@ void TypeChecker::visitStmInit(StmInit *stminit)
 
 }
 
-void TypeChecker::visitInt(Int *int)
+void TypeChecker::visitInt(Int* integer)
 {
   /* Code For Int Goes Here */
 
@@ -188,14 +188,14 @@ void TypeChecker::visitStr(Str *str)
 
 }
 
-void TypeChecker::visitBool(Bool *bool)
+void TypeChecker::visitBool(Bool* boolean)
 {
   /* Code For Bool Goes Here */
 
 
 }
 
-void TypeChecker::visitVoid(Void *void)
+void TypeChecker::visitVoid(Void* void_field)
 {
   /* Code For Void Goes Here */
 
@@ -266,11 +266,11 @@ void TypeChecker::visitNeg(Neg *neg)
 
 }
 
-void TypeChecker::visitNot(Not *not)
+void TypeChecker::visitNot(Not* not_field)
 {
   /* Code For Not Goes Here */
 
-  not->expr_->accept(this);
+  not_field->expr_->accept(this);
 
 }
 

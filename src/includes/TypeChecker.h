@@ -7,11 +7,10 @@
 #ifndef TYPECHECKER_H_
 #define TYPECHECKER_H_
 
-namespace frontend
-{
-
 #include "Absyn.H"
 
+namespace frontend
+{
 
 class TypeChecker : public Visitor
 {
