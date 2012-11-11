@@ -1,9 +1,10 @@
 /*
- * Author: Piotr Dobrowolski
- * pd291528@students.mimuw.edu.pl
- *
- */
+*  Author: Piotr Dobrowolski
+*  pd291528@students.mimuw.edu.pl
+*
+*/
 
+#include <iostream>
 #include "TypeChecker.h"
 
 namespace frontend
@@ -21,17 +22,17 @@ void TypeChecker::visitAddOp(AddOp* t) {} //abstract class
 void TypeChecker::visitMulOp(MulOp* t) {} //abstract class
 void TypeChecker::visitRelOp(RelOp* t) {} //abstract class
 
-void TypeChecker::visitProgram(Program *program)
+void TypeChecker::visitProgram(Program* program)
 {
-  /* Code For Program Goes Here */
+  /* Code For Program Goes Here*/
 
   program->listtopdef_->accept(this);
 
 }
 
-void TypeChecker::visitFnDef(FnDef *fndef)
+void TypeChecker::visitFnDef(FnDef* fndef)
 {
-  /* Code For FnDef Goes Here */
+  /* Code For FnDef Goes Here*/
 
   fndef->type_->accept(this);
   visitIdent(fndef->ident_);
@@ -40,99 +41,99 @@ void TypeChecker::visitFnDef(FnDef *fndef)
 
 }
 
-void TypeChecker::visitArgument(Argument *argument)
+void TypeChecker::visitArgument(Argument* argument)
 {
-  /* Code For Argument Goes Here */
+  /* Code For Argument Goes Here*/
 
   argument->type_->accept(this);
   visitIdent(argument->ident_);
 
 }
 
-void TypeChecker::visitStmBlock(StmBlock *stmblock)
+void TypeChecker::visitStmBlock(StmBlock* stmblock)
 {
-  /* Code For StmBlock Goes Here */
+  /* Code For StmBlock Goes Here*/
 
   stmblock->liststmt_->accept(this);
 
 }
 
-void TypeChecker::visitStmEmpty(StmEmpty *stmempty)
+void TypeChecker::visitStmEmpty(StmEmpty* stmempty)
 {
-  /* Code For StmEmpty Goes Here */
+  /* Code For StmEmpty Goes Here*/
 
 
 }
 
-void TypeChecker::visitStmBStmt(StmBStmt *stmbstmt)
+void TypeChecker::visitStmBStmt(StmBStmt* stmbstmt)
 {
-  /* Code For StmBStmt Goes Here */
+  /* Code For StmBStmt Goes Here*/
 
   stmbstmt->blk_->accept(this);
 
 }
 
-void TypeChecker::visitStmDecl(StmDecl *stmdecl)
+void TypeChecker::visitStmDecl(StmDecl* stmdecl)
 {
-  /* Code For StmDecl Goes Here */
+  /* Code For StmDecl Goes Here*/
 
   stmdecl->type_->accept(this);
   stmdecl->listitem_->accept(this);
 
 }
 
-void TypeChecker::visitStmAss(StmAss *stmass)
+void TypeChecker::visitStmAss(StmAss* stmass)
 {
-  /* Code For StmAss Goes Here */
+  /* Code For StmAss Goes Here*/
 
   visitIdent(stmass->ident_);
   stmass->expr_->accept(this);
 
 }
 
-void TypeChecker::visitStmIncr(StmIncr *stmincr)
+void TypeChecker::visitStmIncr(StmIncr* stmincr)
 {
-  /* Code For StmIncr Goes Here */
+  /* Code For StmIncr Goes Here*/
 
   visitIdent(stmincr->ident_);
 
 }
 
-void TypeChecker::visitStmDecr(StmDecr *stmdecr)
+void TypeChecker::visitStmDecr(StmDecr* stmdecr)
 {
-  /* Code For StmDecr Goes Here */
+  /* Code For StmDecr Goes Here*/
 
   visitIdent(stmdecr->ident_);
 
 }
 
-void TypeChecker::visitStmRet(StmRet *stmret)
+void TypeChecker::visitStmRet(StmRet* stmret)
 {
-  /* Code For StmRet Goes Here */
+  /* Code For StmRet Goes Here*/
 
   stmret->expr_->accept(this);
 
 }
 
-void TypeChecker::visitStmVRet(StmVRet *stmvret)
+void TypeChecker::visitStmVRet(StmVRet* stmvret)
 {
-  /* Code For StmVRet Goes Here */
+  /* Code For StmVRet Goes Here*/
 
 
 }
 
-void TypeChecker::visitStmCond(StmCond *stmcond)
+void TypeChecker::visitStmCond(StmCond* stmcond)
 {
-  /* Code For StmCond Goes Here */
+  /* Code For StmCond Goes Here*/
 
   stmcond->expr_->accept(this);
   stmcond->stmt_->accept(this);
 
 }
 
-void TypeChecker::visitStmCondElse(StmCondElse *stmcondelse)
+void TypeChecker::visitStmCondElse(StmCondElse* stmcondelse)
 {
-  /* Code For StmCondElse Goes Here */
+  /* Code For StmCondElse Goes Here*/
 
   stmcondelse->expr_->accept(this);
   stmcondelse->stmt_1->accept(this);
@@ -140,34 +141,34 @@ void TypeChecker::visitStmCondElse(StmCondElse *stmcondelse)
 
 }
 
-void TypeChecker::visitStmWhile(StmWhile *stmwhile)
+void TypeChecker::visitStmWhile(StmWhile* stmwhile)
 {
-  /* Code For StmWhile Goes Here */
+  /* Code For StmWhile Goes Here*/
 
   stmwhile->expr_->accept(this);
   stmwhile->stmt_->accept(this);
 
 }
 
-void TypeChecker::visitStmSExp(StmSExp *stmsexp)
+void TypeChecker::visitStmSExp(StmSExp* stmsexp)
 {
-  /* Code For StmSExp Goes Here */
+  /* Code For StmSExp Goes Here*/
 
   stmsexp->expr_->accept(this);
 
 }
 
-void TypeChecker::visitStmNoInit(StmNoInit *stmnoinit)
+void TypeChecker::visitStmNoInit(StmNoInit* stmnoinit)
 {
-  /* Code For StmNoInit Goes Here */
+  /* Code For StmNoInit Goes Here*/
 
   visitIdent(stmnoinit->ident_);
 
 }
 
-void TypeChecker::visitStmInit(StmInit *stminit)
+void TypeChecker::visitStmInit(StmInit* stminit)
 {
-  /* Code For StmInit Goes Here */
+  /* Code For StmInit Goes Here*/
 
   visitIdent(stminit->ident_);
   stminit->expr_->accept(this);
@@ -176,91 +177,91 @@ void TypeChecker::visitStmInit(StmInit *stminit)
 
 void TypeChecker::visitInt(Int* integer)
 {
-  /* Code For Int Goes Here */
+  /* Code For Int Goes Here*/
 
 
 }
 
-void TypeChecker::visitStr(Str *str)
+void TypeChecker::visitStr(Str* str)
 {
-  /* Code For Str Goes Here */
+  /* Code For Str Goes Here*/
 
 
 }
 
 void TypeChecker::visitBool(Bool* boolean)
 {
-  /* Code For Bool Goes Here */
+  /* Code For Bool Goes Here*/
 
 
 }
 
 void TypeChecker::visitVoid(Void* void_field)
 {
-  /* Code For Void Goes Here */
+  /* Code For Void Goes Here*/
 
 
 }
 
-void TypeChecker::visitFun(Fun *fun)
+void TypeChecker::visitFun(Fun* fun)
 {
-  /* Code For Fun Goes Here */
+  /* Code For Fun Goes Here*/
 
   fun->type_->accept(this);
   fun->listtype_->accept(this);
 
 }
 
-void TypeChecker::visitEVar(EVar *evar)
+void TypeChecker::visitEVar(EVar* evar)
 {
-  /* Code For EVar Goes Here */
+  /* Code For EVar Goes Here*/
 
   visitIdent(evar->ident_);
 
 }
 
-void TypeChecker::visitELitInt(ELitInt *elitint)
+void TypeChecker::visitELitInt(ELitInt* elitint)
 {
-  /* Code For ELitInt Goes Here */
+  /* Code For ELitInt Goes Here*/
 
   visitInteger(elitint->integer_);
 
 }
 
-void TypeChecker::visitELitTrue(ELitTrue *elittrue)
+void TypeChecker::visitELitTrue(ELitTrue* elittrue)
 {
-  /* Code For ELitTrue Goes Here */
+  /* Code For ELitTrue Goes Here*/
 
 
 }
 
-void TypeChecker::visitELitFalse(ELitFalse *elitfalse)
+void TypeChecker::visitELitFalse(ELitFalse* elitfalse)
 {
-  /* Code For ELitFalse Goes Here */
+  /* Code For ELitFalse Goes Here*/
 
 
 }
 
-void TypeChecker::visitEApp(EApp *eapp)
+void TypeChecker::visitEApp(EApp* eapp)
 {
-  /* Code For EApp Goes Here */
+  /* Code For EApp Goes Here*/
 
   visitIdent(eapp->ident_);
   eapp->listexpr_->accept(this);
 
 }
 
-void TypeChecker::visitEString(EString *estring)
+void TypeChecker::visitEString(EString* estring)
 {
-  /* Code For EString Goes Here */
+  /* Code For EString Goes Here*/
 
   visitString(estring->string_);
 
 }
 
-void TypeChecker::visitNeg(Neg *neg)
+void TypeChecker::visitNeg(Neg* neg)
 {
-  /* Code For Neg Goes Here */
+  /* Code For Neg Goes Here*/
 
   neg->expr_->accept(this);
 
@@ -268,15 +269,15 @@ void TypeChecker::visitNeg(Neg *neg)
 
 void TypeChecker::visitNot(Not* not_field)
 {
-  /* Code For Not Goes Here */
+  /* Code For Not Goes Here*/
 
   not_field->expr_->accept(this);
 
 }
 
-void TypeChecker::visitEMul(EMul *emul)
+void TypeChecker::visitEMul(EMul* emul)
 {
-  /* Code For EMul Goes Here */
+  /* Code For EMul Goes Here*/
 
   emul->expr_1->accept(this);
   emul->mulop_->accept(this);
@@ -284,9 +285,9 @@ void TypeChecker::visitEMul(EMul *emul)
 
 }
 
-void TypeChecker::visitEAdd(EAdd *eadd)
+void TypeChecker::visitEAdd(EAdd* eadd)
 {
-  /* Code For EAdd Goes Here */
+  /* Code For EAdd Goes Here*/
 
   eadd->expr_1->accept(this);
   eadd->addop_->accept(this);
@@ -294,9 +295,9 @@ void TypeChecker::visitEAdd(EAdd *eadd)
 
 }
 
-void TypeChecker::visitERel(ERel *erel)
+void TypeChecker::visitERel(ERel* erel)
 {
-  /* Code For ERel Goes Here */
+  /* Code For ERel Goes Here*/
 
   erel->expr_1->accept(this);
   erel->relop_->accept(this);
@@ -304,97 +305,97 @@ void TypeChecker::visitERel(ERel *erel)
 
 }
 
-void TypeChecker::visitEAnd(EAnd *eand)
+void TypeChecker::visitEAnd(EAnd* eand)
 {
-  /* Code For EAnd Goes Here */
+  /* Code For EAnd Goes Here*/
 
   eand->expr_1->accept(this);
   eand->expr_2->accept(this);
 
 }
 
-void TypeChecker::visitEOr(EOr *eor)
+void TypeChecker::visitEOr(EOr* eor)
 {
-  /* Code For EOr Goes Here */
+  /* Code For EOr Goes Here*/
 
   eor->expr_1->accept(this);
   eor->expr_2->accept(this);
 
 }
 
-void TypeChecker::visitPlus(Plus *plus)
+void TypeChecker::visitPlus(Plus* plus)
 {
-  /* Code For Plus Goes Here */
+  /* Code For Plus Goes Here*/
 
 
 }
 
-void TypeChecker::visitMinus(Minus *minus)
+void TypeChecker::visitMinus(Minus* minus)
 {
-  /* Code For Minus Goes Here */
+  /* Code For Minus Goes Here*/
 
 
 }
 
-void TypeChecker::visitTimes(Times *times)
+void TypeChecker::visitTimes(Times* times)
 {
-  /* Code For Times Goes Here */
+  /* Code For Times Goes Here*/
 
 
 }
 
-void TypeChecker::visitDiv(Div *div)
+void TypeChecker::visitDiv(Div* div)
 {
-  /* Code For Div Goes Here */
+  /* Code For Div Goes Here*/
 
 
 }
 
-void TypeChecker::visitMod(Mod *mod)
+void TypeChecker::visitMod(Mod* mod)
 {
-  /* Code For Mod Goes Here */
+  /* Code For Mod Goes Here*/
 
 
 }
 
-void TypeChecker::visitLTH(LTH *lth)
+void TypeChecker::visitLTH(LTH* lth)
 {
-  /* Code For LTH Goes Here */
+  /* Code For LTH Goes Here*/
 
 
 }
 
-void TypeChecker::visitLE(LE *le)
+void TypeChecker::visitLE(LE* le)
 {
-  /* Code For LE Goes Here */
+  /* Code For LE Goes Here*/
 
 
 }
 
-void TypeChecker::visitGTH(GTH *gth)
+void TypeChecker::visitGTH(GTH* gth)
 {
-  /* Code For GTH Goes Here */
+  /* Code For GTH Goes Here*/
 
 
 }
 
-void TypeChecker::visitGE(GE *ge)
+void TypeChecker::visitGE(GE* ge)
 {
-  /* Code For GE Goes Here */
+  /* Code For GE Goes Here*/
 
 
 }
 
-void TypeChecker::visitEQU(EQU *equ)
+void TypeChecker::visitEQU(EQU* equ)
 {
-  /* Code For EQU Goes Here */
+  /* Code For EQU Goes Here*/
 
 
 }
 
-void TypeChecker::visitNE(NE *ne)
+void TypeChecker::visitNE(NE* ne)
 {
-  /* Code For NE Goes Here */
+  /* Code For NE Goes Here*/
 
 
 }
@@ -451,27 +452,28 @@ void TypeChecker::visitListExpr(ListExpr* listexpr)
 
 void TypeChecker::visitInteger(Integer x)
 {
-  /* Code for Integer Goes Here */
+  /* Code for Integer Goes Here*/
 }
 
 void TypeChecker::visitChar(Char x)
 {
-  /* Code for Char Goes Here */
+  /* Code for Char Goes Here*/
 }
 
 void TypeChecker::visitDouble(Double x)
 {
-  /* Code for Double Goes Here */
+  /* Code for Double Goes Here*/
 }
 
 void TypeChecker::visitString(String x)
 {
-  /* Code for String Goes Here */
+  /* Code for String Goes Here*/
 }
 
 void TypeChecker::visitIdent(Ident x)
 {
-  /* Code for Ident Goes Here */
+  /* Code for Ident Goes Here*/
+    std::cout << x << std::endl;
 }
 
-} /* namespace frontend */
+} /* namespace frontend*/

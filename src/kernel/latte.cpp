@@ -106,19 +106,26 @@ int main(int argc, char** argv)
         return arguments.wrong ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
+    frontend::TypeChecker type_checker;
+
     short number_of_inputs =
             arguments.input_count == 0 ? 1 : arguments.input_count;
     for(short i = 0; i < number_of_inputs; i++)
     {
-        // Open files.
         FILE* input = open_file(arguments.input_count,
                 (arguments.input_count > 0)
                     ? arguments.input_files[i]
                     : 0);
-
-        // Parse.
         frontend::ParserManager parser_mngr(input);
-        Visitable* program = parser_mngr.get_ast();
+        if (not parser_mngr.try_to_parse())
+        {
+            cerr << "Parse error! " << endl;  // TODO: more sophisticated error msg.
+            if (fclose(input) != 0)
+                cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
+            continue;
+        }
+
+        Prog* program = parser_mngr.get_prog();
 
         // Close file.
         if (fclose(input) != 0)
@@ -126,8 +133,7 @@ int main(int argc, char** argv)
 
         // Check semantics.
         // Check types.
-        frontend::TypeChecker type_checker;
-        type_checker.visitProgram(program);
+        type_checker.visitProg(program);
         // Compile.
     }
 
