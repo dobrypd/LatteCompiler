@@ -7,9 +7,9 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
-#include "Parser.H"
+#include "ParserManager.h"
+#include "TypeChecker.h"
 #include "Absyn.H"
-#include "Printer.H"
 
 using std::cerr;
 using std::cout;
@@ -73,23 +73,27 @@ Arguments parse_args(int argc, char** argv)
     return args;
 }
 
-void open_files(int count, char** file_names, FILE** inputs)
+FILE* open_file(short files, char* file_name)
 {
-    for (int i = 0; i < count; i++)
+    FILE* input = 0;
+    if (files > 0)
     {
-        inputs[i] = fopen(file_names[i], "r");
-        if (!inputs[i])
+        input = fopen(file_name, "r");
+        if (!input)
         {
-            cerr << "Cannot open file: " << file_names[i] << endl;
+            cerr << "Cannot open file: " << file_name << endl;
             exit(EXIT_FAILURE);
         }
+        if (debug)
+            cerr << "Opened " << file_name << endl;
     }
-    if (count == 0)
+    else
     {
         if (debug)
             cerr << "Will load Latte program from stdio." << endl;
-        inputs[1] = stdin;
+        input = stdin;
     }
+    return input;
 }
 
 int main(int argc, char** argv)
@@ -102,34 +106,30 @@ int main(int argc, char** argv)
         return arguments.wrong ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
-    // Open files.
-    FILE* inputs[arguments.input_count == 0 ? 1 : arguments.input_count];
-    open_files(arguments.input_count, arguments.input_files, inputs);
-    if (debug)
-        cerr << "Opened " << arguments.input_count << " file(s)." << endl;
+    short number_of_inputs =
+            arguments.input_count == 0 ? 1 : arguments.input_count;
+    for(short i = 0; i < number_of_inputs; i++)
+    {
+        // Open files.
+        FILE* input = open_file(arguments.input_count,
+                (arguments.input_count > 0)
+                    ? arguments.input_files[i]
+                    : 0);
 
-    // Parse input files.
-    Prog* parse_tree = pProg(inputs[0]);
+        // Parse.
+        frontend::ParserManager parser_mngr(input);
+        Visitable* program = parser_mngr.get_ast();
 
-    // Close files.
-    for (int i = 0; i < arguments.input_count; i++)
-        fclose(inputs[i]);
+        // Close file.
+        if (fclose(input) != 0)
+            cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
 
-    if (!parse_tree)
-            //cerr << parse_tree << endl;
-            return EXIT_FAILURE;
-
-    ShowAbsyn *s = new ShowAbsyn();
-    cout << s->show(parse_tree) << endl;
-    delete s;
-    delete parse_tree;
-
-    // Check semantics.
-    cout << "HERE WILL DO IT...";
-
-    // Check types.
-
-    // Compile.
+        // Check semantics.
+        // Check types.
+        frontend::TypeChecker type_checker;
+        type_checker.visitProgram(program);
+        // Compile.
+    }
 
     return EXIT_SUCCESS;
 }
