@@ -5,24 +5,24 @@
 */
 
 #include <iostream>
-#include "TypeChecker.h"
+#include "ASTChecker.h"
 
 namespace frontend
 {
 
-void TypeChecker::visitProg(Prog* t) {} //abstract class
-void TypeChecker::visitTopDef(TopDef* t) {} //abstract class
-void TypeChecker::visitArg(Arg* t) {} //abstract class
-void TypeChecker::visitBlk(Blk* t) {} //abstract class
-void TypeChecker::visitStmt(Stmt* t) {} //abstract class
-void TypeChecker::visitItem(Item* t) {} //abstract class
-void TypeChecker::visitType(Type* t) {} //abstract class
-void TypeChecker::visitExpr(Expr* t) {} //abstract class
-void TypeChecker::visitAddOp(AddOp* t) {} //abstract class
-void TypeChecker::visitMulOp(MulOp* t) {} //abstract class
-void TypeChecker::visitRelOp(RelOp* t) {} //abstract class
+void ASTChecker::visitProg(Prog* t) {} //abstract class
+void ASTChecker::visitTopDef(TopDef* t) {} //abstract class
+void ASTChecker::visitArg(Arg* t) {} //abstract class
+void ASTChecker::visitBlk(Blk* t) {} //abstract class
+void ASTChecker::visitStmt(Stmt* t) {} //abstract class
+void ASTChecker::visitItem(Item* t) {} //abstract class
+void ASTChecker::visitType(Type* t) {} //abstract class
+void ASTChecker::visitExpr(Expr* t) {} //abstract class
+void ASTChecker::visitAddOp(AddOp* t) {} //abstract class
+void ASTChecker::visitMulOp(MulOp* t) {} //abstract class
+void ASTChecker::visitRelOp(RelOp* t) {} //abstract class
 
-void TypeChecker::visitProgram(Program* program)
+void ASTChecker::visitProgram(Program* program)
 {
   /* Code For Program Goes Here*/
 
@@ -30,7 +30,7 @@ void TypeChecker::visitProgram(Program* program)
 
 }
 
-void TypeChecker::visitFnDef(FnDef* fndef)
+void ASTChecker::visitFnDef(FnDef* fndef)
 {
   /* Code For FnDef Goes Here*/
 
@@ -41,7 +41,7 @@ void TypeChecker::visitFnDef(FnDef* fndef)
 
 }
 
-void TypeChecker::visitArgument(Argument* argument)
+void ASTChecker::visitArgument(Argument* argument)
 {
   /* Code For Argument Goes Here*/
 
@@ -50,7 +50,7 @@ void TypeChecker::visitArgument(Argument* argument)
 
 }
 
-void TypeChecker::visitStmBlock(StmBlock* stmblock)
+void ASTChecker::visitStmBlock(StmBlock* stmblock)
 {
   /* Code For StmBlock Goes Here*/
 
@@ -58,14 +58,14 @@ void TypeChecker::visitStmBlock(StmBlock* stmblock)
 
 }
 
-void TypeChecker::visitStmEmpty(StmEmpty* stmempty)
+void ASTChecker::visitStmEmpty(StmEmpty* stmempty)
 {
   /* Code For StmEmpty Goes Here*/
 
 
 }
 
-void TypeChecker::visitStmBStmt(StmBStmt* stmbstmt)
+void ASTChecker::visitStmBStmt(StmBStmt* stmbstmt)
 {
   /* Code For StmBStmt Goes Here*/
 
@@ -73,7 +73,7 @@ void TypeChecker::visitStmBStmt(StmBStmt* stmbstmt)
 
 }
 
-void TypeChecker::visitStmDecl(StmDecl* stmdecl)
+void ASTChecker::visitStmDecl(StmDecl* stmdecl)
 {
   /* Code For StmDecl Goes Here*/
 
@@ -82,7 +82,7 @@ void TypeChecker::visitStmDecl(StmDecl* stmdecl)
 
 }
 
-void TypeChecker::visitStmAss(StmAss* stmass)
+void ASTChecker::visitStmAss(StmAss* stmass)
 {
   /* Code For StmAss Goes Here*/
 
@@ -91,7 +91,7 @@ void TypeChecker::visitStmAss(StmAss* stmass)
 
 }
 
-void TypeChecker::visitStmIncr(StmIncr* stmincr)
+void ASTChecker::visitStmIncr(StmIncr* stmincr)
 {
   /* Code For StmIncr Goes Here*/
 
@@ -99,7 +99,7 @@ void TypeChecker::visitStmIncr(StmIncr* stmincr)
 
 }
 
-void TypeChecker::visitStmDecr(StmDecr* stmdecr)
+void ASTChecker::visitStmDecr(StmDecr* stmdecr)
 {
   /* Code For StmDecr Goes Here*/
 
@@ -107,7 +107,7 @@ void TypeChecker::visitStmDecr(StmDecr* stmdecr)
 
 }
 
-void TypeChecker::visitStmRet(StmRet* stmret)
+void ASTChecker::visitStmRet(StmRet* stmret)
 {
   /* Code For StmRet Goes Here*/
 
@@ -115,14 +115,14 @@ void TypeChecker::visitStmRet(StmRet* stmret)
 
 }
 
-void TypeChecker::visitStmVRet(StmVRet* stmvret)
+void ASTChecker::visitStmVRet(StmVRet* stmvret)
 {
   /* Code For StmVRet Goes Here*/
 
 
 }
 
-void TypeChecker::visitStmCond(StmCond* stmcond)
+void ASTChecker::visitStmCond(StmCond* stmcond)
 {
   /* Code For StmCond Goes Here*/
 
@@ -131,7 +131,7 @@ void TypeChecker::visitStmCond(StmCond* stmcond)
 
 }
 
-void TypeChecker::visitStmCondElse(StmCondElse* stmcondelse)
+void ASTChecker::visitStmCondElse(StmCondElse* stmcondelse)
 {
   /* Code For StmCondElse Goes Here*/
 
@@ -141,7 +141,7 @@ void TypeChecker::visitStmCondElse(StmCondElse* stmcondelse)
 
 }
 
-void TypeChecker::visitStmWhile(StmWhile* stmwhile)
+void ASTChecker::visitStmWhile(StmWhile* stmwhile)
 {
   /* Code For StmWhile Goes Here*/
 
@@ -150,7 +150,7 @@ void TypeChecker::visitStmWhile(StmWhile* stmwhile)
 
 }
 
-void TypeChecker::visitStmSExp(StmSExp* stmsexp)
+void ASTChecker::visitStmSExp(StmSExp* stmsexp)
 {
   /* Code For StmSExp Goes Here*/
 
@@ -158,7 +158,7 @@ void TypeChecker::visitStmSExp(StmSExp* stmsexp)
 
 }
 
-void TypeChecker::visitStmNoInit(StmNoInit* stmnoinit)
+void ASTChecker::visitStmNoInit(StmNoInit* stmnoinit)
 {
   /* Code For StmNoInit Goes Here*/
 
@@ -166,7 +166,7 @@ void TypeChecker::visitStmNoInit(StmNoInit* stmnoinit)
 
 }
 
-void TypeChecker::visitStmInit(StmInit* stminit)
+void ASTChecker::visitStmInit(StmInit* stminit)
 {
   /* Code For StmInit Goes Here*/
 
@@ -175,35 +175,35 @@ void TypeChecker::visitStmInit(StmInit* stminit)
 
 }
 
-void TypeChecker::visitInt(Int* integer)
+void ASTChecker::visitInt(Int* integer)
 {
   /* Code For Int Goes Here*/
 
 
 }
 
-void TypeChecker::visitStr(Str* str)
+void ASTChecker::visitStr(Str* str)
 {
   /* Code For Str Goes Here*/
 
 
 }
 
-void TypeChecker::visitBool(Bool* boolean)
+void ASTChecker::visitBool(Bool* boolean)
 {
   /* Code For Bool Goes Here*/
 
 
 }
 
-void TypeChecker::visitVoid(Void* void_field)
+void ASTChecker::visitVoid(Void* void_field)
 {
   /* Code For Void Goes Here*/
 
 
 }
 
-void TypeChecker::visitFun(Fun* fun)
+void ASTChecker::visitFun(Fun* fun)
 {
   /* Code For Fun Goes Here*/
 
@@ -212,7 +212,7 @@ void TypeChecker::visitFun(Fun* fun)
 
 }
 
-void TypeChecker::visitEVar(EVar* evar)
+void ASTChecker::visitEVar(EVar* evar)
 {
   /* Code For EVar Goes Here*/
 
@@ -220,7 +220,7 @@ void TypeChecker::visitEVar(EVar* evar)
 
 }
 
-void TypeChecker::visitELitInt(ELitInt* elitint)
+void ASTChecker::visitELitInt(ELitInt* elitint)
 {
   /* Code For ELitInt Goes Here*/
 
@@ -228,21 +228,21 @@ void TypeChecker::visitELitInt(ELitInt* elitint)
 
 }
 
-void TypeChecker::visitELitTrue(ELitTrue* elittrue)
+void ASTChecker::visitELitTrue(ELitTrue* elittrue)
 {
   /* Code For ELitTrue Goes Here*/
 
 
 }
 
-void TypeChecker::visitELitFalse(ELitFalse* elitfalse)
+void ASTChecker::visitELitFalse(ELitFalse* elitfalse)
 {
   /* Code For ELitFalse Goes Here*/
 
 
 }
 
-void TypeChecker::visitEApp(EApp* eapp)
+void ASTChecker::visitEApp(EApp* eapp)
 {
   /* Code For EApp Goes Here*/
 
@@ -251,7 +251,7 @@ void TypeChecker::visitEApp(EApp* eapp)
 
 }
 
-void TypeChecker::visitEString(EString* estring)
+void ASTChecker::visitEString(EString* estring)
 {
   /* Code For EString Goes Here*/
 
@@ -259,7 +259,7 @@ void TypeChecker::visitEString(EString* estring)
 
 }
 
-void TypeChecker::visitNeg(Neg* neg)
+void ASTChecker::visitNeg(Neg* neg)
 {
   /* Code For Neg Goes Here*/
 
@@ -267,7 +267,7 @@ void TypeChecker::visitNeg(Neg* neg)
 
 }
 
-void TypeChecker::visitNot(Not* not_field)
+void ASTChecker::visitNot(Not* not_field)
 {
   /* Code For Not Goes Here*/
 
@@ -275,7 +275,7 @@ void TypeChecker::visitNot(Not* not_field)
 
 }
 
-void TypeChecker::visitEMul(EMul* emul)
+void ASTChecker::visitEMul(EMul* emul)
 {
   /* Code For EMul Goes Here*/
 
@@ -285,7 +285,7 @@ void TypeChecker::visitEMul(EMul* emul)
 
 }
 
-void TypeChecker::visitEAdd(EAdd* eadd)
+void ASTChecker::visitEAdd(EAdd* eadd)
 {
   /* Code For EAdd Goes Here*/
 
@@ -295,7 +295,7 @@ void TypeChecker::visitEAdd(EAdd* eadd)
 
 }
 
-void TypeChecker::visitERel(ERel* erel)
+void ASTChecker::visitERel(ERel* erel)
 {
   /* Code For ERel Goes Here*/
 
@@ -305,7 +305,7 @@ void TypeChecker::visitERel(ERel* erel)
 
 }
 
-void TypeChecker::visitEAnd(EAnd* eand)
+void ASTChecker::visitEAnd(EAnd* eand)
 {
   /* Code For EAnd Goes Here*/
 
@@ -314,7 +314,7 @@ void TypeChecker::visitEAnd(EAnd* eand)
 
 }
 
-void TypeChecker::visitEOr(EOr* eor)
+void ASTChecker::visitEOr(EOr* eor)
 {
   /* Code For EOr Goes Here*/
 
@@ -323,77 +323,77 @@ void TypeChecker::visitEOr(EOr* eor)
 
 }
 
-void TypeChecker::visitPlus(Plus* plus)
+void ASTChecker::visitPlus(Plus* plus)
 {
   /* Code For Plus Goes Here*/
 
 
 }
 
-void TypeChecker::visitMinus(Minus* minus)
+void ASTChecker::visitMinus(Minus* minus)
 {
   /* Code For Minus Goes Here*/
 
 
 }
 
-void TypeChecker::visitTimes(Times* times)
+void ASTChecker::visitTimes(Times* times)
 {
   /* Code For Times Goes Here*/
 
 
 }
 
-void TypeChecker::visitDiv(Div* div)
+void ASTChecker::visitDiv(Div* div)
 {
   /* Code For Div Goes Here*/
 
 
 }
 
-void TypeChecker::visitMod(Mod* mod)
+void ASTChecker::visitMod(Mod* mod)
 {
   /* Code For Mod Goes Here*/
 
 
 }
 
-void TypeChecker::visitLTH(LTH* lth)
+void ASTChecker::visitLTH(LTH* lth)
 {
   /* Code For LTH Goes Here*/
 
 
 }
 
-void TypeChecker::visitLE(LE* le)
+void ASTChecker::visitLE(LE* le)
 {
   /* Code For LE Goes Here*/
 
 
 }
 
-void TypeChecker::visitGTH(GTH* gth)
+void ASTChecker::visitGTH(GTH* gth)
 {
   /* Code For GTH Goes Here*/
 
 
 }
 
-void TypeChecker::visitGE(GE* ge)
+void ASTChecker::visitGE(GE* ge)
 {
   /* Code For GE Goes Here*/
 
 
 }
 
-void TypeChecker::visitEQU(EQU* equ)
+void ASTChecker::visitEQU(EQU* equ)
 {
   /* Code For EQU Goes Here*/
 
 
 }
 
-void TypeChecker::visitNE(NE* ne)
+void ASTChecker::visitNE(NE* ne)
 {
   /* Code For NE Goes Here*/
 
@@ -401,7 +401,7 @@ void TypeChecker::visitNE(NE* ne)
 }
 
 
-void TypeChecker::visitListTopDef(ListTopDef* listtopdef)
+void ASTChecker::visitListTopDef(ListTopDef* listtopdef)
 {
   for (ListTopDef::iterator i = listtopdef->begin() ; i != listtopdef->end() ; ++i)
   {
@@ -409,7 +409,7 @@ void TypeChecker::visitListTopDef(ListTopDef* listtopdef)
   }
 }
 
-void TypeChecker::visitListArg(ListArg* listarg)
+void ASTChecker::visitListArg(ListArg* listarg)
 {
   for (ListArg::iterator i = listarg->begin() ; i != listarg->end() ; ++i)
   {
@@ -417,7 +417,7 @@ void TypeChecker::visitListArg(ListArg* listarg)
   }
 }
 
-void TypeChecker::visitListStmt(ListStmt* liststmt)
+void ASTChecker::visitListStmt(ListStmt* liststmt)
 {
   for (ListStmt::iterator i = liststmt->begin() ; i != liststmt->end() ; ++i)
   {
@@ -425,7 +425,7 @@ void TypeChecker::visitListStmt(ListStmt* liststmt)
   }
 }
 
-void TypeChecker::visitListItem(ListItem* listitem)
+void ASTChecker::visitListItem(ListItem* listitem)
 {
   for (ListItem::iterator i = listitem->begin() ; i != listitem->end() ; ++i)
   {
@@ -433,7 +433,7 @@ void TypeChecker::visitListItem(ListItem* listitem)
   }
 }
 
-void TypeChecker::visitListType(ListType* listtype)
+void ASTChecker::visitListType(ListType* listtype)
 {
   for (ListType::iterator i = listtype->begin() ; i != listtype->end() ; ++i)
   {
@@ -441,7 +441,7 @@ void TypeChecker::visitListType(ListType* listtype)
   }
 }
 
-void TypeChecker::visitListExpr(ListExpr* listexpr)
+void ASTChecker::visitListExpr(ListExpr* listexpr)
 {
   for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
   {
@@ -450,27 +450,27 @@ void TypeChecker::visitListExpr(ListExpr* listexpr)
 }
 
 
-void TypeChecker::visitInteger(Integer x)
+void ASTChecker::visitInteger(Integer x)
 {
   /* Code for Integer Goes Here*/
 }
 
-void TypeChecker::visitChar(Char x)
+void ASTChecker::visitChar(Char x)
 {
   /* Code for Char Goes Here*/
 }
 
-void TypeChecker::visitDouble(Double x)
+void ASTChecker::visitDouble(Double x)
 {
   /* Code for Double Goes Here*/
 }
 
-void TypeChecker::visitString(String x)
+void ASTChecker::visitString(String x)
 {
   /* Code for String Goes Here*/
 }
 
-void TypeChecker::visitIdent(Ident x)
+void ASTChecker::visitIdent(Ident x)
 {
   /* Code for Ident Goes Here*/
     std::cout << x << std::endl;

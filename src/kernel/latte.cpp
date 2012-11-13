@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "ParserManager.h"
-#include "TypeChecker.h"
+#include "ASTChecker.h"
 #include "Absyn.H"
 
 using std::cerr;
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
         return arguments.wrong ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
-    frontend::TypeChecker type_checker;
+    frontend::ASTChecker checker;
 
     short number_of_inputs =
             arguments.input_count == 0 ? 1 : arguments.input_count;
@@ -131,10 +131,10 @@ int main(int argc, char** argv)
         if (fclose(input) != 0)
             cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
 
-        // Check semantics.
-        // Check types.
-        type_checker.visitProg(program);
-        // Compile.
+        // Check AST. Semantics and types.
+        checker.visitProg(program);
+
+        // TODO: Compile.
     }
 
     return EXIT_SUCCESS;

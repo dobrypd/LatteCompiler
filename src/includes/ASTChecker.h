@@ -4,15 +4,15 @@
  *
  */
 
-#ifndef TYPECHECKER_H_
-#define TYPECHECKER_H_
+#ifndef ASTCHECKER_H_
+#define ASTCHECKER_H_
 
 #include "Absyn.H"
 
 namespace frontend
 {
 
-class TypeChecker : public Visitor
+class ASTChecker : public Visitor
 {
 public:
   void visitProg(Prog* p);
@@ -90,4 +90,4 @@ public:
 
 } /* namespace frontend */
 
-#endif /* TYPECHECKER_H_ */
+#endif /* ASTCHECKER_H_ */
