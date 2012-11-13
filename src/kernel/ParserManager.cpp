@@ -13,7 +13,6 @@ namespace frontend
 
 ParserManager::ParserManager(FILE* input) : prog_file(input)
 {
-    std::cout << "Parser manager initialization." << std::endl;
 }
 
 bool ParserManager::try_to_parse()

@@ -132,7 +132,7 @@ int main(int argc, char** argv)
             cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
 
         // Check AST. Semantics and types.
-        checker.visitProg(program);
+        checker.check(program);
 
         // TODO: Compile.
     }
