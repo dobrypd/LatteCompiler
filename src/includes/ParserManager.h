@@ -16,12 +16,12 @@ namespace frontend
 class ParserManager
 {
 private:
-    Prog* prog;
+    Visitable* main_visitable;
     FILE* prog_file;
 public:
     ParserManager(FILE* input);
     bool try_to_parse();
-    Prog* get_prog();
+    Visitable* get();
 };
 
 } /* namespace frontend */

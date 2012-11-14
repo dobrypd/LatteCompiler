@@ -6,14 +6,17 @@
 
 #include <iostream>
 #include "ASTChecker.h"
+#include "ErrorHandler.h"
 
 namespace frontend
 {
 
+ASTChecker::ASTChecker(ErrorHandler& error_handler) : error_handler(error_handler)
+{
+}
+
 void ASTChecker::check(Visitable* v)
 {
-    this->current_token = 0;
-    std::cout << "test" << std::endl;
     v->accept(this);
 }
 
@@ -37,7 +40,6 @@ void ASTChecker::visitProgram(Program* program)
 void ASTChecker::visitFnDef(FnDef* fndef)
 {
     /* Code For FnDef Goes Here*/
-
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);
     fndef->listarg_->accept(this);
@@ -48,7 +50,6 @@ void ASTChecker::visitFnDef(FnDef* fndef)
 void ASTChecker::visitArgument(Argument* argument)
 {
     /* Code For Argument Goes Here*/
-
     argument->type_->accept(this);
     visitIdent(argument->ident_);
 

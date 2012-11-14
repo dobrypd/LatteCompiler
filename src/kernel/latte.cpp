@@ -7,9 +7,10 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
+#include "Absyn.H"
 #include "ParserManager.h"
 #include "ASTChecker.h"
-#include "Absyn.H"
+#include "ErrorHandler.h"
 
 using std::cerr;
 using std::cout;
@@ -106,8 +107,6 @@ int main(int argc, char** argv)
         return arguments.wrong ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
-    frontend::ASTChecker checker;
-
     short number_of_inputs =
             arguments.input_count == 0 ? 1 : arguments.input_count;
     for(short i = 0; i < number_of_inputs; i++)
@@ -119,20 +118,19 @@ int main(int argc, char** argv)
         frontend::ParserManager parser_mngr(input);
         if (not parser_mngr.try_to_parse())
         {
-            cerr << "Parse error! " << endl;  // TODO: more sophisticated error msg.
             if (fclose(input) != 0)
                 cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
             continue;
         }
 
-        Prog* program = parser_mngr.get_prog();
+        // Check AST. Semantics and types.
+        frontend::ErrorHandler this_file_handler(input);
+        frontend::ASTChecker checker(this_file_handler);
+        checker.check(parser_mngr.get());
 
         // Close file.
         if (fclose(input) != 0)
             cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
-
-        // Check AST. Semantics and types.
-        checker.check(program);
 
         // TODO: Compile.
     }

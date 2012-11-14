@@ -14,7 +14,7 @@ endif
 
 
 BNFC=bnfc
-BNFC_FLAGS=-m -cpp_stl
+BNFC_FLAGS=-m -cpp_stl -l
 CC=g++
 CFLAGS=-Wall -c $(OPTDBG)
 LFLAGS=-Wall $(OPTDBG)

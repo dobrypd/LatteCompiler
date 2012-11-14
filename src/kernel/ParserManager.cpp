@@ -17,17 +17,17 @@ ParserManager::ParserManager(FILE* input) : prog_file(input)
 
 bool ParserManager::try_to_parse()
 {
-    this->prog = pProg(this->prog_file);
-    if (this->prog)
+    this->main_visitable = pProg(this->prog_file);
+    if (this->main_visitable)
     {
         return true;
     }
     return false;
 }
 
-Prog* ParserManager::get_prog()
+Visitable* ParserManager::get()
 {
-    return this->prog;
+    return this->main_visitable;
 }
 
 } /* namespace frontend */

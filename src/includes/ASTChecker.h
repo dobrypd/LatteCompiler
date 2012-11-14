@@ -8,6 +8,7 @@
 #define ASTCHECKER_H_
 
 #include "Absyn.H"
+#include "ErrorHandler.h"
 
 namespace frontend
 {
@@ -16,8 +17,9 @@ class ASTChecker : public Visitor
 {
 private:
     //Env env;
-    int current_token;
+    ErrorHandler error_handler;
 public:
+    ASTChecker(ErrorHandler& error_handler);
     void check(Visitable* v);
 
     void visitProg(Prog* p);
