@@ -114,7 +114,7 @@ int main(int argc, char** argv)
         FILE* input = open_file(arguments.input_count,
                 (arguments.input_count > 0)
                     ? arguments.input_files[i]
-                    : 0);
+                    : NULL);
         frontend::ParserManager parser_mngr(input);
         if (not parser_mngr.try_to_parse())
         {
@@ -124,15 +124,16 @@ int main(int argc, char** argv)
         }
 
         // Check AST. Semantics and types.
-        frontend::ErrorHandler file_error_handler(input);
+        frontend::ErrorHandler file_error_handler(
+                (arguments.input_count > 0) ? arguments.input_files[i] : NULL);
         frontend::ASTChecker checker(file_error_handler);
         checker.check(parser_mngr.get());
-
-        file_error_handler.flush();
 
         // Close file.
         if (fclose(input) != 0)
             cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
+
+        file_error_handler.flush();
 
         // TODO: Compile.
     }

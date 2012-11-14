@@ -1,8 +1,7 @@
 /*
- * ErrorHandler.h
+ * Author: Piotr Dobrowolski
+ * pd291528@students.mimuw.edu.pl
  *
- *  Created on: 14-11-2012
- *      Author: piotrek
  */
 
 #ifndef ERRORHANDLER_H_
@@ -10,7 +9,7 @@
 
 #include <string>
 #include <vector>
-#include <stdio.h>
+#include <fstream>
 
 namespace frontend
 {
@@ -21,15 +20,21 @@ public:
     typedef std::pair<bool, std::string> error_type;
 
 private:
-    FILE* file;
+    bool is_file;
+    std::string file_name;
+    std::ifstream file;
     std::vector<std::pair<int, error_type> > errors;
 
     int current_pos;
-    char* get_line(int pos);
+    std::string current_line;
+    std::string get_line(int pos);
 
 public:
-    ErrorHandler(FILE* file);
+    ErrorHandler(char* input_file);
+    ~ErrorHandler();
     void handle(int line, error_type error);
+    void error(int line, std::string msg);
+    void warning(int line, std::string msg);
     void flush();
 };
 

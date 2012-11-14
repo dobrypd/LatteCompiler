@@ -35,8 +35,7 @@ void ASTChecker::visitRelOp(RelOp* t) {} //abstract class
 
 void ASTChecker::visitProgram(Program* program)
 {
-    ErrorHandler::error_type error = std::make_pair(true, std::string("Twoja stara"));
-    this->error_handler.handle(program->line_number, error);
+    this->error_handler.warning(program->line_number, "hello!");
     program->listtopdef_->accept(this);
 }
 
@@ -52,6 +51,8 @@ void ASTChecker::visitFnDef(FnDef* fndef)
 
 void ASTChecker::visitArgument(Argument* argument)
 {
+    ErrorHandler::error_type error = std::make_pair(true, std::string("Twoja stara"));
+    this->error_handler.handle(argument->line_number, error);
     /* Code For Argument Goes Here*/
     argument->type_->accept(this);
     visitIdent(argument->ident_);
