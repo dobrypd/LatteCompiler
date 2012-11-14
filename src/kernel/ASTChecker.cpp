@@ -4,6 +4,7 @@
  *
  */
 
+#include <string>
 #include <iostream>
 #include "ASTChecker.h"
 #include "ErrorHandler.h"
@@ -34,6 +35,8 @@ void ASTChecker::visitRelOp(RelOp* t) {} //abstract class
 
 void ASTChecker::visitProgram(Program* program)
 {
+    ErrorHandler::error_type error = std::make_pair(true, std::string("Twoja stara"));
+    this->error_handler.handle(program->line_number, error);
     program->listtopdef_->accept(this);
 }
 

@@ -124,9 +124,11 @@ int main(int argc, char** argv)
         }
 
         // Check AST. Semantics and types.
-        frontend::ErrorHandler this_file_handler(input);
-        frontend::ASTChecker checker(this_file_handler);
+        frontend::ErrorHandler file_error_handler(input);
+        frontend::ASTChecker checker(file_error_handler);
         checker.check(parser_mngr.get());
+
+        file_error_handler.flush();
 
         // Close file.
         if (fclose(input) != 0)

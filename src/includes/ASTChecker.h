@@ -17,7 +17,7 @@ class ASTChecker : public Visitor
 {
 private:
     //Env env;
-    ErrorHandler error_handler;
+    ErrorHandler& error_handler;
 public:
     ASTChecker(ErrorHandler& error_handler);
     void check(Visitable* v);
