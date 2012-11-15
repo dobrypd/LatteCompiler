@@ -9,6 +9,7 @@
 
 #include "Absyn.H"
 #include "ErrorHandler.h"
+#include "Environment.h"
 
 namespace frontend
 {
@@ -16,8 +17,9 @@ namespace frontend
 class ASTChecker : public Visitor
 {
 private:
-    //Env env;
     ErrorHandler& error_handler;
+    Environment env;
+
 public:
     ASTChecker(ErrorHandler& error_handler);
     void check(Visitable* v);
@@ -92,7 +94,6 @@ public:
     void visitDouble(Double x);
     void visitString(String x);
     void visitIdent(Ident x);
-
 };
 
 } /* namespace frontend */
