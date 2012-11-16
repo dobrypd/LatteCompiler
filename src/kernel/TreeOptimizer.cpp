@@ -1,44 +1,45 @@
 /*
- * FunctionLoader.cpp
+ * Author: Piotr Dobrowolski
+ * pd291528@students.mimuw.edu.pl
  *
- *  Created on: 16-11-2012
- *      Author: piotrek
  */
 
-#include "FunctionLoader.h"
+#include "TreeOptimizer.h"
+#include "ErrorHandler.h"
 
 namespace frontend
 {
 
-FunctionLoader::FunctionLoader(ErrorHandler& error_handler, Environment& env)
-    : error_handler(error_handler), env(env)
+TreeOptimizer::TreeOptimizer()
 {
+    // TODO Auto-generated constructor stub
+
 }
 
-
-void FunctionLoader::check(Visitable* v)
+void TreeOptimizer::optimize(Visitable* v)
 {
+    //std::cout << &(this->env) << std::endl;
     v->accept(this);
 }
 
-void FunctionLoader::visitProg(Prog* t) { } //abstract class
-void FunctionLoader::visitTopDef(TopDef* t) {} //abstract class
-void FunctionLoader::visitArg(Arg* t) {} //abstract class
-void FunctionLoader::visitBlk(Blk* t) {} //abstract class
-void FunctionLoader::visitStmt(Stmt* t) {} //abstract class
-void FunctionLoader::visitItem(Item* t) {} //abstract class
-void FunctionLoader::visitType(Type* t) {} //abstract class
-void FunctionLoader::visitExpr(Expr* t) {} //abstract class
-void FunctionLoader::visitAddOp(AddOp* t) {} //abstract class
-void FunctionLoader::visitMulOp(MulOp* t) {} //abstract class
-void FunctionLoader::visitRelOp(RelOp* t) {} //abstract class
+void TreeOptimizer::visitProg(Prog* t) { } //abstract class
+void TreeOptimizer::visitTopDef(TopDef* t) {} //abstract class
+void TreeOptimizer::visitArg(Arg* t) {} //abstract class
+void TreeOptimizer::visitBlk(Blk* t) {} //abstract class
+void TreeOptimizer::visitStmt(Stmt* t) {} //abstract class
+void TreeOptimizer::visitItem(Item* t) {} //abstract class
+void TreeOptimizer::visitType(Type* t) {} //abstract class
+void TreeOptimizer::visitExpr(Expr* t) {} //abstract class
+void TreeOptimizer::visitAddOp(AddOp* t) {} //abstract class
+void TreeOptimizer::visitMulOp(MulOp* t) {} //abstract class
+void TreeOptimizer::visitRelOp(RelOp* t) {} //abstract class
 
-void FunctionLoader::visitProgram(Program* program)
+void TreeOptimizer::visitProgram(Program* program)
 {
     program->listtopdef_->accept(this);
 }
 
-void FunctionLoader::visitFnDef(FnDef* fndef)
+void TreeOptimizer::visitFnDef(FnDef* fndef)
 {
     /* Code For FnDef Goes Here*/
     fndef->type_->accept(this);
@@ -48,7 +49,7 @@ void FunctionLoader::visitFnDef(FnDef* fndef)
 
 }
 
-void FunctionLoader::visitArgument(Argument* argument)
+void TreeOptimizer::visitArgument(Argument* argument)
 {
     /* Code For Argument Goes Here*/
     argument->type_->accept(this);
@@ -56,7 +57,7 @@ void FunctionLoader::visitArgument(Argument* argument)
 
 }
 
-void FunctionLoader::visitStmBlock(StmBlock* stmblock)
+void TreeOptimizer::visitStmBlock(StmBlock* stmblock)
 {
     /* Code For StmBlock Goes Here*/
 
@@ -64,14 +65,14 @@ void FunctionLoader::visitStmBlock(StmBlock* stmblock)
 
 }
 
-void FunctionLoader::visitStmEmpty(StmEmpty* stmempty)
+void TreeOptimizer::visitStmEmpty(StmEmpty* stmempty)
 {
     /* Code For StmEmpty Goes Here*/
 
 
 }
 
-void FunctionLoader::visitStmBStmt(StmBStmt* stmbstmt)
+void TreeOptimizer::visitStmBStmt(StmBStmt* stmbstmt)
 {
     /* Code For StmBStmt Goes Here*/
 
@@ -79,7 +80,7 @@ void FunctionLoader::visitStmBStmt(StmBStmt* stmbstmt)
 
 }
 
-void FunctionLoader::visitStmDecl(StmDecl* stmdecl)
+void TreeOptimizer::visitStmDecl(StmDecl* stmdecl)
 {
     /* Code For StmDecl Goes Here*/
 
@@ -88,7 +89,7 @@ void FunctionLoader::visitStmDecl(StmDecl* stmdecl)
 
 }
 
-void FunctionLoader::visitStmAss(StmAss* stmass)
+void TreeOptimizer::visitStmAss(StmAss* stmass)
 {
     /* Code For StmAss Goes Here*/
 
@@ -97,7 +98,7 @@ void FunctionLoader::visitStmAss(StmAss* stmass)
 
 }
 
-void FunctionLoader::visitStmIncr(StmIncr* stmincr)
+void TreeOptimizer::visitStmIncr(StmIncr* stmincr)
 {
     /* Code For StmIncr Goes Here*/
 
@@ -105,7 +106,7 @@ void FunctionLoader::visitStmIncr(StmIncr* stmincr)
 
 }
 
-void FunctionLoader::visitStmDecr(StmDecr* stmdecr)
+void TreeOptimizer::visitStmDecr(StmDecr* stmdecr)
 {
     /* Code For StmDecr Goes Here*/
 
@@ -113,7 +114,7 @@ void FunctionLoader::visitStmDecr(StmDecr* stmdecr)
 
 }
 
-void FunctionLoader::visitStmRet(StmRet* stmret)
+void TreeOptimizer::visitStmRet(StmRet* stmret)
 {
     /* Code For StmRet Goes Here*/
 
@@ -121,14 +122,14 @@ void FunctionLoader::visitStmRet(StmRet* stmret)
 
 }
 
-void FunctionLoader::visitStmVRet(StmVRet* stmvret)
+void TreeOptimizer::visitStmVRet(StmVRet* stmvret)
 {
     /* Code For StmVRet Goes Here*/
 
 
 }
 
-void FunctionLoader::visitStmCond(StmCond* stmcond)
+void TreeOptimizer::visitStmCond(StmCond* stmcond)
 {
     /* Code For StmCond Goes Here*/
 
@@ -137,7 +138,7 @@ void FunctionLoader::visitStmCond(StmCond* stmcond)
 
 }
 
-void FunctionLoader::visitStmCondElse(StmCondElse* stmcondelse)
+void TreeOptimizer::visitStmCondElse(StmCondElse* stmcondelse)
 {
     /* Code For StmCondElse Goes Here*/
 
@@ -147,7 +148,7 @@ void FunctionLoader::visitStmCondElse(StmCondElse* stmcondelse)
 
 }
 
-void FunctionLoader::visitStmWhile(StmWhile* stmwhile)
+void TreeOptimizer::visitStmWhile(StmWhile* stmwhile)
 {
     /* Code For StmWhile Goes Here*/
 
@@ -156,7 +157,7 @@ void FunctionLoader::visitStmWhile(StmWhile* stmwhile)
 
 }
 
-void FunctionLoader::visitStmSExp(StmSExp* stmsexp)
+void TreeOptimizer::visitStmSExp(StmSExp* stmsexp)
 {
     /* Code For StmSExp Goes Here*/
 
@@ -164,7 +165,7 @@ void FunctionLoader::visitStmSExp(StmSExp* stmsexp)
 
 }
 
-void FunctionLoader::visitStmNoInit(StmNoInit* stmnoinit)
+void TreeOptimizer::visitStmNoInit(StmNoInit* stmnoinit)
 {
     /* Code For StmNoInit Goes Here*/
 
@@ -172,7 +173,7 @@ void FunctionLoader::visitStmNoInit(StmNoInit* stmnoinit)
 
 }
 
-void FunctionLoader::visitStmInit(StmInit* stminit)
+void TreeOptimizer::visitStmInit(StmInit* stminit)
 {
     /* Code For StmInit Goes Here*/
 
@@ -181,35 +182,35 @@ void FunctionLoader::visitStmInit(StmInit* stminit)
 
 }
 
-void FunctionLoader::visitInt(Int* integer)
+void TreeOptimizer::visitInt(Int* integer)
 {
     /* Code For Int Goes Here*/
 
 
 }
 
-void FunctionLoader::visitStr(Str* str)
+void TreeOptimizer::visitStr(Str* str)
 {
     /* Code For Str Goes Here*/
 
 
 }
 
-void FunctionLoader::visitBool(Bool* boolean)
+void TreeOptimizer::visitBool(Bool* boolean)
 {
     /* Code For Bool Goes Here*/
 
 
 }
 
-void FunctionLoader::visitVoid(Void* void_field)
+void TreeOptimizer::visitVoid(Void* void_field)
 {
     /* Code For Void Goes Here*/
 
 
 }
 
-void FunctionLoader::visitFun(Fun* fun)
+void TreeOptimizer::visitFun(Fun* fun)
 {
     /* Code For Fun Goes Here*/
 
@@ -218,7 +219,7 @@ void FunctionLoader::visitFun(Fun* fun)
 
 }
 
-void FunctionLoader::visitEVar(EVar* evar)
+void TreeOptimizer::visitEVar(EVar* evar)
 {
     /* Code For EVar Goes Here*/
 
@@ -226,7 +227,7 @@ void FunctionLoader::visitEVar(EVar* evar)
 
 }
 
-void FunctionLoader::visitELitInt(ELitInt* elitint)
+void TreeOptimizer::visitELitInt(ELitInt* elitint)
 {
     /* Code For ELitInt Goes Here*/
 
@@ -234,21 +235,21 @@ void FunctionLoader::visitELitInt(ELitInt* elitint)
 
 }
 
-void FunctionLoader::visitELitTrue(ELitTrue* elittrue)
+void TreeOptimizer::visitELitTrue(ELitTrue* elittrue)
 {
     /* Code For ELitTrue Goes Here*/
 
 
 }
 
-void FunctionLoader::visitELitFalse(ELitFalse* elitfalse)
+void TreeOptimizer::visitELitFalse(ELitFalse* elitfalse)
 {
     /* Code For ELitFalse Goes Here*/
 
 
 }
 
-void FunctionLoader::visitEApp(EApp* eapp)
+void TreeOptimizer::visitEApp(EApp* eapp)
 {
     /* Code For EApp Goes Here*/
 
@@ -257,7 +258,7 @@ void FunctionLoader::visitEApp(EApp* eapp)
 
 }
 
-void FunctionLoader::visitEString(EString* estring)
+void TreeOptimizer::visitEString(EString* estring)
 {
     /* Code For EString Goes Here*/
 
@@ -265,7 +266,7 @@ void FunctionLoader::visitEString(EString* estring)
 
 }
 
-void FunctionLoader::visitNeg(Neg* neg)
+void TreeOptimizer::visitNeg(Neg* neg)
 {
     /* Code For Neg Goes Here*/
 
@@ -273,7 +274,7 @@ void FunctionLoader::visitNeg(Neg* neg)
 
 }
 
-void FunctionLoader::visitNot(Not* not_field)
+void TreeOptimizer::visitNot(Not* not_field)
 {
     /* Code For Not Goes Here*/
 
@@ -281,7 +282,7 @@ void FunctionLoader::visitNot(Not* not_field)
 
 }
 
-void FunctionLoader::visitEMul(EMul* emul)
+void TreeOptimizer::visitEMul(EMul* emul)
 {
     /* Code For EMul Goes Here*/
 
@@ -291,7 +292,7 @@ void FunctionLoader::visitEMul(EMul* emul)
 
 }
 
-void FunctionLoader::visitEAdd(EAdd* eadd)
+void TreeOptimizer::visitEAdd(EAdd* eadd)
 {
     /* Code For EAdd Goes Here*/
 
@@ -301,7 +302,7 @@ void FunctionLoader::visitEAdd(EAdd* eadd)
 
 }
 
-void FunctionLoader::visitERel(ERel* erel)
+void TreeOptimizer::visitERel(ERel* erel)
 {
     /* Code For ERel Goes Here*/
 
@@ -311,7 +312,7 @@ void FunctionLoader::visitERel(ERel* erel)
 
 }
 
-void FunctionLoader::visitEAnd(EAnd* eand)
+void TreeOptimizer::visitEAnd(EAnd* eand)
 {
     /* Code For EAnd Goes Here*/
 
@@ -320,7 +321,7 @@ void FunctionLoader::visitEAnd(EAnd* eand)
 
 }
 
-void FunctionLoader::visitEOr(EOr* eor)
+void TreeOptimizer::visitEOr(EOr* eor)
 {
     /* Code For EOr Goes Here*/
 
@@ -329,77 +330,77 @@ void FunctionLoader::visitEOr(EOr* eor)
 
 }
 
-void FunctionLoader::visitPlus(Plus* plus)
+void TreeOptimizer::visitPlus(Plus* plus)
 {
     /* Code For Plus Goes Here*/
 
 
 }
 
-void FunctionLoader::visitMinus(Minus* minus)
+void TreeOptimizer::visitMinus(Minus* minus)
 {
     /* Code For Minus Goes Here*/
 
 
 }
 
-void FunctionLoader::visitTimes(Times* times)
+void TreeOptimizer::visitTimes(Times* times)
 {
     /* Code For Times Goes Here*/
 
 
 }
 
-void FunctionLoader::visitDiv(Div* div)
+void TreeOptimizer::visitDiv(Div* div)
 {
     /* Code For Div Goes Here*/
 
 
 }
 
-void FunctionLoader::visitMod(Mod* mod)
+void TreeOptimizer::visitMod(Mod* mod)
 {
     /* Code For Mod Goes Here*/
 
 
 }
 
-void FunctionLoader::visitLTH(LTH* lth)
+void TreeOptimizer::visitLTH(LTH* lth)
 {
     /* Code For LTH Goes Here*/
 
 
 }
 
-void FunctionLoader::visitLE(LE* le)
+void TreeOptimizer::visitLE(LE* le)
 {
     /* Code For LE Goes Here*/
 
 
 }
 
-void FunctionLoader::visitGTH(GTH* gth)
+void TreeOptimizer::visitGTH(GTH* gth)
 {
     /* Code For GTH Goes Here*/
 
 
 }
 
-void FunctionLoader::visitGE(GE* ge)
+void TreeOptimizer::visitGE(GE* ge)
 {
     /* Code For GE Goes Here*/
 
 
 }
 
-void FunctionLoader::visitEQU(EQU* equ)
+void TreeOptimizer::visitEQU(EQU* equ)
 {
     /* Code For EQU Goes Here*/
 
 
 }
 
-void FunctionLoader::visitNE(NE* ne)
+void TreeOptimizer::visitNE(NE* ne)
 {
     /* Code For NE Goes Here*/
 
@@ -407,7 +408,7 @@ void FunctionLoader::visitNE(NE* ne)
 }
 
 
-void FunctionLoader::visitListTopDef(ListTopDef* listtopdef)
+void TreeOptimizer::visitListTopDef(ListTopDef* listtopdef)
 {
     for (ListTopDef::iterator i = listtopdef->begin() ; i != listtopdef->end() ; ++i)
     {
@@ -415,7 +416,7 @@ void FunctionLoader::visitListTopDef(ListTopDef* listtopdef)
     }
 }
 
-void FunctionLoader::visitListArg(ListArg* listarg)
+void TreeOptimizer::visitListArg(ListArg* listarg)
 {
     for (ListArg::iterator i = listarg->begin() ; i != listarg->end() ; ++i)
     {
@@ -423,7 +424,7 @@ void FunctionLoader::visitListArg(ListArg* listarg)
     }
 }
 
-void FunctionLoader::visitListStmt(ListStmt* liststmt)
+void TreeOptimizer::visitListStmt(ListStmt* liststmt)
 {
     for (ListStmt::iterator i = liststmt->begin() ; i != liststmt->end() ; ++i)
     {
@@ -431,7 +432,7 @@ void FunctionLoader::visitListStmt(ListStmt* liststmt)
     }
 }
 
-void FunctionLoader::visitListItem(ListItem* listitem)
+void TreeOptimizer::visitListItem(ListItem* listitem)
 {
     for (ListItem::iterator i = listitem->begin() ; i != listitem->end() ; ++i)
     {
@@ -439,7 +440,7 @@ void FunctionLoader::visitListItem(ListItem* listitem)
     }
 }
 
-void FunctionLoader::visitListType(ListType* listtype)
+void TreeOptimizer::visitListType(ListType* listtype)
 {
     for (ListType::iterator i = listtype->begin() ; i != listtype->end() ; ++i)
     {
@@ -447,7 +448,7 @@ void FunctionLoader::visitListType(ListType* listtype)
     }
 }
 
-void FunctionLoader::visitListExpr(ListExpr* listexpr)
+void TreeOptimizer::visitListExpr(ListExpr* listexpr)
 {
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
@@ -456,28 +457,29 @@ void FunctionLoader::visitListExpr(ListExpr* listexpr)
 }
 
 
-void FunctionLoader::visitInteger(Integer x)
+void TreeOptimizer::visitInteger(Integer x)
 {
     /* Code for Integer Goes Here*/
 }
 
-void FunctionLoader::visitChar(Char x)
+void TreeOptimizer::visitChar(Char x)
 {
     /* Code for Char Goes Here*/
 }
 
-void FunctionLoader::visitDouble(Double x)
+void TreeOptimizer::visitDouble(Double x)
 {
     /* Code for Double Goes Here*/
 }
 
-void FunctionLoader::visitString(String x)
+void TreeOptimizer::visitString(String x)
 {
     /* Code for String Goes Here*/
 }
 
-void FunctionLoader::visitIdent(Ident x)
+void TreeOptimizer::visitIdent(Ident x)
 {
 }
+
 
 } /* namespace frontend */

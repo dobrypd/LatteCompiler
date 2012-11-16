@@ -4,8 +4,8 @@
  *
  */
 
-#ifndef ASTCHECKER_H_
-#define ASTCHECKER_H_
+#ifndef RETURNSCHECKER_H_
+#define RETURNSCHECKER_H_
 
 #include "Absyn.H"
 #include "ErrorHandler.h"
@@ -14,14 +14,14 @@
 namespace frontend
 {
 
-class ASTChecker : public Visitor
+class ReturnsChecker : public Visitor
 {
 private:
     ErrorHandler& error_handler;
     Environment& env;
 
 public:
-    ASTChecker(ErrorHandler& error_handler, Environment& env);
+    ReturnsChecker(ErrorHandler& error_handler, Environment& env);
     void check(Visitable* v);
 
     void visitProg(Prog* p);
@@ -97,5 +97,4 @@ public:
 };
 
 } /* namespace frontend */
-
-#endif /* ASTCHECKER_H_ */
+#endif /* RETURNSCHECKER_H_ */

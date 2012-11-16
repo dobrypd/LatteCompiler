@@ -8,15 +8,18 @@
 #ifndef FUNCTIONLOADER_H_
 #define FUNCTIONLOADER_H_
 
-#include "MyVisitor.h"
 #include "Absyn.H"
+#include "Environment.h"
 #include "ErrorHandler.h"
 
 namespace frontend
 {
 
-class FunctionLoader : public MyVisitor, public Visitor
+class FunctionLoader : public Visitor
 {
+private:
+    ErrorHandler& error_handler;
+    Environment& env;
 public:
     FunctionLoader(ErrorHandler& error_handler, Environment& env);
     void check(Visitable* v);

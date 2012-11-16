@@ -8,18 +8,18 @@
 #include <iostream>
 #include "ASTChecker.h"
 #include "ErrorHandler.h"
-#include "MyVisitor.h"
 
 namespace frontend
 {
 
 ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env)
-    : MyVisitor(error_handler, env)
+    : error_handler(error_handler), env(env)
 {
 }
 
 void ASTChecker::check(Visitable* v)
 {
+    std::cout << &(this->env) << std::endl;
     v->accept(this);
 }
 

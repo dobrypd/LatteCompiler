@@ -1,44 +1,47 @@
 /*
- * FunctionLoader.cpp
+ * Author: Piotr Dobrowolski
+ * pd291528@students.mimuw.edu.pl
  *
- *  Created on: 16-11-2012
- *      Author: piotrek
  */
 
-#include "FunctionLoader.h"
+#include <iostream>
+#include "ReturnsChecker.h"
+#include "ErrorHandler.h"
 
 namespace frontend
 {
 
-FunctionLoader::FunctionLoader(ErrorHandler& error_handler, Environment& env)
+ReturnsChecker::ReturnsChecker(ErrorHandler& error_handler, Environment& env)
     : error_handler(error_handler), env(env)
 {
+    // TODO Auto-generated constructor stub
+
 }
 
-
-void FunctionLoader::check(Visitable* v)
+void ReturnsChecker::check(Visitable* v)
 {
+    std::cout << &(this->env) << std::endl;
     v->accept(this);
 }
 
-void FunctionLoader::visitProg(Prog* t) { } //abstract class
-void FunctionLoader::visitTopDef(TopDef* t) {} //abstract class
-void FunctionLoader::visitArg(Arg* t) {} //abstract class
-void FunctionLoader::visitBlk(Blk* t) {} //abstract class
-void FunctionLoader::visitStmt(Stmt* t) {} //abstract class
-void FunctionLoader::visitItem(Item* t) {} //abstract class
-void FunctionLoader::visitType(Type* t) {} //abstract class
-void FunctionLoader::visitExpr(Expr* t) {} //abstract class
-void FunctionLoader::visitAddOp(AddOp* t) {} //abstract class
-void FunctionLoader::visitMulOp(MulOp* t) {} //abstract class
-void FunctionLoader::visitRelOp(RelOp* t) {} //abstract class
+void ReturnsChecker::visitProg(Prog* t) { } //abstract class
+void ReturnsChecker::visitTopDef(TopDef* t) {} //abstract class
+void ReturnsChecker::visitArg(Arg* t) {} //abstract class
+void ReturnsChecker::visitBlk(Blk* t) {} //abstract class
+void ReturnsChecker::visitStmt(Stmt* t) {} //abstract class
+void ReturnsChecker::visitItem(Item* t) {} //abstract class
+void ReturnsChecker::visitType(Type* t) {} //abstract class
+void ReturnsChecker::visitExpr(Expr* t) {} //abstract class
+void ReturnsChecker::visitAddOp(AddOp* t) {} //abstract class
+void ReturnsChecker::visitMulOp(MulOp* t) {} //abstract class
+void ReturnsChecker::visitRelOp(RelOp* t) {} //abstract class
 
-void FunctionLoader::visitProgram(Program* program)
+void ReturnsChecker::visitProgram(Program* program)
 {
     program->listtopdef_->accept(this);
 }
 
-void FunctionLoader::visitFnDef(FnDef* fndef)
+void ReturnsChecker::visitFnDef(FnDef* fndef)
 {
     /* Code For FnDef Goes Here*/
     fndef->type_->accept(this);
@@ -48,7 +51,7 @@ void FunctionLoader::visitFnDef(FnDef* fndef)
 
 }
 
-void FunctionLoader::visitArgument(Argument* argument)
+void ReturnsChecker::visitArgument(Argument* argument)
 {
     /* Code For Argument Goes Here*/
     argument->type_->accept(this);
@@ -56,7 +59,7 @@ void FunctionLoader::visitArgument(Argument* argument)
 
 }
 
-void FunctionLoader::visitStmBlock(StmBlock* stmblock)
+void ReturnsChecker::visitStmBlock(StmBlock* stmblock)
 {
     /* Code For StmBlock Goes Here*/
 
@@ -64,14 +67,14 @@ void FunctionLoader::visitStmBlock(StmBlock* stmblock)
 
 }
 
-void FunctionLoader::visitStmEmpty(StmEmpty* stmempty)
+void ReturnsChecker::visitStmEmpty(StmEmpty* stmempty)
 {
     /* Code For StmEmpty Goes Here*/
 
 
 }
 
-void FunctionLoader::visitStmBStmt(StmBStmt* stmbstmt)
+void ReturnsChecker::visitStmBStmt(StmBStmt* stmbstmt)
 {
     /* Code For StmBStmt Goes Here*/
 
@@ -79,7 +82,7 @@ void FunctionLoader::visitStmBStmt(StmBStmt* stmbstmt)
 
 }
 
-void FunctionLoader::visitStmDecl(StmDecl* stmdecl)
+void ReturnsChecker::visitStmDecl(StmDecl* stmdecl)
 {
     /* Code For StmDecl Goes Here*/
 
@@ -88,7 +91,7 @@ void FunctionLoader::visitStmDecl(StmDecl* stmdecl)
 
 }
 
-void FunctionLoader::visitStmAss(StmAss* stmass)
+void ReturnsChecker::visitStmAss(StmAss* stmass)
 {
     /* Code For StmAss Goes Here*/
 
@@ -97,7 +100,7 @@ void FunctionLoader::visitStmAss(StmAss* stmass)
 
 }
 
-void FunctionLoader::visitStmIncr(StmIncr* stmincr)
+void ReturnsChecker::visitStmIncr(StmIncr* stmincr)
 {
     /* Code For StmIncr Goes Here*/
 
@@ -105,7 +108,7 @@ void FunctionLoader::visitStmIncr(StmIncr* stmincr)
 
 }
 
-void FunctionLoader::visitStmDecr(StmDecr* stmdecr)
+void ReturnsChecker::visitStmDecr(StmDecr* stmdecr)
 {
     /* Code For StmDecr Goes Here*/
 
@@ -113,7 +116,7 @@ void FunctionLoader::visitStmDecr(StmDecr* stmdecr)
 
 }
 
-void FunctionLoader::visitStmRet(StmRet* stmret)
+void ReturnsChecker::visitStmRet(StmRet* stmret)
 {
     /* Code For StmRet Goes Here*/
 
@@ -121,14 +124,14 @@ void FunctionLoader::visitStmRet(StmRet* stmret)
 
 }
 
-void FunctionLoader::visitStmVRet(StmVRet* stmvret)
+void ReturnsChecker::visitStmVRet(StmVRet* stmvret)
 {
     /* Code For StmVRet Goes Here*/
 
 
 }
 
-void FunctionLoader::visitStmCond(StmCond* stmcond)
+void ReturnsChecker::visitStmCond(StmCond* stmcond)
 {
     /* Code For StmCond Goes Here*/
 
@@ -137,7 +140,7 @@ void FunctionLoader::visitStmCond(StmCond* stmcond)
 
 }
 
-void FunctionLoader::visitStmCondElse(StmCondElse* stmcondelse)
+void ReturnsChecker::visitStmCondElse(StmCondElse* stmcondelse)
 {
     /* Code For StmCondElse Goes Here*/
 
@@ -147,7 +150,7 @@ void FunctionLoader::visitStmCondElse(StmCondElse* stmcondelse)
 
 }
 
-void FunctionLoader::visitStmWhile(StmWhile* stmwhile)
+void ReturnsChecker::visitStmWhile(StmWhile* stmwhile)
 {
     /* Code For StmWhile Goes Here*/
 
@@ -156,7 +159,7 @@ void FunctionLoader::visitStmWhile(StmWhile* stmwhile)
 
 }
 
-void FunctionLoader::visitStmSExp(StmSExp* stmsexp)
+void ReturnsChecker::visitStmSExp(StmSExp* stmsexp)
 {
     /* Code For StmSExp Goes Here*/
 
@@ -164,7 +167,7 @@ void FunctionLoader::visitStmSExp(StmSExp* stmsexp)
 
 }
 
-void FunctionLoader::visitStmNoInit(StmNoInit* stmnoinit)
+void ReturnsChecker::visitStmNoInit(StmNoInit* stmnoinit)
 {
     /* Code For StmNoInit Goes Here*/
 
@@ -172,7 +175,7 @@ void FunctionLoader::visitStmNoInit(StmNoInit* stmnoinit)
 
 }
 
-void FunctionLoader::visitStmInit(StmInit* stminit)
+void ReturnsChecker::visitStmInit(StmInit* stminit)
 {
     /* Code For StmInit Goes Here*/
 
@@ -181,35 +184,35 @@ void FunctionLoader::visitStmInit(StmInit* stminit)
 
 }
 
-void FunctionLoader::visitInt(Int* integer)
+void ReturnsChecker::visitInt(Int* integer)
 {
     /* Code For Int Goes Here*/
 
 
 }
 
-void FunctionLoader::visitStr(Str* str)
+void ReturnsChecker::visitStr(Str* str)
 {
     /* Code For Str Goes Here*/
 
 
 }
 
-void FunctionLoader::visitBool(Bool* boolean)
+void ReturnsChecker::visitBool(Bool* boolean)
 {
     /* Code For Bool Goes Here*/
 
 
 }
 
-void FunctionLoader::visitVoid(Void* void_field)
+void ReturnsChecker::visitVoid(Void* void_field)
 {
     /* Code For Void Goes Here*/
 
 
 }
 
-void FunctionLoader::visitFun(Fun* fun)
+void ReturnsChecker::visitFun(Fun* fun)
 {
     /* Code For Fun Goes Here*/
 
@@ -218,7 +221,7 @@ void FunctionLoader::visitFun(Fun* fun)
 
 }
 
-void FunctionLoader::visitEVar(EVar* evar)
+void ReturnsChecker::visitEVar(EVar* evar)
 {
     /* Code For EVar Goes Here*/
 
@@ -226,7 +229,7 @@ void FunctionLoader::visitEVar(EVar* evar)
 
 }
 
-void FunctionLoader::visitELitInt(ELitInt* elitint)
+void ReturnsChecker::visitELitInt(ELitInt* elitint)
 {
     /* Code For ELitInt Goes Here*/
 
@@ -234,21 +237,21 @@ void FunctionLoader::visitELitInt(ELitInt* elitint)
 
 }
 
-void FunctionLoader::visitELitTrue(ELitTrue* elittrue)
+void ReturnsChecker::visitELitTrue(ELitTrue* elittrue)
 {
     /* Code For ELitTrue Goes Here*/
 
 
 }
 
-void FunctionLoader::visitELitFalse(ELitFalse* elitfalse)
+void ReturnsChecker::visitELitFalse(ELitFalse* elitfalse)
 {
     /* Code For ELitFalse Goes Here*/
 
 
 }
 
-void FunctionLoader::visitEApp(EApp* eapp)
+void ReturnsChecker::visitEApp(EApp* eapp)
 {
     /* Code For EApp Goes Here*/
 
@@ -257,7 +260,7 @@ void FunctionLoader::visitEApp(EApp* eapp)
 
 }
 
-void FunctionLoader::visitEString(EString* estring)
+void ReturnsChecker::visitEString(EString* estring)
 {
     /* Code For EString Goes Here*/
 
@@ -265,7 +268,7 @@ void FunctionLoader::visitEString(EString* estring)
 
 }
 
-void FunctionLoader::visitNeg(Neg* neg)
+void ReturnsChecker::visitNeg(Neg* neg)
 {
     /* Code For Neg Goes Here*/
 
@@ -273,7 +276,7 @@ void FunctionLoader::visitNeg(Neg* neg)
 
 }
 
-void FunctionLoader::visitNot(Not* not_field)
+void ReturnsChecker::visitNot(Not* not_field)
 {
     /* Code For Not Goes Here*/
 
@@ -281,7 +284,7 @@ void FunctionLoader::visitNot(Not* not_field)
 
 }
 
-void FunctionLoader::visitEMul(EMul* emul)
+void ReturnsChecker::visitEMul(EMul* emul)
 {
     /* Code For EMul Goes Here*/
 
@@ -291,7 +294,7 @@ void FunctionLoader::visitEMul(EMul* emul)
 
 }
 
-void FunctionLoader::visitEAdd(EAdd* eadd)
+void ReturnsChecker::visitEAdd(EAdd* eadd)
 {
     /* Code For EAdd Goes Here*/
 
@@ -301,7 +304,7 @@ void FunctionLoader::visitEAdd(EAdd* eadd)
 
 }
 
-void FunctionLoader::visitERel(ERel* erel)
+void ReturnsChecker::visitERel(ERel* erel)
 {
     /* Code For ERel Goes Here*/
 
@@ -311,7 +314,7 @@ void FunctionLoader::visitERel(ERel* erel)
 
 }
 
-void FunctionLoader::visitEAnd(EAnd* eand)
+void ReturnsChecker::visitEAnd(EAnd* eand)
 {
     /* Code For EAnd Goes Here*/
 
@@ -320,7 +323,7 @@ void FunctionLoader::visitEAnd(EAnd* eand)
 
 }
 
-void FunctionLoader::visitEOr(EOr* eor)
+void ReturnsChecker::visitEOr(EOr* eor)
 {
     /* Code For EOr Goes Here*/
 
@@ -329,77 +332,77 @@ void FunctionLoader::visitEOr(EOr* eor)
 
 }
 
-void FunctionLoader::visitPlus(Plus* plus)
+void ReturnsChecker::visitPlus(Plus* plus)
 {
     /* Code For Plus Goes Here*/
 
 
 }
 
-void FunctionLoader::visitMinus(Minus* minus)
+void ReturnsChecker::visitMinus(Minus* minus)
 {
     /* Code For Minus Goes Here*/
 
 
 }
 
-void FunctionLoader::visitTimes(Times* times)
+void ReturnsChecker::visitTimes(Times* times)
 {
     /* Code For Times Goes Here*/
 
 
 }
 
-void FunctionLoader::visitDiv(Div* div)
+void ReturnsChecker::visitDiv(Div* div)
 {
     /* Code For Div Goes Here*/
 
 
 }
 
-void FunctionLoader::visitMod(Mod* mod)
+void ReturnsChecker::visitMod(Mod* mod)
 {
     /* Code For Mod Goes Here*/
 
 
 }
 
-void FunctionLoader::visitLTH(LTH* lth)
+void ReturnsChecker::visitLTH(LTH* lth)
 {
     /* Code For LTH Goes Here*/
 
 
 }
 
-void FunctionLoader::visitLE(LE* le)
+void ReturnsChecker::visitLE(LE* le)
 {
     /* Code For LE Goes Here*/
 
 
 }
 
-void FunctionLoader::visitGTH(GTH* gth)
+void ReturnsChecker::visitGTH(GTH* gth)
 {
     /* Code For GTH Goes Here*/
 
 
 }
 
-void FunctionLoader::visitGE(GE* ge)
+void ReturnsChecker::visitGE(GE* ge)
 {
     /* Code For GE Goes Here*/
 
 
 }
 
-void FunctionLoader::visitEQU(EQU* equ)
+void ReturnsChecker::visitEQU(EQU* equ)
 {
     /* Code For EQU Goes Here*/
 
 
 }
 
-void FunctionLoader::visitNE(NE* ne)
+void ReturnsChecker::visitNE(NE* ne)
 {
     /* Code For NE Goes Here*/
 
@@ -407,7 +410,7 @@ void FunctionLoader::visitNE(NE* ne)
 }
 
 
-void FunctionLoader::visitListTopDef(ListTopDef* listtopdef)
+void ReturnsChecker::visitListTopDef(ListTopDef* listtopdef)
 {
     for (ListTopDef::iterator i = listtopdef->begin() ; i != listtopdef->end() ; ++i)
     {
@@ -415,7 +418,7 @@ void FunctionLoader::visitListTopDef(ListTopDef* listtopdef)
     }
 }
 
-void FunctionLoader::visitListArg(ListArg* listarg)
+void ReturnsChecker::visitListArg(ListArg* listarg)
 {
     for (ListArg::iterator i = listarg->begin() ; i != listarg->end() ; ++i)
     {
@@ -423,7 +426,7 @@ void FunctionLoader::visitListArg(ListArg* listarg)
     }
 }
 
-void FunctionLoader::visitListStmt(ListStmt* liststmt)
+void ReturnsChecker::visitListStmt(ListStmt* liststmt)
 {
     for (ListStmt::iterator i = liststmt->begin() ; i != liststmt->end() ; ++i)
     {
@@ -431,7 +434,7 @@ void FunctionLoader::visitListStmt(ListStmt* liststmt)
     }
 }
 
-void FunctionLoader::visitListItem(ListItem* listitem)
+void ReturnsChecker::visitListItem(ListItem* listitem)
 {
     for (ListItem::iterator i = listitem->begin() ; i != listitem->end() ; ++i)
     {
@@ -439,7 +442,7 @@ void FunctionLoader::visitListItem(ListItem* listitem)
     }
 }
 
-void FunctionLoader::visitListType(ListType* listtype)
+void ReturnsChecker::visitListType(ListType* listtype)
 {
     for (ListType::iterator i = listtype->begin() ; i != listtype->end() ; ++i)
     {
@@ -447,7 +450,7 @@ void FunctionLoader::visitListType(ListType* listtype)
     }
 }
 
-void FunctionLoader::visitListExpr(ListExpr* listexpr)
+void ReturnsChecker::visitListExpr(ListExpr* listexpr)
 {
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
@@ -456,28 +459,29 @@ void FunctionLoader::visitListExpr(ListExpr* listexpr)
 }
 
 
-void FunctionLoader::visitInteger(Integer x)
+void ReturnsChecker::visitInteger(Integer x)
 {
     /* Code for Integer Goes Here*/
 }
 
-void FunctionLoader::visitChar(Char x)
+void ReturnsChecker::visitChar(Char x)
 {
     /* Code for Char Goes Here*/
 }
 
-void FunctionLoader::visitDouble(Double x)
+void ReturnsChecker::visitDouble(Double x)
 {
     /* Code for Double Goes Here*/
 }
 
-void FunctionLoader::visitString(String x)
+void ReturnsChecker::visitString(String x)
 {
     /* Code for String Goes Here*/
 }
 
-void FunctionLoader::visitIdent(Ident x)
+void ReturnsChecker::visitIdent(Ident x)
 {
 }
+
 
 } /* namespace frontend */

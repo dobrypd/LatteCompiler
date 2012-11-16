@@ -12,6 +12,8 @@
 #include "ASTChecker.h"
 #include "ErrorHandler.h"
 #include "FunctionLoader.h"
+#include "TreeOptimizer.h"
+#include "ReturnsChecker.h"
 
 using std::cerr;
 using std::cout;
@@ -138,18 +140,26 @@ int main(int argc, char** argv)
         //  * Optimize tree, expressions
         //  * Type check (returns)
 
-        // Used in all checkers:
+        // Used in all checkers as references!!! Delete in this same time!!!
         frontend::Environment env;
         frontend::ErrorHandler file_error_handler(
                 (arguments.input_count > 0) ? arguments.input_files[i] : NULL);
 
         // Load functions.
-        frontend::FunctionLoader function_loader(file_error_handler, env);  // Do not remove args!
+        frontend::FunctionLoader function_loader(file_error_handler, env);
         function_loader.check(ast_root);
 
         // Type check (without returns).
-        frontend::ASTChecker checker(file_error_handler, env);  // Do not remove args!
+        frontend::ASTChecker checker(file_error_handler, env);
         checker.check(ast_root);
+
+        // Optimizer.
+        frontend::TreeOptimizer tree_optimizer;
+        tree_optimizer.optimize(ast_root);
+
+        // Returns checker.
+        frontend::ReturnsChecker returns_checker(file_error_handler, env);
+        returns_checker.check(ast_root);
 
         // End of semantic check, typecheck and tree optimization.
 

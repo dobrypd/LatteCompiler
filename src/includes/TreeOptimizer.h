@@ -4,25 +4,19 @@
  *
  */
 
-#ifndef ASTCHECKER_H_
-#define ASTCHECKER_H_
+#ifndef TREEOPTIMIZER_H_
+#define TREEOPTIMIZER_H_
 
 #include "Absyn.H"
-#include "ErrorHandler.h"
-#include "Environment.h"
 
 namespace frontend
 {
 
-class ASTChecker : public Visitor
+class TreeOptimizer : public Visitor
 {
-private:
-    ErrorHandler& error_handler;
-    Environment& env;
-
 public:
-    ASTChecker(ErrorHandler& error_handler, Environment& env);
-    void check(Visitable* v);
+    TreeOptimizer();
+    void optimize(Visitable* v);
 
     void visitProg(Prog* p);
     void visitTopDef(TopDef* p);
@@ -97,5 +91,4 @@ public:
 };
 
 } /* namespace frontend */
-
-#endif /* ASTCHECKER_H_ */
+#endif /* TREEOPTIMIZER_H_ */
