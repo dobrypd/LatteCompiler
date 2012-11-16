@@ -1,24 +1,24 @@
 /*
- * Author: Piotr Dobrowolski
- * pd291528@students.mimuw.edu.pl
+ * FunctionLoader.h
  *
+ *  Created on: 16-11-2012
+ *      Author: piotrek
  */
 
-#ifndef ASTCHECKER_H_
-#define ASTCHECKER_H_
+#ifndef FUNCTIONLOADER_H_
+#define FUNCTIONLOADER_H_
 
+#include "MyVisitor.h"
 #include "Absyn.H"
 #include "ErrorHandler.h"
-#include "Environment.h"
-#include "MyVisitor.h"
 
 namespace frontend
 {
 
-class ASTChecker : public MyVisitor, public Visitor
+class FunctionLoader : public MyVisitor, public Visitor
 {
 public:
-    ASTChecker(ErrorHandler& error_handler, Environment& env);
+    FunctionLoader(ErrorHandler& error_handler, Environment& env);
     void check(Visitable* v);
 
     void visitProg(Prog* p);
@@ -94,5 +94,4 @@ public:
 };
 
 } /* namespace frontend */
-
-#endif /* ASTCHECKER_H_ */
+#endif /* FUNCTIONLOADER_H_ */

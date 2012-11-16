@@ -34,7 +34,7 @@ private:
     // Stack.
     std::deque<std::map<std::string, var_info> > env_stack;
 
-    void submerge();  // When going into neasted block.
+    void submerge();  // When going into nested block.
     void save_tip();  // Save tip of environment to stack.
     void load_tip(); // Load tip of environment from stack.
     void emerge();  // When returning from block.
@@ -42,17 +42,18 @@ private:
 public:
     Environment();
 
-    // Common case - save_tip -> emerge -> submerge -> emerge -> load_tip - loading function
-    void prepare_to_load_function();
+    // Common case - save_tip -> emerge -> [submerge -> emerge] -> load_tip
+    // - loading function, in [] function top environment
+    void prepare_to_function();
     void back_from_function();
 
-    void prepare_to_load_block();
+    void prepare_to_block();
     void back_from_block();
 
     void add_variable();
     void add_function();
 
-    void set_variable(); // TODO: really I need this?
+    void set_variable();  // TODO: really I need this?
     void set_function();
 
     bool lookup_variable();

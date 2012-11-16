@@ -1,46 +1,45 @@
 /*
- * Author: Piotr Dobrowolski
- * pd291528@students.mimuw.edu.pl
+ * FunctionLoader.cpp
  *
+ *  Created on: 16-11-2012
+ *      Author: piotrek
  */
 
-#include <string>
-#include <iostream>
-#include "ASTChecker.h"
-#include "ErrorHandler.h"
+#include "FunctionLoader.h"
 #include "MyVisitor.h"
 
 namespace frontend
 {
 
-ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env)
+FunctionLoader::FunctionLoader(ErrorHandler& error_handler, Environment& env)
     : MyVisitor(error_handler, env)
 {
 }
 
-void ASTChecker::check(Visitable* v)
+
+void FunctionLoader::check(Visitable* v)
 {
     v->accept(this);
 }
 
-void ASTChecker::visitProg(Prog* t) { } //abstract class
-void ASTChecker::visitTopDef(TopDef* t) {} //abstract class
-void ASTChecker::visitArg(Arg* t) {} //abstract class
-void ASTChecker::visitBlk(Blk* t) {} //abstract class
-void ASTChecker::visitStmt(Stmt* t) {} //abstract class
-void ASTChecker::visitItem(Item* t) {} //abstract class
-void ASTChecker::visitType(Type* t) {} //abstract class
-void ASTChecker::visitExpr(Expr* t) {} //abstract class
-void ASTChecker::visitAddOp(AddOp* t) {} //abstract class
-void ASTChecker::visitMulOp(MulOp* t) {} //abstract class
-void ASTChecker::visitRelOp(RelOp* t) {} //abstract class
+void FunctionLoader::visitProg(Prog* t) { } //abstract class
+void FunctionLoader::visitTopDef(TopDef* t) {} //abstract class
+void FunctionLoader::visitArg(Arg* t) {} //abstract class
+void FunctionLoader::visitBlk(Blk* t) {} //abstract class
+void FunctionLoader::visitStmt(Stmt* t) {} //abstract class
+void FunctionLoader::visitItem(Item* t) {} //abstract class
+void FunctionLoader::visitType(Type* t) {} //abstract class
+void FunctionLoader::visitExpr(Expr* t) {} //abstract class
+void FunctionLoader::visitAddOp(AddOp* t) {} //abstract class
+void FunctionLoader::visitMulOp(MulOp* t) {} //abstract class
+void FunctionLoader::visitRelOp(RelOp* t) {} //abstract class
 
-void ASTChecker::visitProgram(Program* program)
+void FunctionLoader::visitProgram(Program* program)
 {
     program->listtopdef_->accept(this);
 }
 
-void ASTChecker::visitFnDef(FnDef* fndef)
+void FunctionLoader::visitFnDef(FnDef* fndef)
 {
     /* Code For FnDef Goes Here*/
     fndef->type_->accept(this);
@@ -50,7 +49,7 @@ void ASTChecker::visitFnDef(FnDef* fndef)
 
 }
 
-void ASTChecker::visitArgument(Argument* argument)
+void FunctionLoader::visitArgument(Argument* argument)
 {
     /* Code For Argument Goes Here*/
     argument->type_->accept(this);
@@ -58,7 +57,7 @@ void ASTChecker::visitArgument(Argument* argument)
 
 }
 
-void ASTChecker::visitStmBlock(StmBlock* stmblock)
+void FunctionLoader::visitStmBlock(StmBlock* stmblock)
 {
     /* Code For StmBlock Goes Here*/
 
@@ -66,14 +65,14 @@ void ASTChecker::visitStmBlock(StmBlock* stmblock)
 
 }
 
-void ASTChecker::visitStmEmpty(StmEmpty* stmempty)
+void FunctionLoader::visitStmEmpty(StmEmpty* stmempty)
 {
     /* Code For StmEmpty Goes Here*/
 
 
 }
 
-void ASTChecker::visitStmBStmt(StmBStmt* stmbstmt)
+void FunctionLoader::visitStmBStmt(StmBStmt* stmbstmt)
 {
     /* Code For StmBStmt Goes Here*/
 
@@ -81,7 +80,7 @@ void ASTChecker::visitStmBStmt(StmBStmt* stmbstmt)
 
 }
 
-void ASTChecker::visitStmDecl(StmDecl* stmdecl)
+void FunctionLoader::visitStmDecl(StmDecl* stmdecl)
 {
     /* Code For StmDecl Goes Here*/
 
@@ -90,7 +89,7 @@ void ASTChecker::visitStmDecl(StmDecl* stmdecl)
 
 }
 
-void ASTChecker::visitStmAss(StmAss* stmass)
+void FunctionLoader::visitStmAss(StmAss* stmass)
 {
     /* Code For StmAss Goes Here*/
 
@@ -99,7 +98,7 @@ void ASTChecker::visitStmAss(StmAss* stmass)
 
 }
 
-void ASTChecker::visitStmIncr(StmIncr* stmincr)
+void FunctionLoader::visitStmIncr(StmIncr* stmincr)
 {
     /* Code For StmIncr Goes Here*/
 
@@ -107,7 +106,7 @@ void ASTChecker::visitStmIncr(StmIncr* stmincr)
 
 }
 
-void ASTChecker::visitStmDecr(StmDecr* stmdecr)
+void FunctionLoader::visitStmDecr(StmDecr* stmdecr)
 {
     /* Code For StmDecr Goes Here*/
 
@@ -115,7 +114,7 @@ void ASTChecker::visitStmDecr(StmDecr* stmdecr)
 
 }
 
-void ASTChecker::visitStmRet(StmRet* stmret)
+void FunctionLoader::visitStmRet(StmRet* stmret)
 {
     /* Code For StmRet Goes Here*/
 
@@ -123,14 +122,14 @@ void ASTChecker::visitStmRet(StmRet* stmret)
 
 }
 
-void ASTChecker::visitStmVRet(StmVRet* stmvret)
+void FunctionLoader::visitStmVRet(StmVRet* stmvret)
 {
     /* Code For StmVRet Goes Here*/
 
 
 }
 
-void ASTChecker::visitStmCond(StmCond* stmcond)
+void FunctionLoader::visitStmCond(StmCond* stmcond)
 {
     /* Code For StmCond Goes Here*/
 
@@ -139,7 +138,7 @@ void ASTChecker::visitStmCond(StmCond* stmcond)
 
 }
 
-void ASTChecker::visitStmCondElse(StmCondElse* stmcondelse)
+void FunctionLoader::visitStmCondElse(StmCondElse* stmcondelse)
 {
     /* Code For StmCondElse Goes Here*/
 
@@ -149,7 +148,7 @@ void ASTChecker::visitStmCondElse(StmCondElse* stmcondelse)
 
 }
 
-void ASTChecker::visitStmWhile(StmWhile* stmwhile)
+void FunctionLoader::visitStmWhile(StmWhile* stmwhile)
 {
     /* Code For StmWhile Goes Here*/
 
@@ -158,7 +157,7 @@ void ASTChecker::visitStmWhile(StmWhile* stmwhile)
 
 }
 
-void ASTChecker::visitStmSExp(StmSExp* stmsexp)
+void FunctionLoader::visitStmSExp(StmSExp* stmsexp)
 {
     /* Code For StmSExp Goes Here*/
 
@@ -166,7 +165,7 @@ void ASTChecker::visitStmSExp(StmSExp* stmsexp)
 
 }
 
-void ASTChecker::visitStmNoInit(StmNoInit* stmnoinit)
+void FunctionLoader::visitStmNoInit(StmNoInit* stmnoinit)
 {
     /* Code For StmNoInit Goes Here*/
 
@@ -174,7 +173,7 @@ void ASTChecker::visitStmNoInit(StmNoInit* stmnoinit)
 
 }
 
-void ASTChecker::visitStmInit(StmInit* stminit)
+void FunctionLoader::visitStmInit(StmInit* stminit)
 {
     /* Code For StmInit Goes Here*/
 
@@ -183,35 +182,35 @@ void ASTChecker::visitStmInit(StmInit* stminit)
 
 }
 
-void ASTChecker::visitInt(Int* integer)
+void FunctionLoader::visitInt(Int* integer)
 {
     /* Code For Int Goes Here*/
 
 
 }
 
-void ASTChecker::visitStr(Str* str)
+void FunctionLoader::visitStr(Str* str)
 {
     /* Code For Str Goes Here*/
 
 
 }
 
-void ASTChecker::visitBool(Bool* boolean)
+void FunctionLoader::visitBool(Bool* boolean)
 {
     /* Code For Bool Goes Here*/
 
 
 }
 
-void ASTChecker::visitVoid(Void* void_field)
+void FunctionLoader::visitVoid(Void* void_field)
 {
     /* Code For Void Goes Here*/
 
 
 }
 
-void ASTChecker::visitFun(Fun* fun)
+void FunctionLoader::visitFun(Fun* fun)
 {
     /* Code For Fun Goes Here*/
 
@@ -220,7 +219,7 @@ void ASTChecker::visitFun(Fun* fun)
 
 }
 
-void ASTChecker::visitEVar(EVar* evar)
+void FunctionLoader::visitEVar(EVar* evar)
 {
     /* Code For EVar Goes Here*/
 
@@ -228,7 +227,7 @@ void ASTChecker::visitEVar(EVar* evar)
 
 }
 
-void ASTChecker::visitELitInt(ELitInt* elitint)
+void FunctionLoader::visitELitInt(ELitInt* elitint)
 {
     /* Code For ELitInt Goes Here*/
 
@@ -236,21 +235,21 @@ void ASTChecker::visitELitInt(ELitInt* elitint)
 
 }
 
-void ASTChecker::visitELitTrue(ELitTrue* elittrue)
+void FunctionLoader::visitELitTrue(ELitTrue* elittrue)
 {
     /* Code For ELitTrue Goes Here*/
 
 
 }
 
-void ASTChecker::visitELitFalse(ELitFalse* elitfalse)
+void FunctionLoader::visitELitFalse(ELitFalse* elitfalse)
 {
     /* Code For ELitFalse Goes Here*/
 
 
 }
 
-void ASTChecker::visitEApp(EApp* eapp)
+void FunctionLoader::visitEApp(EApp* eapp)
 {
     /* Code For EApp Goes Here*/
 
@@ -259,7 +258,7 @@ void ASTChecker::visitEApp(EApp* eapp)
 
 }
 
-void ASTChecker::visitEString(EString* estring)
+void FunctionLoader::visitEString(EString* estring)
 {
     /* Code For EString Goes Here*/
 
@@ -267,7 +266,7 @@ void ASTChecker::visitEString(EString* estring)
 
 }
 
-void ASTChecker::visitNeg(Neg* neg)
+void FunctionLoader::visitNeg(Neg* neg)
 {
     /* Code For Neg Goes Here*/
 
@@ -275,7 +274,7 @@ void ASTChecker::visitNeg(Neg* neg)
 
 }
 
-void ASTChecker::visitNot(Not* not_field)
+void FunctionLoader::visitNot(Not* not_field)
 {
     /* Code For Not Goes Here*/
 
@@ -283,7 +282,7 @@ void ASTChecker::visitNot(Not* not_field)
 
 }
 
-void ASTChecker::visitEMul(EMul* emul)
+void FunctionLoader::visitEMul(EMul* emul)
 {
     /* Code For EMul Goes Here*/
 
@@ -293,7 +292,7 @@ void ASTChecker::visitEMul(EMul* emul)
 
 }
 
-void ASTChecker::visitEAdd(EAdd* eadd)
+void FunctionLoader::visitEAdd(EAdd* eadd)
 {
     /* Code For EAdd Goes Here*/
 
@@ -303,7 +302,7 @@ void ASTChecker::visitEAdd(EAdd* eadd)
 
 }
 
-void ASTChecker::visitERel(ERel* erel)
+void FunctionLoader::visitERel(ERel* erel)
 {
     /* Code For ERel Goes Here*/
 
@@ -313,7 +312,7 @@ void ASTChecker::visitERel(ERel* erel)
 
 }
 
-void ASTChecker::visitEAnd(EAnd* eand)
+void FunctionLoader::visitEAnd(EAnd* eand)
 {
     /* Code For EAnd Goes Here*/
 
@@ -322,7 +321,7 @@ void ASTChecker::visitEAnd(EAnd* eand)
 
 }
 
-void ASTChecker::visitEOr(EOr* eor)
+void FunctionLoader::visitEOr(EOr* eor)
 {
     /* Code For EOr Goes Here*/
 
@@ -331,77 +330,77 @@ void ASTChecker::visitEOr(EOr* eor)
 
 }
 
-void ASTChecker::visitPlus(Plus* plus)
+void FunctionLoader::visitPlus(Plus* plus)
 {
     /* Code For Plus Goes Here*/
 
 
 }
 
-void ASTChecker::visitMinus(Minus* minus)
+void FunctionLoader::visitMinus(Minus* minus)
 {
     /* Code For Minus Goes Here*/
 
 
 }
 
-void ASTChecker::visitTimes(Times* times)
+void FunctionLoader::visitTimes(Times* times)
 {
     /* Code For Times Goes Here*/
 
 
 }
 
-void ASTChecker::visitDiv(Div* div)
+void FunctionLoader::visitDiv(Div* div)
 {
     /* Code For Div Goes Here*/
 
 
 }
 
-void ASTChecker::visitMod(Mod* mod)
+void FunctionLoader::visitMod(Mod* mod)
 {
     /* Code For Mod Goes Here*/
 
 
 }
 
-void ASTChecker::visitLTH(LTH* lth)
+void FunctionLoader::visitLTH(LTH* lth)
 {
     /* Code For LTH Goes Here*/
 
 
 }
 
-void ASTChecker::visitLE(LE* le)
+void FunctionLoader::visitLE(LE* le)
 {
     /* Code For LE Goes Here*/
 
 
 }
 
-void ASTChecker::visitGTH(GTH* gth)
+void FunctionLoader::visitGTH(GTH* gth)
 {
     /* Code For GTH Goes Here*/
 
 
 }
 
-void ASTChecker::visitGE(GE* ge)
+void FunctionLoader::visitGE(GE* ge)
 {
     /* Code For GE Goes Here*/
 
 
 }
 
-void ASTChecker::visitEQU(EQU* equ)
+void FunctionLoader::visitEQU(EQU* equ)
 {
     /* Code For EQU Goes Here*/
 
 
 }
 
-void ASTChecker::visitNE(NE* ne)
+void FunctionLoader::visitNE(NE* ne)
 {
     /* Code For NE Goes Here*/
 
@@ -409,7 +408,7 @@ void ASTChecker::visitNE(NE* ne)
 }
 
 
-void ASTChecker::visitListTopDef(ListTopDef* listtopdef)
+void FunctionLoader::visitListTopDef(ListTopDef* listtopdef)
 {
     for (ListTopDef::iterator i = listtopdef->begin() ; i != listtopdef->end() ; ++i)
     {
@@ -417,7 +416,7 @@ void ASTChecker::visitListTopDef(ListTopDef* listtopdef)
     }
 }
 
-void ASTChecker::visitListArg(ListArg* listarg)
+void FunctionLoader::visitListArg(ListArg* listarg)
 {
     for (ListArg::iterator i = listarg->begin() ; i != listarg->end() ; ++i)
     {
@@ -425,7 +424,7 @@ void ASTChecker::visitListArg(ListArg* listarg)
     }
 }
 
-void ASTChecker::visitListStmt(ListStmt* liststmt)
+void FunctionLoader::visitListStmt(ListStmt* liststmt)
 {
     for (ListStmt::iterator i = liststmt->begin() ; i != liststmt->end() ; ++i)
     {
@@ -433,7 +432,7 @@ void ASTChecker::visitListStmt(ListStmt* liststmt)
     }
 }
 
-void ASTChecker::visitListItem(ListItem* listitem)
+void FunctionLoader::visitListItem(ListItem* listitem)
 {
     for (ListItem::iterator i = listitem->begin() ; i != listitem->end() ; ++i)
     {
@@ -441,7 +440,7 @@ void ASTChecker::visitListItem(ListItem* listitem)
     }
 }
 
-void ASTChecker::visitListType(ListType* listtype)
+void FunctionLoader::visitListType(ListType* listtype)
 {
     for (ListType::iterator i = listtype->begin() ; i != listtype->end() ; ++i)
     {
@@ -449,7 +448,7 @@ void ASTChecker::visitListType(ListType* listtype)
     }
 }
 
-void ASTChecker::visitListExpr(ListExpr* listexpr)
+void FunctionLoader::visitListExpr(ListExpr* listexpr)
 {
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
@@ -458,28 +457,28 @@ void ASTChecker::visitListExpr(ListExpr* listexpr)
 }
 
 
-void ASTChecker::visitInteger(Integer x)
+void FunctionLoader::visitInteger(Integer x)
 {
     /* Code for Integer Goes Here*/
 }
 
-void ASTChecker::visitChar(Char x)
+void FunctionLoader::visitChar(Char x)
 {
     /* Code for Char Goes Here*/
 }
 
-void ASTChecker::visitDouble(Double x)
+void FunctionLoader::visitDouble(Double x)
 {
     /* Code for Double Goes Here*/
 }
 
-void ASTChecker::visitString(String x)
+void FunctionLoader::visitString(String x)
 {
     /* Code for String Goes Here*/
 }
 
-void ASTChecker::visitIdent(Ident x)
+void FunctionLoader::visitIdent(Ident x)
 {
 }
 
-} /* namespace frontend*/
+} /* namespace frontend */

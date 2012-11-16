@@ -11,6 +11,7 @@
 #include "ParserManager.h"
 #include "ASTChecker.h"
 #include "ErrorHandler.h"
+#include "FunctionLoader.h"
 
 using std::cerr;
 using std::cout;
@@ -123,15 +124,34 @@ int main(int argc, char** argv)
             continue;
         }
 
-        // Check AST. Semantics and types.
-        frontend::ErrorHandler file_error_handler(
-                (arguments.input_count > 0) ? arguments.input_files[i] : NULL);
-        frontend::ASTChecker checker(file_error_handler);
-        checker.check(parser_mngr.get());
+        // Parse.
+        Visitable* ast_root;
+        ast_root = parser_mngr.get();
 
         // Close file.
         if (fclose(input) != 0)
             cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
+
+        // Check AST.
+        //  * Load Functions
+        //  * Type check (without returns)
+        //  * Optimize tree, expressions
+        //  * Type check (returns)
+
+        // Used in all checkers:
+        frontend::Environment env;
+        frontend::ErrorHandler file_error_handler(
+                (arguments.input_count > 0) ? arguments.input_files[i] : NULL);
+
+        // Load functions.
+        frontend::FunctionLoader function_loader(file_error_handler, env);  // Do not remove args!
+        function_loader.check(ast_root);
+
+        // Type check (without returns).
+        frontend::ASTChecker checker(file_error_handler, env);  // Do not remove args!
+        checker.check(ast_root);
+
+        // End of semantic check, typecheck and tree optimization.
 
         file_error_handler.flush();
 
