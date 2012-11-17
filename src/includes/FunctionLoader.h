@@ -1,8 +1,7 @@
 /*
- * FunctionLoader.h
+ * Author: Piotr Dobrowolski
+ * pd291528@students.mimuw.edu.pl
  *
- *  Created on: 16-11-2012
- *      Author: piotrek
  */
 
 #ifndef FUNCTIONLOADER_H_

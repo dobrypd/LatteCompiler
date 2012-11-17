@@ -1,11 +1,12 @@
 /*
- * FunctionLoader.cpp
+ * Author: Piotr Dobrowolski
+ * pd291528@students.mimuw.edu.pl
  *
- *  Created on: 16-11-2012
- *      Author: piotrek
  */
 
+#include <iostream>
 #include "FunctionLoader.h"
+#include "global.h"
 
 namespace frontend
 {
@@ -40,11 +41,17 @@ void FunctionLoader::visitProgram(Program* program)
 
 void FunctionLoader::visitFnDef(FnDef* fndef)
 {
-    /* Code For FnDef Goes Here*/
-    fndef->type_->accept(this);
-    visitIdent(fndef->ident_);
-    fndef->listarg_->accept(this);
-    fndef->blk_->accept(this);
+    if (debug) {
+        std::cout << fndef->line_number << " found function `"
+                << fndef->ident_ << "` definition" << std::endl;
+    }
+
+    //fndef->type_->accept(this);
+    //visitIdent(fndef->ident_);
+    //fndef->listarg_->accept(this);
+    //fndef->blk_->accept(this);
+
+    this->env.add_function(fndef);
 
 }
 

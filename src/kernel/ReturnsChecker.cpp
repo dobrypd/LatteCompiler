@@ -20,7 +20,6 @@ ReturnsChecker::ReturnsChecker(ErrorHandler& error_handler, Environment& env)
 
 void ReturnsChecker::check(Visitable* v)
 {
-    std::cout << &(this->env) << std::endl;
     v->accept(this);
 }
 

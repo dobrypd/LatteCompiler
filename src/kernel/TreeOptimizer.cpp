@@ -18,7 +18,6 @@ TreeOptimizer::TreeOptimizer()
 
 void TreeOptimizer::optimize(Visitable* v)
 {
-    //std::cout << &(this->env) << std::endl;
     v->accept(this);
 }
 

@@ -62,8 +62,20 @@ void Environment::add_variable()
 {
 }
 
-void Environment::add_function()
+void Environment::add_function(FnDef* function_definition)
 {
+    //fndef->type_->accept(this);
+    //visitIdent(fndef->ident_);
+    //fndef->listarg_->accept(this);
+    //fndef->blk_->accept(this);
+    Environment::FunInfoPtr new_function(new Environment::fun_info);
+    new_function->ret_type = function_definition->type_;
+    for (ListArg::iterator it = function_definition->listarg_->begin();
+            it != function_definition->listarg_->end(); it++){
+        std::cout << "Found argument: " << (dynamic_cast<Argument*>(*it))->ident_ << std::endl;
+    }
+    //new_function->arguments
+
 }
 
 void Environment::set_variable()

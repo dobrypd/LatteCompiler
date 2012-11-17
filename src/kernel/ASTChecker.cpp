@@ -20,7 +20,6 @@ ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env)
 
 void ASTChecker::check(Visitable* v)
 {
-    std::cout << &(this->env) << std::endl;
     v->accept(this);
 }
 
