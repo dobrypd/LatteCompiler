@@ -8,6 +8,7 @@
 #include <iostream>
 #include "ASTChecker.h"
 #include "ErrorHandler.h"
+#include "global.h"
 
 namespace frontend
 {

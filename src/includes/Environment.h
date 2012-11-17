@@ -11,6 +11,7 @@
 #include <vector>
 #include <deque>
 #include <map>
+#include <boost/shared_ptr.hpp>
 
 namespace frontend
 {
@@ -27,28 +28,25 @@ public:
     } fun_info;
 
 private:
+    typedef boost::shared_ptr<var_info> VarInfoPtr;
+    typedef boost::shared_ptr<std::string> StrPtr;
+    typedef std::map<std::string, VarInfoPtr> MapType;
+    typedef boost::shared_ptr<MapType> MapPtr;
+    typedef boost::shared_ptr<fun_info> FunInfoPtr;
+
     // Environment for variables, vector of map -> ident, ident_struct
-    std::vector<std::map<std::string, var_info> > env_v;
+    std::vector<MapPtr> env_v;
     // Environment for functions.
-    std::map<std::string, fun_info> env_f;
-    // Stack.
-    std::deque<std::map<std::string, var_info> > env_stack;
+    std::map<std::string, FunInfoPtr> env_f;
 
     void submerge();  // When going into nested block.
-    void save_tip();  // Save tip of environment to stack.
-    void load_tip(); // Load tip of environment from stack.
     void emerge();  // When returning from block.
 
 public:
     Environment();
 
-    // Common case - save_tip -> emerge -> [submerge -> emerge] -> load_tip
-    // - loading function, in [] function top environment
-    void prepare_to_function();
-    void back_from_function();
-
-    void prepare_to_block();
-    void back_from_block();
+    void prepare();
+    void back();
 
     void add_variable();
     void add_function();
