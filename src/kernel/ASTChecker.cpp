@@ -6,6 +6,7 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 #include "ASTChecker.h"
 #include "ErrorHandler.h"
 #include "global.h"
@@ -345,28 +346,23 @@ void ASTChecker::visitStmInit(StmInit* stminit)
 
 void ASTChecker::visitInt(Int* integer)
 {
-    this->last_type = integer;
 }
 
 void ASTChecker::visitStr(Str* str)
 {
-    this->last_type = str;
 }
 
 void ASTChecker::visitBool(Bool* boolean)
 {
-    this->last_type = boolean;
 }
 
 void ASTChecker::visitVoid(Void* void_field)
 {
-    this->last_type = void_field;
 }
 
 void ASTChecker::visitFun(Fun* fun)
 {
-    // In this function it's not used.
-    this->last_type = fun;
+    // In this version it's not used.
     fun->type_->accept(this);
     fun->listtype_->accept(this);
 
@@ -374,52 +370,81 @@ void ASTChecker::visitFun(Fun* fun)
 
 void ASTChecker::visitEVar(EVar* evar)
 {
+    Environment::VarInfoPtr var_info = this->env.get_variable(evar->ident_);
     visitIdent(evar->ident_);
+    if (var_info == 0) {
+        std::string msg = "variable `";
+        msg += evar->ident_;
+        msg += "` used before declaration.";
+        this->error_handler.error(evar->line_number, msg);
+    }
+    else
+    {
+        this->last_type = var_info->type;
+    }
 }
 
 void ASTChecker::visitELitInt(ELitInt* elitint)
 {
-    /* Code For ELitInt Goes Here*/
-
     visitInteger(elitint->integer_);
-
+    this->last_type = &(this->lineral_int);
 }
 
 void ASTChecker::visitELitTrue(ELitTrue* elittrue)
 {
-    /* Code For ELitTrue Goes Here*/
-
-
+    this->last_type = &(this->literal_bool);
 }
 
 void ASTChecker::visitELitFalse(ELitFalse* elitfalse)
 {
-    /* Code For ELitFalse Goes Here*/
-
-
+    this->last_type = &(this->literal_bool);
 }
 
 void ASTChecker::visitEApp(EApp* eapp)
 {
-    /* Code For EApp Goes Here*/
-
     visitIdent(eapp->ident_);
+    Environment::FunInfoPtr fun_ptr = this->env.get_function(eapp->ident_);
+    // Check if function exists.
+    if (fun_ptr == 0)
+    {
+        std::string msg = "function `";
+        msg += eapp->ident_;
+        msg += "` does not exist.";
+        this->error_handler.error(eapp->line_number, msg);
+        return;
+    }
+
     eapp->listexpr_->accept(this);
+    // Check if arguments are ok.
+    bool argument_types_ok = true;
+    ListExpr::iterator app_it = eapp->listexpr_->begin();
+    Ident argument("funciton `");
+    argument += eapp->ident_;
+    argument += "` argument";
+    for(std::vector<Environment::VarInfoPtr>::iterator it = fun_ptr->arguments.begin();
+            it != fun_ptr->arguments.end(); it++)
+    {
+        if (app_it == eapp->listexpr_->end()) {
+            // Not enough in application.
+            argument_types_ok = false;
+            break;
+        }
+        /* check type */
+        this->check_type(argument, (*it)->type, app_it->)
+        app_it++;
+    }
+    argument_types_ok &&= (app_it == eapp->listexpr_->end());
 
 }
 
 void ASTChecker::visitEString(EString* estring)
 {
-    /* Code For EString Goes Here*/
-
     visitString(estring->string_);
-
+    this->last_type = &(this->literal_string);
 }
 
 void ASTChecker::visitNeg(Neg* neg)
 {
-    /* Code For Neg Goes Here*/
-
     neg->expr_->accept(this);
 
 }

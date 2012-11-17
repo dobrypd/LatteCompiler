@@ -25,6 +25,11 @@ private:
     Type* last_function_type;
     Ident& last_function_ident;
 
+    // Literal types;
+    Int lineral_int;
+    Bool literal_bool;
+    Str literal_string;
+
     void add_variable(Type* t, Ident& ident, int line_number);
     void check_type(Ident& i1, Type* t1, Ident& i2, Type* t2, int line_number);
 

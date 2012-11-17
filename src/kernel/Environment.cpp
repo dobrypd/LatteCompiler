@@ -128,7 +128,10 @@ Environment::VarInfoPtr Environment::get_variable(Ident& ident) const
 
 Environment::FunInfoPtr Environment::get_function(Ident& ident) const
 {
-    return (this->env_f.find(ident))->second;
+    std::map<std::string, FunInfoPtr>::const_iterator it = this->env_f.find(ident);
+    if (it == this->env_f.end())
+        return FunInfoPtr();
+    return it->second;
 }
 
 } /* namespace frontend */
