@@ -43,16 +43,18 @@ void FunctionLoader::visitFnDef(FnDef* fndef)
 {
     if (debug) {
         std::cout << fndef->line_number << " found function `"
-                << fndef->ident_ << "` definition" << std::endl;
+                << fndef->ident_ << "` definition." << std::endl;
     }
-
-    //fndef->type_->accept(this);
-    //visitIdent(fndef->ident_);
-    //fndef->listarg_->accept(this);
-    //fndef->blk_->accept(this);
-
-    this->env.add_function(fndef);
-
+    if (!this->env.lookup_function(fndef))
+        this->env.add_function(fndef);
+    else
+    {
+        std::string comunicate;
+        comunicate += "funciton `";
+        comunicate += fndef->ident_;
+        comunicate += "` already declared.";
+        this->error_handler.error(fndef->type_->line_number, comunicate);
+    }
 }
 
 void FunctionLoader::visitArgument(Argument* argument)

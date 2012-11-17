@@ -64,18 +64,20 @@ void Environment::add_variable()
 
 void Environment::add_function(FnDef* function_definition)
 {
-    //fndef->type_->accept(this);
-    //visitIdent(fndef->ident_);
-    //fndef->listarg_->accept(this);
-    //fndef->blk_->accept(this);
     Environment::FunInfoPtr new_function(new Environment::fun_info);
     new_function->ret_type = function_definition->type_;
+
+    if (debug) std::cout << "Found arguments: ";
     for (ListArg::iterator it = function_definition->listarg_->begin();
             it != function_definition->listarg_->end(); it++){
-        std::cout << "Found argument: " << (dynamic_cast<Argument*>(*it))->ident_ << std::endl;
-    }
-    //new_function->arguments
 
+        if (debug) std::cout << (dynamic_cast<Argument*>(*it))->ident_ << ", ";
+        Environment::VarInfoPtr next_argument(new Environment::var_info);
+        new_function->arguments.push_back(next_argument);
+    }
+
+    if (debug) std::cout << std::endl;
+    this->env_f[function_definition->ident_] = new_function;
 }
 
 void Environment::set_variable()
@@ -90,8 +92,9 @@ bool Environment::lookup_variable()
 {
 }
 
-bool Environment::lookup_function()
+bool Environment::lookup_function(FnDef* function_definition)
 {
+    return (this->env_f.find(function_definition->ident_)) != this->env_f.end();
 }
 
 } /* namespace frontend */

@@ -61,7 +61,7 @@ public:
     void set_function();
 
     bool lookup_variable();
-    bool lookup_function();
+    bool lookup_function(FnDef* function_definition);
 };
 
 } /* namespace frontend */

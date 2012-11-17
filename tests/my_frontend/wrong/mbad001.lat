@@ -1,0 +1,15 @@
+
+int foo(int a, int b)
+{
+    return 0;
+}
+
+int foo(int r, int k)
+{
+    return 1;
+}
+
+int main()
+{
+    return 0;
+}
