@@ -26,6 +26,12 @@ etypes type_to_enum(Type* t);
 std::string type_pretty_print(Type* t);
 bool operator==(Type & t1, Type & t2);
 
+template <class T, class U>
+bool check_is(U a)
+{
+    return !((dynamic_cast<T>(a)) == 0);
+}
+
 }
 
 #endif /* GLOBAL_H_ */

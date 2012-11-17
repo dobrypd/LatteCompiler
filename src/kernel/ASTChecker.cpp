@@ -230,8 +230,7 @@ void ASTChecker::visitStmRet(StmRet* stmret)
 
 void ASTChecker::visitStmVRet(StmVRet* stmvret)
 {
-    Type* f_ret_t = this->last_function_type;
-    if ((dynamic_cast<Void*>(f_ret_t)) == 0)
+    if (!(check_is<Void *>(this->last_function_type)))
     {
         std::string msg = "function `";
         msg += this->last_function_ident;
@@ -244,38 +243,80 @@ void ASTChecker::visitStmVRet(StmVRet* stmvret)
 
 void ASTChecker::visitStmCond(StmCond* stmcond)
 {
-    /* Code For StmCond Goes Here*/
-
+    this->env.prepare();
+    this->last_type = 0;
     stmcond->expr_->accept(this);
+    if (this->last_type == 0)
+    {
+        std::string msg = "cannot evaluate expression";
+        this->error_handler.error(stmcond->expr_->line_number, msg);
+
+    }
+    else
+    if (!(check_is<Bool *>(this->last_type)))
+    {
+        std::string msg = "expression must evaluate to boolean type instead of [";
+        msg += type_pretty_print(this->last_type);
+        msg += "].";
+        this->error_handler.error(stmcond->expr_->line_number, msg);
+    }
     stmcond->stmt_->accept(this);
+    this->env.back();
 
 }
 
 void ASTChecker::visitStmCondElse(StmCondElse* stmcondelse)
 {
-    /* Code For StmCondElse Goes Here*/
-
+    this->env.prepare();
+    this->last_type = 0;
     stmcondelse->expr_->accept(this);
+    if (this->last_type == 0)
+    {
+        std::string msg = "cannot evaluate expression";
+        this->error_handler.error(stmcondelse->expr_->line_number, msg);
+
+    }
+    else
+    if (!(check_is<Bool *>(this->last_type)))
+    {
+        std::string msg = "expression must evaluate to boolean type instead of [";
+        msg += type_pretty_print(this->last_type);
+        msg += "].";
+        this->error_handler.error(stmcondelse->expr_->line_number, msg);
+    }
     stmcondelse->stmt_1->accept(this);
     stmcondelse->stmt_2->accept(this);
-
+    this->env.back();
 }
 
 void ASTChecker::visitStmWhile(StmWhile* stmwhile)
 {
-    /* Code For StmWhile Goes Here*/
-
+    this->env.prepare();
+    this->last_type = 0;
     stmwhile->expr_->accept(this);
+    if (this->last_type == 0)
+    {
+        std::string msg = "cannot evaluate expression";
+        this->error_handler.error(stmwhile->expr_->line_number, msg);
+
+    }
+    else
+    if (!(check_is<Bool *>(this->last_type)))
+    {
+        std::string msg = "expression must evaluate to boolean type instead of [";
+        msg += type_pretty_print(this->last_type);
+        msg += "].";
+        this->error_handler.error(stmwhile->expr_->line_number, msg);
+    }
     stmwhile->stmt_->accept(this);
+    this->env.back();
 
 }
 
 void ASTChecker::visitStmSExp(StmSExp* stmsexp)
 {
-    /* Code For StmSExp Goes Here*/
-
+    this->last_type = 0;
     stmsexp->expr_->accept(this);
-
 }
 
 void ASTChecker::visitStmNoInit(StmNoInit* stmnoinit)
@@ -304,36 +345,28 @@ void ASTChecker::visitStmInit(StmInit* stminit)
 
 void ASTChecker::visitInt(Int* integer)
 {
-    /* Code For Int Goes Here*/
-
-
+    this->last_type = integer;
 }
 
 void ASTChecker::visitStr(Str* str)
 {
-    /* Code For Str Goes Here*/
-
-
+    this->last_type = str;
 }
 
 void ASTChecker::visitBool(Bool* boolean)
 {
-    /* Code For Bool Goes Here*/
-
-
+    this->last_type = boolean;
 }
 
 void ASTChecker::visitVoid(Void* void_field)
 {
-    /* Code For Void Goes Here*/
-
-
+    this->last_type = void_field;
 }
 
 void ASTChecker::visitFun(Fun* fun)
 {
-    /* Code For Fun Goes Here*/
-
+    // In this function it's not used.
+    this->last_type = fun;
     fun->type_->accept(this);
     fun->listtype_->accept(this);
 
@@ -341,10 +374,7 @@ void ASTChecker::visitFun(Fun* fun)
 
 void ASTChecker::visitEVar(EVar* evar)
 {
-    /* Code For EVar Goes Here*/
-
     visitIdent(evar->ident_);
-
 }
 
 void ASTChecker::visitELitInt(ELitInt* elitint)
