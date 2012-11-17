@@ -7,6 +7,7 @@
 #ifndef ASTCHECKER_H_
 #define ASTCHECKER_H_
 
+#include <boost/shared_ptr.hpp>
 #include "Absyn.H"
 #include "ErrorHandler.h"
 #include "Environment.h"
@@ -19,9 +20,16 @@ class ASTChecker : public Visitor
 private:
     ErrorHandler& error_handler;
     Environment& env;
+    Type* last_declaration_type;
+    Type* last_type;  // For expressions.
+    Type* last_function_type;
+    Ident& last_function_ident;
+
+    void add_variable(Type* t, Ident& ident, int line_number);
+    void check_type(Ident& i1, Type* t1, Ident& i2, Type* t2, int line_number);
 
 public:
-    ASTChecker(ErrorHandler& error_handler, Environment& env);
+    ASTChecker(ErrorHandler& error_handler, Environment& env, Ident& pr_name);
     void check(Visitable* v);
 
     void visitProg(Prog* p);

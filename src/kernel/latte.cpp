@@ -150,7 +150,8 @@ int main(int argc, char** argv)
         function_loader.check(ast_root);
 
         // Type check (without returns).
-        frontend::ASTChecker checker(file_error_handler, env);
+        Ident pr_name((arguments.input_count > 0) ? arguments.input_files[i] : "stdin");
+        frontend::ASTChecker checker(file_error_handler, env, pr_name);
         checker.check(ast_root);
 
         // Optimizer.

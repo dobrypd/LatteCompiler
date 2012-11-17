@@ -13,14 +13,72 @@
 namespace frontend
 {
 
-ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env)
-    : error_handler(error_handler), env(env)
+ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env, Ident& pr_name)
+    : error_handler(error_handler), env(env),
+      last_declaration_type(0), last_type(0),
+      last_function_ident(pr_name)
 {
 }
 
 void ASTChecker::check(Visitable* v)
 {
     v->accept(this);
+}
+
+void ASTChecker::add_variable(Type* t, Ident& ident, int line_number)
+{
+    if (this->env.can_add_variable(ident))
+        this->env.add_variable(t, ident);
+    else
+    {
+        std::string msg;
+        msg += "variable `";
+        msg += ident;
+        msg += "` already declared.";
+        this->error_handler.error(line_number, msg);
+    }
+}
+
+void ASTChecker::check_type(Ident& i1, Type* t1, Ident& i2, Type* t2, int line_number)
+{
+    if (t1 == 0)
+    {
+        std::string msg;
+        msg += "Type error, cannot find type of : `";
+        msg += i1;
+        msg += "`.";
+        this->error_handler.error(line_number, msg);
+        return ;
+    }
+    if (t2 == 0)
+    {
+        std::string msg;
+        msg += "Type error, cannot find type of : `";
+        msg += i2;
+        msg += "`.";
+        this->error_handler.error(line_number, msg);
+        return ;
+    }
+
+    if (*(t1) == *(t2))
+    {
+        // OK
+        ;
+    }
+    else
+    {
+        std::string msg;
+        msg += "Type error: `";
+        msg += i1;
+        msg += "` has different type [";
+        msg += type_pretty_print(t1);
+        msg += "] than `";
+        msg += i2;
+        msg += "` with type [";
+        msg += type_pretty_print(t2);
+        msg += "].";
+        this->error_handler.error(line_number, msg);
+    }
 }
 
 void ASTChecker::visitProg(Prog* t) { } //abstract class
@@ -42,113 +100,146 @@ void ASTChecker::visitProgram(Program* program)
 
 void ASTChecker::visitFnDef(FnDef* fndef)
 {
-    this->env.prepare();
+    this->last_function_type = 0;
     fndef->type_->accept(this);
+    this->last_function_type = fndef->type_;
     visitIdent(fndef->ident_);
+    this->last_function_ident = fndef->ident_;
 
+    this->env.prepare();
     fndef->listarg_->accept(this);
-    for(ListArg::iterator it = fndef->listarg_->begin(); it != fndef->listarg_->end(); it++)
-    {
-        // Add argument to environment.
-        Argument* argument = dynamic_cast<Argument* >(*it);
-        if (argument == 0)
-            throw "Did you changed grammar?!";
-        if (!this->env.lookup_variable(argument->ident_))
-            this->env.add_variable(argument->type_, argument->ident_);
-        else
-        {
-            std::string msg;
-            msg += "argument `";
-            msg += argument->ident_;
-            msg += "` already declared.";
-            this->error_handler.error(argument->line_number, msg);
-        }
-    }
-
     fndef->blk_->accept(this);
-
     this->env.back();
-
+    this->last_function_type = 0;
 }
 
 void ASTChecker::visitArgument(Argument* argument)
 {
-    /* Code For Argument Goes Here*/
     argument->type_->accept(this);
     visitIdent(argument->ident_);
 
+    this->add_variable(argument->type_, argument->ident_, argument->line_number);
 }
 
 void ASTChecker::visitStmBlock(StmBlock* stmblock)
 {
-    /* Code For StmBlock Goes Here*/
-
+    // Do not add new env because it should be already done.
     stmblock->liststmt_->accept(this);
-
 }
 
 void ASTChecker::visitStmEmpty(StmEmpty* stmempty)
 {
-    /* Code For StmEmpty Goes Here*/
-
-
+    std::cerr << "hello" << std::endl;  // TODO:
 }
 
 void ASTChecker::visitStmBStmt(StmBStmt* stmbstmt)
 {
-    /* Code For StmBStmt Goes Here*/
-
+    this->env.prepare();
     stmbstmt->blk_->accept(this);
-
+    this->env.back();
 }
 
 void ASTChecker::visitStmDecl(StmDecl* stmdecl)
 {
-    /* Code For StmDecl Goes Here*/
-
     stmdecl->type_->accept(this);
+    this->last_declaration_type = stmdecl->type_;
     stmdecl->listitem_->accept(this);
-
+    this->last_declaration_type = 0;
 }
 
 void ASTChecker::visitStmAss(StmAss* stmass)
 {
-    /* Code For StmAss Goes Here*/
-
     visitIdent(stmass->ident_);
+    Environment::VarInfoPtr var_info = this->env.get_variable(stmass->ident_);
+
+    this->last_type = 0;
     stmass->expr_->accept(this);
 
+    if (var_info == 0) {
+        std::string msg = "variable `";
+        msg += stmass->ident_;
+        msg += "` used before declared.";
+        this->error_handler.error(stmass->line_number, msg);
+    }
+    else
+    {
+        Ident expevalident = Ident("type evaluation of expression");
+        this->check_type(stmass->ident_, var_info->type,
+                expevalident, this->last_type,
+                stmass->line_number);
+    }
 }
 
 void ASTChecker::visitStmIncr(StmIncr* stmincr)
 {
-    /* Code For StmIncr Goes Here*/
-
     visitIdent(stmincr->ident_);
-
+    Environment::VarInfoPtr var_info = this->env.get_variable(stmincr->ident_);
+    if (var_info == 0) {
+        std::string msg = "variable `";
+        msg += stmincr->ident_;
+        msg += "` used before declared.";
+        this->error_handler.error(stmincr->line_number, msg);
+        return;
+    }
+    etypes t = type_to_enum(var_info->type);
+    if (t != INT)
+    {
+        std::string msg = "variable `";
+        msg += stmincr->ident_;
+        msg += "` with type [";
+        msg += type_pretty_print(var_info->type);
+        msg += "] cannot be used with ++ operator.";
+        this->error_handler.error(stmincr->line_number, msg);
+    }
 }
 
 void ASTChecker::visitStmDecr(StmDecr* stmdecr)
 {
-    /* Code For StmDecr Goes Here*/
-
     visitIdent(stmdecr->ident_);
-
+    Environment::VarInfoPtr var_info = this->env.get_variable(stmdecr->ident_);
+    if (var_info == 0) {
+        std::string msg = "variable `";
+        msg += stmdecr->ident_;
+        msg += "` used before declared.";
+        this->error_handler.error(stmdecr->line_number, msg);
+        return;
+    }
+    etypes t = type_to_enum(var_info->type);
+    if (t != INT)
+    {
+        std::string msg = "variable `";
+        msg += stmdecr->ident_;
+        msg += "` with type [";
+        msg += type_pretty_print(var_info->type);
+        msg += "] cannot be used with -- operator.";
+        this->error_handler.error(stmdecr->line_number, msg);
+    }
 }
 
 void ASTChecker::visitStmRet(StmRet* stmret)
 {
-    /* Code For StmRet Goes Here*/
-
+    this->last_type = 0;
     stmret->expr_->accept(this);
+    Ident f_i("function ");
+    f_i += this->last_function_ident;
+    Ident expevalident = Ident("type evaluation of expression");
+    this->check_type(f_i, this->last_function_type, expevalident,
+            this->last_type, stmret->line_number);
 
 }
 
 void ASTChecker::visitStmVRet(StmVRet* stmvret)
 {
-    /* Code For StmVRet Goes Here*/
-
-
+    Type* f_ret_t = this->last_function_type;
+    if ((dynamic_cast<Void*>(f_ret_t)) == 0)
+    {
+        std::string msg = "function `";
+        msg += this->last_function_ident;
+        msg += "` is not void type, should return [";
+        msg += type_pretty_print(this->last_function_type);
+        msg += "].";
+        this->error_handler.error(stmvret->line_number, msg);
+    }
 }
 
 void ASTChecker::visitStmCond(StmCond* stmcond)
@@ -189,19 +280,26 @@ void ASTChecker::visitStmSExp(StmSExp* stmsexp)
 
 void ASTChecker::visitStmNoInit(StmNoInit* stmnoinit)
 {
-    /* Code For StmNoInit Goes Here*/
+    if (this->last_declaration_type == 0)
+        throw "AST error, variable declaration.";
 
     visitIdent(stmnoinit->ident_);
-
+    this->add_variable(this->last_declaration_type, stmnoinit->ident_,
+            stmnoinit->line_number);
 }
 
 void ASTChecker::visitStmInit(StmInit* stminit)
 {
-    /* Code For StmInit Goes Here*/
+    if (this->last_declaration_type == 0)
+        throw "AST error, variable declaration.";
 
     visitIdent(stminit->ident_);
+
     stminit->expr_->accept(this);
 
+    Ident evalident("type evaluation of expression");
+    this->check_type(stminit->ident_, this->last_declaration_type, evalident, this->last_type, stminit->line_number);
+    this->add_variable(this->last_declaration_type, stminit->ident_, stminit->line_number);
 }
 
 void ASTChecker::visitInt(Int* integer)

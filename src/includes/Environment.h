@@ -20,8 +20,6 @@ namespace frontend
 class Environment
 {
 public:
-    enum etypes {INT, BOOL, STRING, VOID, FUN, UNDEFINED};
-
     typedef struct {
         Type* type;
     } var_info;
@@ -44,7 +42,7 @@ private:
     // Environment for functions.
     std::map<std::string, FunInfoPtr> env_f;
 
-    //bool comp_t(Type* t1, Type* t2);
+    MapPtr env_v_tip();
 
     void submerge();  // When going into nested block.
     void emerge();  // When returning from block.
@@ -61,10 +59,11 @@ public:
     void set_variable();  // TODO: really I need this?
     void set_function();
 
-    bool lookup_variable(Ident& ident);
-    bool lookup_function(FnDef* function_definition) const;
+    bool can_add_variable(Ident& ident) const;
+    bool can_add_funciton(FnDef* function_definition) const;
 
-    FunInfoPtr get_function(std::string& ident) const;
+    VarInfoPtr get_variable(Ident& ident) const;
+    FunInfoPtr get_function(Ident& ident) const;
 };
 
 } /* namespace frontend */

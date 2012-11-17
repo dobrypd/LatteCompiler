@@ -1,0 +1,21 @@
+int f(int a, int b)
+{
+    int c;
+    {
+        int c;
+        {
+            string r;
+            r = "asdf";
+            c = 2;
+            int q;
+            q = 1;
+            int w = 1;
+            w = 2;
+        }
+    }
+}
+
+int main()
+{
+    return 0;
+}

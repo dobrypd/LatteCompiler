@@ -45,7 +45,7 @@ void FunctionLoader::visitFnDef(FnDef* fndef)
         std::cout << fndef->line_number << " found function `"
                 << fndef->ident_ << "` definition." << std::endl;
     }
-    if (!this->env.lookup_function(fndef))
+    if (this->env.can_add_funciton(fndef))
         this->env.add_function(fndef);
     else
     {
