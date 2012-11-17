@@ -19,6 +19,7 @@ class FunctionLoader : public Visitor
 private:
     ErrorHandler& error_handler;
     Environment& env;
+
 public:
     FunctionLoader(ErrorHandler& error_handler, Environment& env);
     void check(Visitable* v);

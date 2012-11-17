@@ -1,0 +1,14 @@
+int a(int a, int b)
+{
+    return 0;
+}
+
+void b(int c, boolean d)
+{
+    return;
+}
+
+int main()
+{
+    return 0;
+}

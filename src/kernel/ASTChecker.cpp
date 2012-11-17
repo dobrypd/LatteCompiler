@@ -42,11 +42,32 @@ void ASTChecker::visitProgram(Program* program)
 
 void ASTChecker::visitFnDef(FnDef* fndef)
 {
-    /* Code For FnDef Goes Here*/
+    this->env.prepare();
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);
+
     fndef->listarg_->accept(this);
+    for(ListArg::iterator it = fndef->listarg_->begin(); it != fndef->listarg_->end(); it++)
+    {
+        // Add argument to environment.
+        Argument* argument = dynamic_cast<Argument* >(*it);
+        if (argument == 0)
+            throw "Did you changed grammar?!";
+        if (!this->env.lookup_variable(argument->ident_))
+            this->env.add_variable(argument->type_, argument->ident_);
+        else
+        {
+            std::string msg;
+            msg += "argument `";
+            msg += argument->ident_;
+            msg += "` already declared.";
+            this->error_handler.error(argument->line_number, msg);
+        }
+    }
+
     fndef->blk_->accept(this);
+
+    this->env.back();
 
 }
 
