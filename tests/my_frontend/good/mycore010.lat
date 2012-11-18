@@ -1,0 +1,11 @@
+int main()
+{
+    printInt(1);
+    printInt(2);
+    printInt(3);
+    printInt(4);
+    printInt(5);
+    printInt(6);
+    printInt(7);
+    return 0;
+}

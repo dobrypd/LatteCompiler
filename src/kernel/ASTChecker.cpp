@@ -738,23 +738,30 @@ void ASTChecker::visitListExpr(ListExpr* listexpr)
     fun_arg += " argument";
 
     int n = 0;
+    std::vector<Environment::VarInfoPtr>::const_iterator arguments_iterator = this->last_arguments_iterator;
+    std::vector<Environment::VarInfoPtr>::const_iterator arguments_end = this->last_arguments_end;
+
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
         n++;
         Ident arg_no("argument number ");
         arg_no += n;
 
-        if (this->last_arguments_iterator == this->last_arguments_end)
+        if (arguments_iterator == arguments_end)
         {
             this->error_flag = true;
+            this->last_arguments_iterator = arguments_iterator;
+            this->last_arguments_end = arguments_end;
             return;
         }
 
         (*i)->accept(this);
 
-        this->check_type(fun_arg, (*(this->last_arguments_iterator))->type, arg_no, this->last_type, this->last_line_number);
-        this->last_arguments_iterator++;
+        this->check_type(fun_arg, (*(arguments_iterator))->type, arg_no, this->last_type, this->last_line_number);
+        arguments_iterator++;
     }
+    this->last_arguments_iterator = arguments_iterator;
+    this->last_arguments_end = arguments_end;
 }
 
 

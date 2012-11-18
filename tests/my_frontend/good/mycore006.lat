@@ -1,0 +1,5 @@
+int main()
+{
+    readInt();
+    return 0;
+}

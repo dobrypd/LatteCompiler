@@ -50,22 +50,24 @@ private:
     /*
      * Globals (in context of Latte program)
      */
-    Void global_void_type;
-    Int global_int_type;
-    Str global_str_type;
-    Environment::FunInfoPtr f_print_int;
-    Environment::FunInfoPtr f_print_str;
-    Environment::FunInfoPtr f_error;
-    Environment::FunInfoPtr f_read_int;
-    Environment::FunInfoPtr f_read_string;
-    Environment::VarInfoPtr int_arg;
-    Environment::VarInfoPtr string_arg;
+    Void* global_void_type;
+    Int* global_int_type;
+    Str* global_str_type;
+    Environment::FunInfoPtr print_int_f;
+    Environment::FunInfoPtr print_string_f;
+    Environment::FunInfoPtr error_f;
+    Environment::FunInfoPtr read_int_f;
+    Environment::FunInfoPtr read_string_f;
+
+    Environment::VarInfoPtr arg_int;
+    Environment::VarInfoPtr arg_str;
     /*
      * end globals.
      */
 
 public:
     Environment();
+    ~Environment();
 
     void prepare();
     void back();

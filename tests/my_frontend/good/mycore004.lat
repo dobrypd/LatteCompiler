@@ -1,0 +1,5 @@
+int main()
+{
+    printString("1");
+    return 0;
+}

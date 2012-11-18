@@ -23,40 +23,44 @@ Environment::Environment()
     if(debug)
         std::cout << "Initializing new environment at address: " << this << std::endl;
 
-    // Add global functions.
-    Ident global_printInt_ident("printInt");
-    Ident global_printString_ident("printString");
-    Ident global_error_ident("error");
-    Ident global_readInt_ident("readInt");
-    Ident global_readString_ident("readString");
+    this->global_int_type = new Int;
+    this->global_str_type = new Str;
+    this->global_void_type = new Void;
+    this->arg_int.reset(new Environment::var_info);
+    this->arg_int->type = this->global_int_type;
+    this->arg_str.reset(new Environment::var_info);
+    this->arg_str->type = this->global_str_type;
 
-    this->int_arg.reset(new var_info);
-    this->int_arg->type = &(this->global_int_type);
-    this->string_arg.reset(new var_info);
-    this->string_arg->type = &(this->global_str_type);
+    this->print_int_f.reset(new Environment::fun_info);
+    print_int_f->ret_type = this->global_void_type;
+    print_int_f->arguments.push_back(this->arg_int);
+    this->env_f["printInt"] = this->print_int_f;
 
-    this->f_print_int.reset(new fun_info);
-    this->f_print_int->ret_type = &(this->global_void_type);
-    this->f_print_int->arguments.push_back(this->int_arg);
-    this->env_f[global_printInt_ident] = this->f_print_int;
+    this->print_string_f.reset(new Environment::fun_info);
+    print_string_f->ret_type = this->global_void_type;
+    print_string_f->arguments.push_back(this->arg_str);
+    this->env_f["printString"] = this->print_string_f;
 
-    this->f_print_str.reset(new fun_info);
-    this->f_print_str->ret_type = &(this->global_void_type);
-    this->f_print_str->arguments.push_back(this->string_arg);
-    this->env_f[global_printString_ident] = this->f_print_str;
+    this->error_f.reset(new Environment::fun_info);
+    error_f->ret_type = this->global_void_type;
+    this->env_f["error"] = this->error_f;
 
-    this->f_error.reset(new fun_info);
-    this->f_error->ret_type = &(this->global_void_type);
-    this->env_f[global_error_ident] = this->f_error;
+    this->read_int_f.reset(new Environment::fun_info);
+    read_int_f->ret_type = this->global_int_type;
+    this->env_f["readInt"] = this->read_int_f;
 
-    this->f_read_int.reset(new fun_info);
-    this->f_read_int->ret_type = &(this->global_int_type);
-    this->env_f[global_readInt_ident] = this->f_read_int;
-
-    this->f_read_string.reset(new fun_info);
-    this->f_read_string->ret_type = &(this->global_str_type);
-    this->env_f[global_readString_ident] = this->f_read_string;
+    this->read_string_f.reset(new Environment::fun_info);
+    read_string_f->ret_type = this->global_str_type;
+    this->env_f["readString"] = this->read_int_f;
 }
+
+Environment::~Environment()
+{
+    delete this->global_int_type;
+    delete this->global_str_type;
+    delete this->global_void_type;
+}
+
 Environment::MapPtr Environment::env_v_tip()
 {
     return this->env_v.back();
