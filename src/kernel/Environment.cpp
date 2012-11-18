@@ -23,6 +23,39 @@ Environment::Environment()
     if(debug)
         std::cout << "Initializing new environment at address: " << this << std::endl;
 
+    // Add global functions.
+    Ident global_printInt_ident("printInt");
+    Ident global_printString_ident("printString");
+    Ident global_error_ident("error");
+    Ident global_readInt_ident("readInt");
+    Ident global_readString_ident("readString");
+
+    this->int_arg.reset(new var_info);
+    this->int_arg->type = &(this->global_int_type);
+    this->string_arg.reset(new var_info);
+    this->string_arg->type = &(this->global_str_type);
+
+    this->f_print_int.reset(new fun_info);
+    this->f_print_int->ret_type = &(this->global_void_type);
+    this->f_print_int->arguments.push_back(this->int_arg);
+    this->env_f[global_printInt_ident] = this->f_print_int;
+
+    this->f_print_str.reset(new fun_info);
+    this->f_print_str->ret_type = &(this->global_void_type);
+    this->f_print_str->arguments.push_back(this->string_arg);
+    this->env_f[global_printString_ident] = this->f_print_str;
+
+    this->f_error.reset(new fun_info);
+    this->f_error->ret_type = &(this->global_void_type);
+    this->env_f[global_error_ident] = this->f_error;
+
+    this->f_read_int.reset(new fun_info);
+    this->f_read_int->ret_type = &(this->global_int_type);
+    this->env_f[global_readInt_ident] = this->f_read_int;
+
+    this->f_read_string.reset(new fun_info);
+    this->f_read_string->ret_type = &(this->global_str_type);
+    this->env_f[global_readString_ident] = this->f_read_string;
 }
 Environment::MapPtr Environment::env_v_tip()
 {

@@ -47,6 +47,23 @@ private:
     void submerge();  // When going into nested block.
     void emerge();  // When returning from block.
 
+    /*
+     * Globals (in context of Latte program)
+     */
+    Void global_void_type;
+    Int global_int_type;
+    Str global_str_type;
+    Environment::FunInfoPtr f_print_int;
+    Environment::FunInfoPtr f_print_str;
+    Environment::FunInfoPtr f_error;
+    Environment::FunInfoPtr f_read_int;
+    Environment::FunInfoPtr f_read_string;
+    Environment::VarInfoPtr int_arg;
+    Environment::VarInfoPtr string_arg;
+    /*
+     * end globals.
+     */
+
 public:
     Environment();
 
