@@ -12,8 +12,6 @@ namespace frontend
 
 TreeOptimizer::TreeOptimizer()
 {
-    // TODO Auto-generated constructor stub
-
 }
 
 void TreeOptimizer::optimize(Visitable* v)
@@ -40,7 +38,6 @@ void TreeOptimizer::visitProgram(Program* program)
 
 void TreeOptimizer::visitFnDef(FnDef* fndef)
 {
-    /* Code For FnDef Goes Here*/
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);
     fndef->listarg_->accept(this);

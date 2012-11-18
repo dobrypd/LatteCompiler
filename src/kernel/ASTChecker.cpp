@@ -456,7 +456,7 @@ void ASTChecker::visitEApp(EApp* eapp)
     this->last_arguments_end = fun_ptr->arguments.end();
     eapp->listexpr_->accept(this);
     if ((this->last_arguments_iterator != this->last_arguments_end) || this->error_flag)
-    {   // TODO: it's so ugly it gave me cancer!, change it.
+    {
         std::string msg = "function `";
         msg += eapp->ident_;
         msg += "` need ";

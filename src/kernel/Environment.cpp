@@ -51,7 +51,7 @@ Environment::Environment()
 
     this->read_string_f.reset(new Environment::fun_info);
     read_string_f->ret_type = this->global_str_type;
-    this->env_f["readString"] = this->read_int_f;
+    this->env_f["readString"] = this->read_string_f;
 }
 
 Environment::~Environment()

@@ -7,6 +7,7 @@
 #include <iostream>
 #include "ReturnsChecker.h"
 #include "ErrorHandler.h"
+#include "global.h"
 
 namespace frontend
 {
@@ -14,8 +15,6 @@ namespace frontend
 ReturnsChecker::ReturnsChecker(ErrorHandler& error_handler, Environment& env)
     : error_handler(error_handler), env(env)
 {
-    // TODO Auto-generated constructor stub
-
 }
 
 void ReturnsChecker::check(Visitable* v)
@@ -42,370 +41,291 @@ void ReturnsChecker::visitProgram(Program* program)
 
 void ReturnsChecker::visitFnDef(FnDef* fndef)
 {
-    /* Code For FnDef Goes Here*/
-    fndef->type_->accept(this);
-    visitIdent(fndef->ident_);
-    fndef->listarg_->accept(this);
+    this->r_flag = false;
     fndef->blk_->accept(this);
-
+    Environment::FunInfoPtr f = this->env.get_function(fndef->ident_);
+    if ((!this->r_flag) && (!(check_is<Void *>(f->ret_type))))
+    {
+        std::string msg;
+        msg += "Function : `";
+        msg += fndef->ident_;
+        msg += "` should returns [";
+        msg += type_pretty_print(f->ret_type);
+        msg += "].";
+        this->error_handler.error(fndef->type_->line_number, msg);
+    }
 }
 
 void ReturnsChecker::visitArgument(Argument* argument)
 {
-    /* Code For Argument Goes Here*/
     argument->type_->accept(this);
     visitIdent(argument->ident_);
-
 }
 
 void ReturnsChecker::visitStmBlock(StmBlock* stmblock)
 {
-    /* Code For StmBlock Goes Here*/
-
     stmblock->liststmt_->accept(this);
-
 }
 
 void ReturnsChecker::visitStmEmpty(StmEmpty* stmempty)
 {
-    /* Code For StmEmpty Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitStmBStmt(StmBStmt* stmbstmt)
 {
-    /* Code For StmBStmt Goes Here*/
-
     stmbstmt->blk_->accept(this);
-
 }
 
 void ReturnsChecker::visitStmDecl(StmDecl* stmdecl)
 {
-    /* Code For StmDecl Goes Here*/
-
     stmdecl->type_->accept(this);
     stmdecl->listitem_->accept(this);
-
 }
 
 void ReturnsChecker::visitStmAss(StmAss* stmass)
 {
-    /* Code For StmAss Goes Here*/
-
     visitIdent(stmass->ident_);
     stmass->expr_->accept(this);
-
 }
 
 void ReturnsChecker::visitStmIncr(StmIncr* stmincr)
 {
-    /* Code For StmIncr Goes Here*/
-
     visitIdent(stmincr->ident_);
-
 }
 
 void ReturnsChecker::visitStmDecr(StmDecr* stmdecr)
 {
-    /* Code For StmDecr Goes Here*/
-
     visitIdent(stmdecr->ident_);
-
 }
 
 void ReturnsChecker::visitStmRet(StmRet* stmret)
 {
-    /* Code For StmRet Goes Here*/
-
     stmret->expr_->accept(this);
-
+    this->r_flag = true;
 }
 
 void ReturnsChecker::visitStmVRet(StmVRet* stmvret)
 {
-    /* Code For StmVRet Goes Here*/
-
-
+    this->r_flag = true;
 }
 
 void ReturnsChecker::visitStmCond(StmCond* stmcond)
 {
-    /* Code For StmCond Goes Here*/
-
     stmcond->expr_->accept(this);
     stmcond->stmt_->accept(this);
-
 }
 
 void ReturnsChecker::visitStmCondElse(StmCondElse* stmcondelse)
 {
-    /* Code For StmCondElse Goes Here*/
-
-    stmcondelse->expr_->accept(this);
-    stmcondelse->stmt_1->accept(this);
-    stmcondelse->stmt_2->accept(this);
-
+    bool r = this->r_flag;
+    if (!r){
+        stmcondelse->expr_->accept(this);
+        stmcondelse->stmt_1->accept(this);
+        r = r || this->r_flag;
+        stmcondelse->stmt_2->accept(this);
+        r = r && this->r_flag;
+    }
+    this->r_flag = r;
 }
 
 void ReturnsChecker::visitStmWhile(StmWhile* stmwhile)
 {
-    /* Code For StmWhile Goes Here*/
-
+    // expr always positive -> infty loop -> this same as return.
     stmwhile->expr_->accept(this);
     stmwhile->stmt_->accept(this);
-
 }
 
 void ReturnsChecker::visitStmSExp(StmSExp* stmsexp)
 {
-    /* Code For StmSExp Goes Here*/
-
     stmsexp->expr_->accept(this);
-
 }
 
 void ReturnsChecker::visitStmNoInit(StmNoInit* stmnoinit)
 {
-    /* Code For StmNoInit Goes Here*/
-
     visitIdent(stmnoinit->ident_);
-
 }
 
 void ReturnsChecker::visitStmInit(StmInit* stminit)
 {
-    /* Code For StmInit Goes Here*/
-
     visitIdent(stminit->ident_);
     stminit->expr_->accept(this);
-
 }
 
 void ReturnsChecker::visitInt(Int* integer)
 {
-    /* Code For Int Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitStr(Str* str)
 {
-    /* Code For Str Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitBool(Bool* boolean)
 {
-    /* Code For Bool Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitVoid(Void* void_field)
 {
-    /* Code For Void Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitFun(Fun* fun)
 {
-    /* Code For Fun Goes Here*/
-
     fun->type_->accept(this);
     fun->listtype_->accept(this);
-
 }
 
 void ReturnsChecker::visitEVar(EVar* evar)
 {
-    /* Code For EVar Goes Here*/
-
     visitIdent(evar->ident_);
-
 }
 
 void ReturnsChecker::visitELitInt(ELitInt* elitint)
 {
-    /* Code For ELitInt Goes Here*/
-
     visitInteger(elitint->integer_);
-
 }
 
 void ReturnsChecker::visitELitTrue(ELitTrue* elittrue)
 {
-    /* Code For ELitTrue Goes Here*/
-
-
+    this->expression_optimization = 1;
 }
 
 void ReturnsChecker::visitELitFalse(ELitFalse* elitfalse)
 {
-    /* Code For ELitFalse Goes Here*/
-
-
+    this->expression_optimization = -1;
 }
 
 void ReturnsChecker::visitEApp(EApp* eapp)
 {
-    /* Code For EApp Goes Here*/
-
     visitIdent(eapp->ident_);
     eapp->listexpr_->accept(this);
-
 }
 
 void ReturnsChecker::visitEString(EString* estring)
 {
-    /* Code For EString Goes Here*/
-
     visitString(estring->string_);
-
 }
 
 void ReturnsChecker::visitNeg(Neg* neg)
 {
-    /* Code For Neg Goes Here*/
-
     neg->expr_->accept(this);
-
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitNot(Not* not_field)
 {
-    /* Code For Not Goes Here*/
-
+    this->expression_optimization = 0;
     not_field->expr_->accept(this);
-
+    this->expression_optimization = -(this->expression_optimization);
 }
 
 void ReturnsChecker::visitEMul(EMul* emul)
 {
-    /* Code For EMul Goes Here*/
-
     emul->expr_1->accept(this);
     emul->mulop_->accept(this);
     emul->expr_2->accept(this);
-
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitEAdd(EAdd* eadd)
 {
-    /* Code For EAdd Goes Here*/
-
     eadd->expr_1->accept(this);
     eadd->addop_->accept(this);
     eadd->expr_2->accept(this);
+    this->expression_optimization = 0;
 
 }
 
 void ReturnsChecker::visitERel(ERel* erel)
 {
-    /* Code For ERel Goes Here*/
-
     erel->expr_1->accept(this);
     erel->relop_->accept(this);
     erel->expr_2->accept(this);
-
+    // TODO: expression optimization
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitEAnd(EAnd* eand)
 {
-    /* Code For EAnd Goes Here*/
-
     eand->expr_1->accept(this);
+    short eo1 = this->expression_optimization;
     eand->expr_2->accept(this);
+    short eo2 = this->expression_optimization;
 
+    if ((eo1 == 1) && (eo2 == 1))
+    {
+        this->expression_optimization = 1;
+    }
+    else if ((eo1 == 0) && (eo2 == 0))
+    {
+        this->expression_optimization = -1;
+    }
+    else
+    {
+        this->expression_optimization = 0;
+    }
 }
 
 void ReturnsChecker::visitEOr(EOr* eor)
 {
-    /* Code For EOr Goes Here*/
-
     eor->expr_1->accept(this);
+    short eo1 = this->expression_optimization;
     eor->expr_2->accept(this);
-
+    short eo2 = this->expression_optimization;
+    if ((eo1 == 1) || (eo2 == 1))
+    {
+        this->expression_optimization = 1;
+    }
+    else if ((eo1 == 0) && (eo2 == 0))
+    {
+        this->expression_optimization = -1;
+    }
+    else
+    {
+        this->expression_optimization = 0;
+    }
 }
 
 void ReturnsChecker::visitPlus(Plus* plus)
 {
-    /* Code For Plus Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitMinus(Minus* minus)
 {
-    /* Code For Minus Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitTimes(Times* times)
 {
-    /* Code For Times Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitDiv(Div* div)
 {
-    /* Code For Div Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitMod(Mod* mod)
 {
-    /* Code For Mod Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitLTH(LTH* lth)
 {
-    /* Code For LTH Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitLE(LE* le)
 {
-    /* Code For LE Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitGTH(GTH* gth)
 {
-    /* Code For GTH Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitGE(GE* ge)
 {
-    /* Code For GE Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitEQU(EQU* equ)
 {
-    /* Code For EQU Goes Here*/
-
-
 }
 
 void ReturnsChecker::visitNE(NE* ne)
 {
-    /* Code For NE Goes Here*/
-
-
 }
 
 

@@ -20,6 +20,9 @@ private:
     ErrorHandler& error_handler;
     Environment& env;
 
+    bool r_flag;
+    short expression_optimization;  // 0 - do not know, -1 - always false, 1 -  always true
+
 public:
     ReturnsChecker(ErrorHandler& error_handler, Environment& env);
     void check(Visitable* v);
