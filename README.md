@@ -8,10 +8,6 @@ pd291528@students.mimuw.edu.pl
 Kompilacja:
 -----------
 
-Zbudowanie gramatyki:
-
-`$ make grammar`
-
 W katalogu głównym wywołanie:
 
 `$ make`
