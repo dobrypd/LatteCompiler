@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <sstream>
 #include "ASTChecker.h"
 #include "ErrorHandler.h"
 #include "global.h"
@@ -16,7 +17,7 @@ namespace frontend
 
 ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env, Ident& pr_name)
     : error_handler(error_handler), env(env), last_line_number(0),
-      last_declaration_type(0), last_type(0),
+      error_flag(false), last_declaration_type(0), last_type(0),
       last_function_ident(pr_name),
       last_arguments_iterator(0), last_arguments_end(0)
 {
@@ -25,7 +26,8 @@ ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env, Ident& pr_
 void ASTChecker::check(Visitable* v)
 {
     // TODO: renew state.
-    last_line_number = 0;
+    this->last_line_number = 0;
+    this->error_flag = false;
     v->accept(this);
 }
 
@@ -88,14 +90,16 @@ void ASTChecker::check_type(Ident& i1, Type* t1, Ident& i2, Type* t2, int line_n
 std::string ASTChecker::args_pretty_print(std::vector<Environment::VarInfoPtr>::const_iterator it,
             std::vector<Environment::VarInfoPtr>::const_iterator end)
 {
-    std::string s;
+    std::string s("[");
     for(; it != end; it++){
         s += type_pretty_print((*it)->type);
         if ((it + 1) != end)
             s += ", ";
     }
+    s += "]";
     return s;
 }
+
 
 void ASTChecker::visitProg(Prog* t) { } //abstract class
 void ASTChecker::visitTopDef(TopDef* t) {} //abstract class
@@ -120,8 +124,6 @@ void ASTChecker::visitFnDef(FnDef* fndef)
     fndef->type_->accept(this);
     this->last_function_type = fndef->type_;
     visitIdent(fndef->ident_);
-    std::cout << std::endl << std::endl << std::endl << fndef->ident_ << std::endl << std::endl << std::endl;
-    std::cout << this->last_function_ident << std::endl;
     this->last_function_ident = fndef->ident_;
 
     this->env.prepare();
@@ -419,7 +421,7 @@ void ASTChecker::visitELitInt(ELitInt* elitint)
 {
     this->last_line_number = elitint->line_number;
     visitInteger(elitint->integer_);
-    this->last_type = &(this->lineral_int);
+    this->last_type = &(this->literal_int);
 }
 
 void ASTChecker::visitELitTrue(ELitTrue* elittrue)
@@ -453,22 +455,22 @@ void ASTChecker::visitEApp(EApp* eapp)
     this->last_arguments_iterator = fun_ptr->arguments.begin();
     this->last_arguments_end = fun_ptr->arguments.end();
     eapp->listexpr_->accept(this);
-    if (this->last_arguments_iterator != this->last_arguments_end)
-    {
+    if ((this->last_arguments_iterator != this->last_arguments_end) || this->error_flag)
+    {   // TODO: it's so ugly it gave me cancer!, change it.
         std::string msg = "function `";
         msg += eapp->ident_;
         msg += "` need ";
-        msg += (fun_ptr->arguments.size());
+        std::ostringstream ss;
+        ss << fun_ptr->arguments.size();
+        msg += ss.str();
         msg += " arguments: ";
         msg += this->args_pretty_print(fun_ptr->arguments.begin(), fun_ptr->arguments.end());
-        msg += ", but you passed only ";
-        msg += (this->last_arguments_iterator - fun_ptr->arguments.begin());
         this->error_handler.error(eapp->line_number, msg);
+        this->error_flag = false;
     }
     // Args checked.
 
     this->last_type = fun_ptr->ret_type;
-    // TODO:
 }
 
 void ASTChecker::visitEString(EString* estring)
@@ -482,57 +484,152 @@ void ASTChecker::visitNeg(Neg* neg)
 {
     this->last_line_number = neg->line_number;
     neg->expr_->accept(this);
-
+    if (!(check_is<Int *>(this->last_type)))
+    {
+        std::string msg = "negation should be only applied to numbers not [";
+        msg += type_pretty_print(this->last_type);
+        msg += "].";
+        this->error_handler.error(neg->line_number, msg);
+    }
+    this->last_type = &(this->literal_int);
 }
 
 void ASTChecker::visitNot(Not* not_field)
 {
     this->last_line_number = not_field->line_number;
     not_field->expr_->accept(this);
-
+    if (!(check_is<Bool *>(this->last_type)))
+    {
+        std::string msg = "logical negation should be only applied to boolieans not [";
+        msg += type_pretty_print(this->last_type);
+        msg += "].";
+        this->error_handler.error(not_field->line_number, msg);
+    }
+    this->last_type = &(this->literal_bool);
 }
 
 void ASTChecker::visitEMul(EMul* emul)
 {
     this->last_line_number = emul->line_number;
+    this->last_type = 0;
     emul->expr_1->accept(this);
+    Type* type1 = this->last_type;
+    Ident left("left side of * / %");
     emul->mulop_->accept(this);
     emul->expr_2->accept(this);
-
+    Ident right("right side of * / %");
+    Type* type2 = this->last_type;
+    this->check_type(left, type1, right, type2, emul->line_number);
+    if ((!(check_is<Int *>(type1))) || (!(check_is<Int *>(type2))))
+    {
+        std::string msg = "* / % should be only applied to numbers not [";
+        msg += type_pretty_print(type1);
+        msg += ", ";
+        msg += type_pretty_print(type2);
+        msg += "].";
+        this->error_handler.error(emul->line_number, msg);
+    }
+    this->last_type = &(this->literal_int);
 }
 
 void ASTChecker::visitEAdd(EAdd* eadd)
 {
     this->last_line_number = eadd->line_number;
+    this->last_type = 0;
     eadd->expr_1->accept(this);
+    Type* type1 = this->last_type;
+    Ident left("left side of + -");
     eadd->addop_->accept(this);
     eadd->expr_2->accept(this);
-
+    Ident right("right side of + -");
+    Type* type2 = this->last_type;
+    this->check_type(left, type1, right, type2, eadd->line_number);
+    if (((!(check_is<Int *>(type1))) || (!(check_is<Int *>(type2))))
+        && (! ( check_is<Str *>(type1) && check_is<Str *>(type2) && check_is<Plus *>(eadd->addop_)) )
+        )
+    {
+        std::string msg = "+ - should be only applied to numbers (or + and string) not [";
+        msg += type_pretty_print(type1);
+        msg += ", ";
+        msg += type_pretty_print(type2);
+        msg += "].";
+        this->error_handler.error(eadd->line_number, msg);
+    }
+    this->last_type = &(this->literal_int);
+    if (check_is<Str *>(type1))
+        this->last_type = &(this->literal_string);
 }
 
 void ASTChecker::visitERel(ERel* erel)
 {
     this->last_line_number = erel->line_number;
+    this->last_type = 0;
     erel->expr_1->accept(this);
+    Type* type1 = this->last_type;
+    Ident left("left side of relation");
     erel->relop_->accept(this);
     erel->expr_2->accept(this);
-
+    Ident right("right side of relation");
+    Type* type2 = this->last_type;
+    this->check_type(left, type1, right, type2, erel->line_number);
+    if (    ((!(check_is<Int *>(type1))) || (!(check_is<Int *>(type2)))) &&
+            ((!(check_is<Bool *>(type1))) || (!(check_is<Bool *>(type2))))
+            )
+    {
+        std::string msg = "relation should be only applied to booleans or numbers not [";
+        msg += type_pretty_print(type1);
+        msg += ", ";
+        msg += type_pretty_print(type2);
+        msg += "].";
+        this->error_handler.error(erel->line_number, msg);
+    }
+    this->last_type = &(this->literal_bool);
 }
 
 void ASTChecker::visitEAnd(EAnd* eand)
 {
     this->last_line_number = eand->line_number;
+    this->last_type = 0;
     eand->expr_1->accept(this);
+    Type* type1 = this->last_type;
+    Ident left("left side of &&");
     eand->expr_2->accept(this);
-
+    Ident right("right side of &&");
+    Type* type2 = this->last_type;
+    this->check_type(left, type1, right, type2, eand->line_number);
+    if ((!(check_is<Bool *>(type1))) || (!(check_is<Bool *>(type2))))
+    {
+        std::string msg = "&& should be only applied to booleans not [";
+        msg += type_pretty_print(type1);
+        msg += ", ";
+        msg += type_pretty_print(type2);
+        msg += "].";
+        this->error_handler.error(eand->line_number, msg);
+    }
+    this->last_type = &(this->literal_bool);
 }
 
 void ASTChecker::visitEOr(EOr* eor)
 {
     this->last_line_number = eor->line_number;
+    this->last_type = 0;
     eor->expr_1->accept(this);
+    Type* type1 = this->last_type;
+    Ident left("left side of ||");
     eor->expr_2->accept(this);
-
+    Ident right("right side of ||");
+    Type* type2 = this->last_type;
+    this->check_type(left, type1, right, type2, eor->line_number);
+    if ((!(check_is<Bool *>(type1))) || (!(check_is<Bool *>(type2))))
+    {
+        std::string msg = "|| should be only applied to booleans and numbers not [";
+        msg += type_pretty_print(type1);
+        msg += ", ";
+        msg += type_pretty_print(type2);
+        msg += "].";
+        this->error_handler.error(eor->line_number, msg);
+    }
+    this->last_type = &(this->literal_bool);
 }
 
 void ASTChecker::visitPlus(Plus* plus)
@@ -647,10 +744,16 @@ void ASTChecker::visitListExpr(ListExpr* listexpr)
         Ident arg_no("argument number ");
         arg_no += n;
 
-        (*i)->accept(this);
         if (this->last_arguments_iterator == this->last_arguments_end)
+        {
+            this->error_flag = true;
             return;
+        }
+
+        (*i)->accept(this);
+
         this->check_type(fun_arg, (*(this->last_arguments_iterator))->type, arg_no, this->last_type, this->last_line_number);
+        this->last_arguments_iterator++;
     }
 }
 

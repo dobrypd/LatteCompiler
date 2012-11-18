@@ -23,6 +23,7 @@ private:
 
     /* STATE */
     int last_line_number;
+    bool error_flag;
     Type* last_declaration_type;
     Type* last_type;  // For expressions.
     Type* last_function_type;
@@ -31,7 +32,7 @@ private:
     std::vector<Environment::VarInfoPtr>::const_iterator last_arguments_end;
 
     // Literal types;
-    Int lineral_int;
+    Int literal_int;
     Bool literal_bool;
     Str literal_string;
 
