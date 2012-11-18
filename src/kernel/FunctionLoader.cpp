@@ -30,7 +30,7 @@ void FunctionLoader::check(Visitable* v)
     {
         std::string msg = "function `";
         msg += main_idnt;
-        msg += "` with 0 arguments does not exist.";
+        msg += "` with 0 arguments and int return type does not exist.";
         this->error_handler.error(1, msg);
         return;
     }

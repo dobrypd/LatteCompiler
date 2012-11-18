@@ -3,13 +3,14 @@
 include bin/Paths.mk
 
 PROJECT=Latte
+BINARY=latec
 GRAMMAR_OBJ=Absyn.o Lexer.o Parser.o Printer.o
 
 OBJECTS:=$(patsubst $(SRC)/kernel/%.cpp,$(BIN)/%.o,$(wildcard $(SRC)/kernel/*.cpp))
 
-OPTDBG= -g
-ifeq ($(release), 1)
-	OPTDBG= -O2 -DNDEBUG
+OPTDBG= -O2 -DNDEBUG
+ifeq ($(debug), 1)
+	OPTDBG= -g
 endif
 
 
@@ -19,7 +20,7 @@ CC=g++
 CFLAGS=-Wall -c $(OPTDBG)
 LFLAGS=-Wall $(OPTDBG)
 
-all : $(PROJECT)
+all : grammar $(PROJECT)
 
 grammar: $(GRAMMAR)/$(PROJECT).cf
 	@echo -en "\033[38m\033[32mCompiling grammar...\033[0m\n"
@@ -33,7 +34,7 @@ grammar: $(GRAMMAR)/$(PROJECT).cf
 
 $(PROJECT): $(OBJECTS)
 	@echo -en "\033[38m\033[32mLinking $(PROJECT)...\033[0m\n"
-	$(CC) $(LFLAGS) $^ $(patsubst %, $(GRAMMAR_BIN)/%, $(GRAMMAR_OBJ)) -I $(INCLUDES) -I $(GRAMMAR_BIN) -o $(BIN)/$@
+	$(CC) $(LFLAGS) $^ $(patsubst %, $(GRAMMAR_BIN)/%, $(GRAMMAR_OBJ)) -I $(INCLUDES) -I $(GRAMMAR_BIN) -o $(BIN)/$(BINARY)
 
 $(OBJECTS): $(BIN)/%.o : $(SRC)/kernel/%.cpp
 	@echo -en "Compiling \033[38m\033[33m$(patsubst $(SRC)/kernel/%,%, $<)\033[0m...\n"
