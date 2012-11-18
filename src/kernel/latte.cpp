@@ -114,6 +114,10 @@ int main(int argc, char** argv)
             arguments.input_count == 0 ? 1 : arguments.input_count;
     for(short i = 0; i < number_of_inputs; i++)
     {
+        if (debug)
+            std::cout << std::endl << "-- new file "
+            << ((arguments.input_count > 0) ? arguments.input_files[i] : "stdin")
+            << " --" << std::endl << std::endl;
         FILE* input = open_file(arguments.input_count,
                 (arguments.input_count > 0)
                     ? arguments.input_files[i]
@@ -134,12 +138,6 @@ int main(int argc, char** argv)
         if (fclose(input) != 0)
             cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
 
-        // Check AST.
-        //  * Load Functions
-        //  * Type check (without returns)
-        //  * Optimize tree, expressions
-        //  * Type check (returns)
-
         // Used in all checkers as references!!! Delete in this same time!!!
         frontend::Environment env;
         frontend::ErrorHandler file_error_handler(
@@ -148,25 +146,30 @@ int main(int argc, char** argv)
         // Load functions.
         frontend::FunctionLoader function_loader(file_error_handler, env);
         function_loader.check(ast_root);
+        if (!file_error_handler.has_errors()){
+            // Type check (without returns).
+            Ident pr_name((arguments.input_count > 0) ? arguments.input_files[i] : "stdin");
+            frontend::ASTChecker checker(file_error_handler, env, pr_name);
+            checker.check(ast_root);
+        }
 
-        // Type check (without returns).
-        Ident pr_name((arguments.input_count > 0) ? arguments.input_files[i] : "stdin");
-        frontend::ASTChecker checker(file_error_handler, env, pr_name);
-        checker.check(ast_root);
+        // Optimizer TODO: next part of assignment. Tree optimization.
 
-        // Optimizer.
-        frontend::TreeOptimizer tree_optimizer;
-        tree_optimizer.optimize(ast_root);
+        if (!file_error_handler.has_errors()){
+            // Returns checker.
+            frontend::ReturnsChecker returns_checker(file_error_handler, env);
+            returns_checker.check(ast_root);
+        }
 
-        // Returns checker.
-        frontend::ReturnsChecker returns_checker(file_error_handler, env);
-        returns_checker.check(ast_root);
 
         // End of semantic check, typecheck and tree optimization.
-
+        if (debug)
+            std::cout << "--ERRORS--" << std::endl;
         file_error_handler.flush();
 
-        // TODO: Compile.
+        if (!file_error_handler.has_errors()){
+            // COMPILE!
+        }
     }
 
     return EXIT_SUCCESS;

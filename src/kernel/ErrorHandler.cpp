@@ -87,4 +87,9 @@ void ErrorHandler::flush()
     }
 }
 
+bool ErrorHandler::has_errors()
+{
+    return !(this->errors.empty());
+}
+
 } /* namespace frontend */

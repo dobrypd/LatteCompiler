@@ -75,9 +75,6 @@ public:
     void add_variable(Type* t, Ident& ident);
     void add_function(FnDef* function_definition);
 
-    void set_variable();  // TODO: really I need this?
-    void set_function();
-
     bool can_add_variable(Ident& ident) const;
     bool can_add_funciton(FnDef* function_definition) const;
 

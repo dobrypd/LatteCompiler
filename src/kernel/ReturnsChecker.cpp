@@ -19,6 +19,10 @@ ReturnsChecker::ReturnsChecker(ErrorHandler& error_handler, Environment& env)
 
 void ReturnsChecker::check(Visitable* v)
 {
+    this->expression_optimization = 0;
+    this->remove = false;
+    this->to_the_end = false;
+
     v->accept(this);
 }
 
@@ -47,7 +51,7 @@ void ReturnsChecker::visitFnDef(FnDef* fndef)
     if ((!this->r_flag) && (!(check_is<Void *>(f->ret_type))))
     {
         std::string msg;
-        msg += "Function : `";
+        msg += "function : `";
         msg += fndef->ident_;
         msg += "` should returns [";
         msg += type_pretty_print(f->ret_type);
@@ -85,7 +89,10 @@ void ReturnsChecker::visitStmDecl(StmDecl* stmdecl)
 void ReturnsChecker::visitStmAss(StmAss* stmass)
 {
     visitIdent(stmass->ident_);
+    this->expression_optimization = 0;
     stmass->expr_->accept(this);
+    //TODO: not so important optimization
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitStmIncr(StmIncr* stmincr)
@@ -100,44 +107,81 @@ void ReturnsChecker::visitStmDecr(StmDecr* stmdecr)
 
 void ReturnsChecker::visitStmRet(StmRet* stmret)
 {
+    this->expression_optimization = 0;
     stmret->expr_->accept(this);
+    if (this->expression_optimization != 0)
+    {
+        // TODO: function optimization.
+        this->to_the_end = true;
+        this->remove = true;
+    }
     this->r_flag = true;
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitStmVRet(StmVRet* stmvret)
 {
     this->r_flag = true;
+    this->to_the_end = true;
+    this->remove = true;
 }
 
 void ReturnsChecker::visitStmCond(StmCond* stmcond)
 {
+    this->expression_optimization = 0;
     stmcond->expr_->accept(this);
-    stmcond->stmt_->accept(this);
+    if (this->expression_optimization == 1)
+    {
+        stmcond->stmt_->accept(this);
+    }
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitStmCondElse(StmCondElse* stmcondelse)
 {
-    bool r = this->r_flag;
-    if (!r){
-        stmcondelse->expr_->accept(this);
+    this->expression_optimization = 0;
+    stmcondelse->expr_->accept(this);
+
+    if (this->expression_optimization == 1)
         stmcondelse->stmt_1->accept(this);
-        r = r || this->r_flag;
+    else if (this->expression_optimization == -1)
+        stmcondelse->stmt_2->accept(this);
+    else
+    {
+        bool r = true;
+        stmcondelse->stmt_1->accept(this);
+        r = r && this->r_flag;
         stmcondelse->stmt_2->accept(this);
         r = r && this->r_flag;
+        this->r_flag = r;
     }
-    this->r_flag = r;
+
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitStmWhile(StmWhile* stmwhile)
 {
-    // expr always positive -> infty loop -> this same as return.
+    this->expression_optimization = 0;
     stmwhile->expr_->accept(this);
-    stmwhile->stmt_->accept(this);
+    if (this->expression_optimization == 1)
+        this->r_flag = true; // infinity loop
+    else if (this->expression_optimization == -1)
+    {
+        ;
+        // do not accept, and do not set flag
+    }
+    else
+    {
+        stmwhile->stmt_->accept(this);
+    }
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitStmSExp(StmSExp* stmsexp)
 {
+    this->expression_optimization = 0;
     stmsexp->expr_->accept(this);
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitStmNoInit(StmNoInit* stmnoinit)
@@ -148,7 +192,13 @@ void ReturnsChecker::visitStmNoInit(StmNoInit* stmnoinit)
 void ReturnsChecker::visitStmInit(StmInit* stminit)
 {
     visitIdent(stminit->ident_);
+    this->expression_optimization = 0;
     stminit->expr_->accept(this);
+    if (this->expression_optimization != 0)
+    {
+        // TODO: variable const initialization.
+        ;
+    }
 }
 
 void ReturnsChecker::visitInt(Int* integer)
@@ -175,39 +225,49 @@ void ReturnsChecker::visitFun(Fun* fun)
 
 void ReturnsChecker::visitEVar(EVar* evar)
 {
+    // Check if initialized by literal.
     visitIdent(evar->ident_);
+    this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitELitInt(ELitInt* elitint)
 {
     visitInteger(elitint->integer_);
+    this->expression_optimization = 2;
+    this->const_int_value = elitint->integer_;
 }
 
 void ReturnsChecker::visitELitTrue(ELitTrue* elittrue)
 {
     this->expression_optimization = 1;
+    this->const_bool_value = true;
 }
 
 void ReturnsChecker::visitELitFalse(ELitFalse* elitfalse)
 {
     this->expression_optimization = -1;
+    this->const_bool_value = false;
 }
 
 void ReturnsChecker::visitEApp(EApp* eapp)
 {
     visitIdent(eapp->ident_);
     eapp->listexpr_->accept(this);
+    // Check const return functions.
 }
 
 void ReturnsChecker::visitEString(EString* estring)
 {
     visitString(estring->string_);
+    this->expression_optimization = 2;
+    this->const_str_value = estring->string_;
 }
 
 void ReturnsChecker::visitNeg(Neg* neg)
 {
     neg->expr_->accept(this);
-    this->expression_optimization = 0;
+    if (this->expression_optimization == 2)
+        this->const_int_value = -this->const_int_value;
 }
 
 void ReturnsChecker::visitNot(Not* not_field)
@@ -219,32 +279,108 @@ void ReturnsChecker::visitNot(Not* not_field)
 
 void ReturnsChecker::visitEMul(EMul* emul)
 {
+    this->expression_optimization = 0;
+    int e1, e2;
+    bool optimize = true;
     emul->expr_1->accept(this);
+    if (this->expression_optimization == 2)
+    {
+        e1 = this->const_int_value;
+    }
+    else
+        optimize = false;
+
     emul->mulop_->accept(this);
     emul->expr_2->accept(this);
-    this->expression_optimization = 0;
+    if (this->expression_optimization == 2)
+    {
+        e2 = this->const_int_value;
+    }
+    else
+        optimize = false;
+
+    if (optimize)
+    {
+        if (check_is<Times*>(emul)){
+            this->const_int_value = e1 * e2;
+        } else if (check_is<Div*>(emul)){
+            this->const_int_value = e1 / e2;
+        } else if (check_is<Mod*>(emul)){
+            this->const_int_value = e1 % e2;
+        } else {
+            this->expression_optimization = 0;
+        }
+    } else
+        this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitEAdd(EAdd* eadd)
 {
+    this->expression_optimization = 0;
+    int e1, e2;
+    bool optimize = true;
     eadd->expr_1->accept(this);
+    if (this->expression_optimization == 2)
+    {
+        e1 = this->const_int_value;
+    }
+    else
+        optimize = false;
     eadd->addop_->accept(this);
     eadd->expr_2->accept(this);
-    this->expression_optimization = 0;
+    if (this->expression_optimization == 2)
+    {
+        e2 = this->const_int_value;
+    }
+    else
+        optimize = false;
 
+    // TOOD: WARNING! literal strings!
+    if (optimize)
+    {
+        if (check_is<Plus*>(eadd)){
+            this->const_int_value = e1 + e2;
+        } else if (check_is<Minus*>(eadd)){
+            this->const_int_value = e1 - e2;
+        } else {
+            this->expression_optimization = 0;
+        }
+    } else
+        this->expression_optimization = 0;
 }
 
 void ReturnsChecker::visitERel(ERel* erel)
 {
-    erel->expr_1->accept(this);
-    erel->relop_->accept(this);
-    erel->expr_2->accept(this);
-    // TODO: expression optimization
     this->expression_optimization = 0;
+    bool optimize = true;
+    erel->expr_1->accept(this);
+    if (this->expression_optimization != 0)
+    {
+        this->e1 = this->const_int_value;
+        if (this->expression_optimization != 2)
+            this->e1 = this->expression_optimization;
+    }
+    else
+        optimize = false;
+    erel->expr_2->accept(this);
+    if (this->expression_optimization != 0)
+    {
+        this->e2 = this->const_int_value;
+        if (this->expression_optimization != 2)
+            this->e2 = this->expression_optimization;
+    }
+    else
+        optimize = false;
+
+    if (!optimize){
+        this->expression_optimization = 0;
+    }
+    erel->relop_->accept(this);
 }
 
 void ReturnsChecker::visitEAnd(EAnd* eand)
 {
+    this->expression_optimization = 0;
     eand->expr_1->accept(this);
     short eo1 = this->expression_optimization;
     eand->expr_2->accept(this);
@@ -254,7 +390,7 @@ void ReturnsChecker::visitEAnd(EAnd* eand)
     {
         this->expression_optimization = 1;
     }
-    else if ((eo1 == 0) && (eo2 == 0))
+    else if ((eo1 == -1) || (eo2 == -1))
     {
         this->expression_optimization = -1;
     }
@@ -306,26 +442,68 @@ void ReturnsChecker::visitMod(Mod* mod)
 
 void ReturnsChecker::visitLTH(LTH* lth)
 {
+    if (this->expression_optimization != 0){
+        if (this->e1 < this->e2){
+            this->expression_optimization = 1;
+        } else {
+            this->expression_optimization = -1;
+        }
+    }
 }
 
 void ReturnsChecker::visitLE(LE* le)
 {
+    if (this->expression_optimization != 0){
+        if (this->e1 <= this->e2){
+            this->expression_optimization = 1;
+        } else {
+            this->expression_optimization = -1;
+        }
+    }
 }
 
 void ReturnsChecker::visitGTH(GTH* gth)
 {
+    if (this->expression_optimization != 0){
+        if (this->e1 > this->e2){
+            this->expression_optimization = 1;
+        } else {
+            this->expression_optimization = -1;
+        }
+    }
 }
 
 void ReturnsChecker::visitGE(GE* ge)
 {
+    if (this->expression_optimization != 0){
+        if (this->e1 >= this->e2){
+            this->expression_optimization = 1;
+        } else {
+            this->expression_optimization = -1;
+        }
+    }
 }
 
 void ReturnsChecker::visitEQU(EQU* equ)
 {
+    if (this->expression_optimization != 0){
+        if (this->e1 == this->e2){
+            this->expression_optimization = 1;
+        } else {
+            this->expression_optimization = -1;
+        }
+    }
 }
 
 void ReturnsChecker::visitNE(NE* ne)
 {
+    if (this->expression_optimization != 0){
+        if (this->e1 != this->e2){
+            this->expression_optimization = 1;
+        } else {
+            this->expression_optimization = -1;
+        }
+    }
 }
 
 
@@ -380,22 +558,18 @@ void ReturnsChecker::visitListExpr(ListExpr* listexpr)
 
 void ReturnsChecker::visitInteger(Integer x)
 {
-    /* Code for Integer Goes Here*/
 }
 
 void ReturnsChecker::visitChar(Char x)
 {
-    /* Code for Char Goes Here*/
 }
 
 void ReturnsChecker::visitDouble(Double x)
 {
-    /* Code for Double Goes Here*/
 }
 
 void ReturnsChecker::visitString(String x)
 {
-    /* Code for String Goes Here*/
 }
 
 void ReturnsChecker::visitIdent(Ident x)

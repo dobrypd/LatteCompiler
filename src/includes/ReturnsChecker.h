@@ -20,8 +20,18 @@ private:
     ErrorHandler& error_handler;
     Environment& env;
 
-    bool r_flag;
-    short expression_optimization;  // 0 - do not know, -1 - always false, 1 -  always true
+    bool r_flag; // return was found in this function.
+
+    // 0 - do not know, -1 - always false, 1 -  always true, 2 - constant variable
+    short expression_optimization;
+
+    int const_int_value;
+    int e1, e2;
+    bool const_bool_value;
+    std::string const_str_value;
+
+    bool remove;
+    bool to_the_end;
 
 public:
     ReturnsChecker(ErrorHandler& error_handler, Environment& env);

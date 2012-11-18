@@ -1,8 +1,7 @@
 /*
- * global.cpp
+ * Author: Piotr Dobrowolski
+ * pd291528@students.mimuw.edu.pl
  *
- *  Created on: 17-11-2012
- *      Author: piotrek
  */
 
 #include "global.h"

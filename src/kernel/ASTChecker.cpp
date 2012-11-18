@@ -150,7 +150,6 @@ void ASTChecker::visitStmBlock(StmBlock* stmblock)
 void ASTChecker::visitStmEmpty(StmEmpty* stmempty)
 {
     this->last_line_number = stmempty->line_number;
-    std::cerr << "hello" << std::endl;  // TODO:
 }
 
 void ASTChecker::visitStmBStmt(StmBStmt* stmbstmt)
@@ -178,7 +177,7 @@ void ASTChecker::visitStmAss(StmAss* stmass)
     this->last_type = 0;
     stmass->expr_->accept(this);
 
-    if (var_info == 0) {
+    if (!var_info) {
         std::string msg = "variable `";
         msg += stmass->ident_;
         msg += "` used before declared.";
@@ -198,15 +197,14 @@ void ASTChecker::visitStmIncr(StmIncr* stmincr)
     this->last_line_number = stmincr->line_number;
     visitIdent(stmincr->ident_);
     Environment::VarInfoPtr var_info = this->env.get_variable(stmincr->ident_);
-    if (var_info == 0) {
+    if (!var_info) {
         std::string msg = "variable `";
         msg += stmincr->ident_;
         msg += "` used before declared.";
         this->error_handler.error(stmincr->line_number, msg);
         return;
     }
-    etypes t = type_to_enum(var_info->type);
-    if (t != INT)
+    if (!check_is<Int*>(var_info->type))
     {
         std::string msg = "variable `";
         msg += stmincr->ident_;
@@ -222,15 +220,14 @@ void ASTChecker::visitStmDecr(StmDecr* stmdecr)
     this->last_line_number = stmdecr->line_number;
     visitIdent(stmdecr->ident_);
     Environment::VarInfoPtr var_info = this->env.get_variable(stmdecr->ident_);
-    if (var_info == 0) {
+    if (!var_info) {
         std::string msg = "variable `";
         msg += stmdecr->ident_;
         msg += "` used before declared.";
         this->error_handler.error(stmdecr->line_number, msg);
         return;
     }
-    etypes t = type_to_enum(var_info->type);
-    if (t != INT)
+    if (!check_is<Int*>(var_info->type))
     {
         std::string msg = "variable `";
         msg += stmdecr->ident_;
@@ -405,7 +402,7 @@ void ASTChecker::visitEVar(EVar* evar)
     this->last_line_number = evar->line_number;
     Environment::VarInfoPtr var_info = this->env.get_variable(evar->ident_);
     visitIdent(evar->ident_);
-    if (var_info == 0) {
+    if (!var_info) {
         std::string msg = "variable `";
         msg += evar->ident_;
         msg += "` used before declaration.";
@@ -442,7 +439,7 @@ void ASTChecker::visitEApp(EApp* eapp)
     visitIdent(eapp->ident_);
     Environment::FunInfoPtr fun_ptr = this->env.get_function(eapp->ident_);
     // Check if function exists.
-    if (fun_ptr == 0)
+    if (!fun_ptr)
     {
         std::string msg = "function `";
         msg += eapp->ident_;

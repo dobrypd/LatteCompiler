@@ -80,7 +80,7 @@ void Environment::emerge()
 void Environment::prepare()
 {
     if(debug)
-        std::cout << "Preparing environment to new " << this->env_v.size() + 1 << " block." << std::endl;
+        std::cout << "Preparing environment to new " << this->env_v.size() + 1 << "'th block." << std::endl;
 
     this->submerge();
 }
@@ -129,15 +129,6 @@ void Environment::add_function(FnDef *function_definition)
         std::cout << std::endl;
 
     this->env_f[function_definition->ident_] = new_function;
-}
-void Environment::set_variable()
-{
-    throw "Not implemented.";
-}
-
-void Environment::set_function()
-{
-    throw "Not implemented.";
 }
 
 bool Environment::can_add_variable(Ident & ident) const

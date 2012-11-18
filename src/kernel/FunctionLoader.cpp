@@ -20,6 +20,20 @@ FunctionLoader::FunctionLoader(ErrorHandler& error_handler, Environment& env)
 void FunctionLoader::check(Visitable* v)
 {
     v->accept(this);
+    /*
+     * check if has main
+     */
+    Ident main_idnt("main");
+    Environment::FunInfoPtr fun_ptr = this->env.get_function(main_idnt);
+    // Check if function exists.
+    if ((!fun_ptr) || (!fun_ptr->arguments.empty()) || (!check_is<Int*>(fun_ptr->ret_type)))
+    {
+        std::string msg = "function `";
+        msg += main_idnt;
+        msg += "` with 0 arguments does not exist.";
+        this->error_handler.error(1, msg);
+        return;
+    }
 }
 
 void FunctionLoader::visitProg(Prog* t) { } //abstract class

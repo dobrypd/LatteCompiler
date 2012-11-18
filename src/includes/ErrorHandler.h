@@ -36,6 +36,8 @@ public:
     void error(int line, std::string msg);
     void warning(int line, std::string msg);
     void flush();
+
+    bool has_errors();
 };
 
 } /* namespace frontend */
