@@ -127,7 +127,8 @@ int main(int argc, char** argv)
         {
             if (fclose(input) != 0)
                 cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
-            continue;
+            std::cerr << "ERROR" << std::endl;
+            return EXIT_FAILURE;
         }
 
         // Parse.
@@ -163,12 +164,15 @@ int main(int argc, char** argv)
 
 
         // End of semantic check, typecheck and tree optimization.
-        if (debug)
-            std::cout << "--ERRORS--" << std::endl;
-        file_error_handler.flush();
+        if (file_error_handler.has_errors()){
+            std::cerr << "ERROR" << std::endl;
+            file_error_handler.flush();
+            return EXIT_FAILURE;
+        }
 
         if (!file_error_handler.has_errors()){
-            // COMPILE!
+            std::cerr << "OK" << std::endl;
+            // COMPILE IT!
         }
     }
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Run only from tests directory"
+echo "Run only from scripts directory"
 
 # FLAG, 1 if you dont want program outputs
 DELETE_OUTPUTS=1
@@ -11,7 +11,7 @@ DEBUG_OUT=1
 PROJECT_DIR=`pwd`/../
 TESTS_IN_DIR=$PROJECT_DIR./tests/
 BIN=$PROJECT_DIR/bin/
-LATTE=$BIN/Latte
+LATTE=../latec
 
 
 for i in `find  $TESTS_IN_DIR -iname "*.lat"`
