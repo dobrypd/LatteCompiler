@@ -46,8 +46,8 @@ test: $(PROJECT)
 
 
 clean:
-	@$(MAKE) -C $(GRAMMAR_BIN) clean
-	rm -f $(BIN)/*.o	
+	rm -f $(BIN)/*.o
+	rm -f $(BINARY)
 	find $(ROOT) -iname "*.bak" | xargs rm -f
 	find $(ROOT) -iname "*.swp" | xargs rm -f
 	find $(ROOT) -iname "*~" | xargs rm -f
