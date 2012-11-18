@@ -13,7 +13,8 @@ namespace frontend
 {
 
 ReturnsChecker::ReturnsChecker(ErrorHandler& error_handler, Environment& env)
-    : error_handler(error_handler), env(env)
+    : error_handler(error_handler), env(env), r_flag(false), expression_optimization(0),
+      const_int_value(0), e1(0), e2(0), const_bool_value(0), remove(false), to_the_end(false)
 {
 }
 
@@ -22,6 +23,10 @@ void ReturnsChecker::check(Visitable* v)
     this->expression_optimization = 0;
     this->remove = false;
     this->to_the_end = false;
+    this->const_int_value = 0;
+    this->e1 = 0;
+    this->e2 = 0;
+    this->const_bool_value = false;
 
     v->accept(this);
 }
@@ -280,7 +285,7 @@ void ReturnsChecker::visitNot(Not* not_field)
 void ReturnsChecker::visitEMul(EMul* emul)
 {
     this->expression_optimization = 0;
-    int e1, e2;
+    int e1 = 0, e2 = 0;
     bool optimize = true;
     emul->expr_1->accept(this);
     if (this->expression_optimization == 2)
@@ -317,7 +322,7 @@ void ReturnsChecker::visitEMul(EMul* emul)
 void ReturnsChecker::visitEAdd(EAdd* eadd)
 {
     this->expression_optimization = 0;
-    int e1, e2;
+    int e1 = 0, e2 = 0;
     bool optimize = true;
     eadd->expr_1->accept(this);
     if (this->expression_optimization == 2)

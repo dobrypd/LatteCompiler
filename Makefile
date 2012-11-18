@@ -20,7 +20,7 @@ CC=g++
 CFLAGS=-Wall -c $(OPTDBG)
 LFLAGS=-Wall $(OPTDBG)
 
-all : grammar $(PROJECT)
+all : $(PROJECT)
 
 grammar: $(GRAMMAR)/$(PROJECT).cf
 	@echo -en "\033[38m\033[32mCompiling grammar...\033[0m\n"
@@ -34,7 +34,7 @@ grammar: $(GRAMMAR)/$(PROJECT).cf
 
 $(PROJECT): $(OBJECTS)
 	@echo -en "\033[38m\033[32mLinking $(PROJECT)...\033[0m\n"
-	$(CC) $(LFLAGS) $^ $(patsubst %, $(GRAMMAR_BIN)/%, $(GRAMMAR_OBJ)) -I $(INCLUDES) -I $(GRAMMAR_BIN) -o $(BIN)/$(BINARY)
+	$(CC) $(LFLAGS) $^ $(patsubst %, $(GRAMMAR_BIN)/%, $(GRAMMAR_OBJ)) -I $(INCLUDES) -I $(GRAMMAR_BIN) -o $(BINARY)
 
 $(OBJECTS): $(BIN)/%.o : $(SRC)/kernel/%.cpp
 	@echo -en "Compiling \033[38m\033[33m$(patsubst $(SRC)/kernel/%,%, $<)\033[0m...\n"

@@ -7,6 +7,11 @@ pd291528@students.mimuw.edu.pl
 
 Kompilacja:
 -----------
+
+Zbudowanie gramatyki:
+
+`$ make grammar`
+
 W katalogu głównym wywołanie:
 
 `$ make`
@@ -18,15 +23,19 @@ Jeżeli razem z debugowym outputem:
 Uruchamianie:
 -------------
 
-w katalogu głównym:
+W katalogu głównym:
 
-`$ ./bin/latec`
+`$ ./latec nazwa_pliku`
+
+Uruchom:
+
+`$ ./latec -h` żeby uzyskać więcej informacji.
 
 Używane narzędzia i biblioteki:
 -------------------------------
 
 Do budowania parsera korzystam z narzędzia `bnfc`.
-Oprócz standardosy bibliotek (stl) korzystam z boost'a (shared pointery).
+Oprócz standardowych bibliotek (stl) korzystam z boost'a (shared pointery).
 
 Zaimplementowane rozszerzenia:
 ------------------------------
