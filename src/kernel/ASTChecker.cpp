@@ -15,14 +15,17 @@ namespace frontend
 {
 
 ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env, Ident& pr_name)
-    : error_handler(error_handler), env(env),
+    : error_handler(error_handler), env(env), last_line_number(0),
       last_declaration_type(0), last_type(0),
-      last_function_ident(pr_name)
+      last_function_ident(pr_name),
+      last_arguments_iterator(0), last_arguments_end(0)
 {
 }
 
 void ASTChecker::check(Visitable* v)
 {
+    // TODO: renew state.
+    last_line_number = 0;
     v->accept(this);
 }
 
@@ -82,6 +85,18 @@ void ASTChecker::check_type(Ident& i1, Type* t1, Ident& i2, Type* t2, int line_n
     }
 }
 
+std::string ASTChecker::args_pretty_print(std::vector<Environment::VarInfoPtr>::const_iterator it,
+            std::vector<Environment::VarInfoPtr>::const_iterator end)
+{
+    std::string s;
+    for(; it != end; it++){
+        s += type_pretty_print((*it)->type);
+        if ((it + 1) != end)
+            s += ", ";
+    }
+    return s;
+}
+
 void ASTChecker::visitProg(Prog* t) { } //abstract class
 void ASTChecker::visitTopDef(TopDef* t) {} //abstract class
 void ASTChecker::visitArg(Arg* t) {} //abstract class
@@ -105,6 +120,8 @@ void ASTChecker::visitFnDef(FnDef* fndef)
     fndef->type_->accept(this);
     this->last_function_type = fndef->type_;
     visitIdent(fndef->ident_);
+    std::cout << std::endl << std::endl << std::endl << fndef->ident_ << std::endl << std::endl << std::endl;
+    std::cout << this->last_function_ident << std::endl;
     this->last_function_ident = fndef->ident_;
 
     this->env.prepare();
@@ -118,7 +135,7 @@ void ASTChecker::visitArgument(Argument* argument)
 {
     argument->type_->accept(this);
     visitIdent(argument->ident_);
-
+    this->last_line_number = argument->line_number;
     this->add_variable(argument->type_, argument->ident_, argument->line_number);
 }
 
@@ -130,6 +147,7 @@ void ASTChecker::visitStmBlock(StmBlock* stmblock)
 
 void ASTChecker::visitStmEmpty(StmEmpty* stmempty)
 {
+    this->last_line_number = stmempty->line_number;
     std::cerr << "hello" << std::endl;  // TODO:
 }
 
@@ -142,6 +160,7 @@ void ASTChecker::visitStmBStmt(StmBStmt* stmbstmt)
 
 void ASTChecker::visitStmDecl(StmDecl* stmdecl)
 {
+    this->last_line_number = stmdecl->line_number;
     stmdecl->type_->accept(this);
     this->last_declaration_type = stmdecl->type_;
     stmdecl->listitem_->accept(this);
@@ -150,6 +169,7 @@ void ASTChecker::visitStmDecl(StmDecl* stmdecl)
 
 void ASTChecker::visitStmAss(StmAss* stmass)
 {
+    this->last_line_number = stmass->line_number;
     visitIdent(stmass->ident_);
     Environment::VarInfoPtr var_info = this->env.get_variable(stmass->ident_);
 
@@ -173,6 +193,7 @@ void ASTChecker::visitStmAss(StmAss* stmass)
 
 void ASTChecker::visitStmIncr(StmIncr* stmincr)
 {
+    this->last_line_number = stmincr->line_number;
     visitIdent(stmincr->ident_);
     Environment::VarInfoPtr var_info = this->env.get_variable(stmincr->ident_);
     if (var_info == 0) {
@@ -196,6 +217,7 @@ void ASTChecker::visitStmIncr(StmIncr* stmincr)
 
 void ASTChecker::visitStmDecr(StmDecr* stmdecr)
 {
+    this->last_line_number = stmdecr->line_number;
     visitIdent(stmdecr->ident_);
     Environment::VarInfoPtr var_info = this->env.get_variable(stmdecr->ident_);
     if (var_info == 0) {
@@ -219,6 +241,7 @@ void ASTChecker::visitStmDecr(StmDecr* stmdecr)
 
 void ASTChecker::visitStmRet(StmRet* stmret)
 {
+    this->last_line_number = stmret->line_number;
     this->last_type = 0;
     stmret->expr_->accept(this);
     Ident f_i("function ");
@@ -231,6 +254,7 @@ void ASTChecker::visitStmRet(StmRet* stmret)
 
 void ASTChecker::visitStmVRet(StmVRet* stmvret)
 {
+    this->last_line_number = stmvret->line_number;
     if (!(check_is<Void *>(this->last_function_type)))
     {
         std::string msg = "function `";
@@ -244,6 +268,7 @@ void ASTChecker::visitStmVRet(StmVRet* stmvret)
 
 void ASTChecker::visitStmCond(StmCond* stmcond)
 {
+    this->last_line_number = stmcond->line_number;
     this->env.prepare();
     this->last_type = 0;
     stmcond->expr_->accept(this);
@@ -268,6 +293,7 @@ void ASTChecker::visitStmCond(StmCond* stmcond)
 
 void ASTChecker::visitStmCondElse(StmCondElse* stmcondelse)
 {
+    this->last_line_number = stmcondelse->line_number;
     this->env.prepare();
     this->last_type = 0;
     stmcondelse->expr_->accept(this);
@@ -292,6 +318,7 @@ void ASTChecker::visitStmCondElse(StmCondElse* stmcondelse)
 
 void ASTChecker::visitStmWhile(StmWhile* stmwhile)
 {
+    this->last_line_number = stmwhile->line_number;
     this->env.prepare();
     this->last_type = 0;
     stmwhile->expr_->accept(this);
@@ -316,12 +343,14 @@ void ASTChecker::visitStmWhile(StmWhile* stmwhile)
 
 void ASTChecker::visitStmSExp(StmSExp* stmsexp)
 {
+    this->last_line_number = stmsexp->line_number;
     this->last_type = 0;
     stmsexp->expr_->accept(this);
 }
 
 void ASTChecker::visitStmNoInit(StmNoInit* stmnoinit)
 {
+    this->last_line_number = stmnoinit->line_number;
     if (this->last_declaration_type == 0)
         throw "AST error, variable declaration.";
 
@@ -332,6 +361,7 @@ void ASTChecker::visitStmNoInit(StmNoInit* stmnoinit)
 
 void ASTChecker::visitStmInit(StmInit* stminit)
 {
+    this->last_line_number = stminit->line_number;
     if (this->last_declaration_type == 0)
         throw "AST error, variable declaration.";
 
@@ -370,6 +400,7 @@ void ASTChecker::visitFun(Fun* fun)
 
 void ASTChecker::visitEVar(EVar* evar)
 {
+    this->last_line_number = evar->line_number;
     Environment::VarInfoPtr var_info = this->env.get_variable(evar->ident_);
     visitIdent(evar->ident_);
     if (var_info == 0) {
@@ -386,22 +417,26 @@ void ASTChecker::visitEVar(EVar* evar)
 
 void ASTChecker::visitELitInt(ELitInt* elitint)
 {
+    this->last_line_number = elitint->line_number;
     visitInteger(elitint->integer_);
     this->last_type = &(this->lineral_int);
 }
 
 void ASTChecker::visitELitTrue(ELitTrue* elittrue)
 {
+    this->last_line_number = elittrue->line_number;
     this->last_type = &(this->literal_bool);
 }
 
 void ASTChecker::visitELitFalse(ELitFalse* elitfalse)
 {
+    this->last_line_number = elitfalse->line_number;
     this->last_type = &(this->literal_bool);
 }
 
 void ASTChecker::visitEApp(EApp* eapp)
 {
+    this->last_line_number = eapp->line_number;
     visitIdent(eapp->ident_);
     Environment::FunInfoPtr fun_ptr = this->env.get_function(eapp->ident_);
     // Check if function exists.
@@ -414,53 +449,52 @@ void ASTChecker::visitEApp(EApp* eapp)
         return;
     }
 
+    // Check arguments.
+    this->last_arguments_iterator = fun_ptr->arguments.begin();
+    this->last_arguments_end = fun_ptr->arguments.end();
     eapp->listexpr_->accept(this);
-    // Check if arguments are ok.
-    bool argument_types_ok = true;
-    ListExpr::iterator app_it = eapp->listexpr_->begin();
-    Ident argument("funciton `");
-    argument += eapp->ident_;
-    argument += "` argument";
-    for(std::vector<Environment::VarInfoPtr>::iterator it = fun_ptr->arguments.begin();
-            it != fun_ptr->arguments.end(); it++)
+    if (this->last_arguments_iterator != this->last_arguments_end)
     {
-        if (app_it == eapp->listexpr_->end()) {
-            // Not enough in application.
-            argument_types_ok = false;
-            break;
-        }
-        /* check type */
-        this->check_type(argument, (*it)->type, app_it->)
-        app_it++;
+        std::string msg = "function `";
+        msg += eapp->ident_;
+        msg += "` need ";
+        msg += (fun_ptr->arguments.size());
+        msg += " arguments: ";
+        msg += this->args_pretty_print(fun_ptr->arguments.begin(), fun_ptr->arguments.end());
+        msg += ", but you passed only ";
+        msg += (this->last_arguments_iterator - fun_ptr->arguments.begin());
+        this->error_handler.error(eapp->line_number, msg);
     }
-    argument_types_ok &&= (app_it == eapp->listexpr_->end());
+    // Args checked.
 
+    this->last_type = fun_ptr->ret_type;
+    // TODO:
 }
 
 void ASTChecker::visitEString(EString* estring)
 {
+    this->last_line_number = estring->line_number;
     visitString(estring->string_);
     this->last_type = &(this->literal_string);
 }
 
 void ASTChecker::visitNeg(Neg* neg)
 {
+    this->last_line_number = neg->line_number;
     neg->expr_->accept(this);
 
 }
 
 void ASTChecker::visitNot(Not* not_field)
 {
-    /* Code For Not Goes Here*/
-
+    this->last_line_number = not_field->line_number;
     not_field->expr_->accept(this);
 
 }
 
 void ASTChecker::visitEMul(EMul* emul)
 {
-    /* Code For EMul Goes Here*/
-
+    this->last_line_number = emul->line_number;
     emul->expr_1->accept(this);
     emul->mulop_->accept(this);
     emul->expr_2->accept(this);
@@ -469,8 +503,7 @@ void ASTChecker::visitEMul(EMul* emul)
 
 void ASTChecker::visitEAdd(EAdd* eadd)
 {
-    /* Code For EAdd Goes Here*/
-
+    this->last_line_number = eadd->line_number;
     eadd->expr_1->accept(this);
     eadd->addop_->accept(this);
     eadd->expr_2->accept(this);
@@ -479,8 +512,7 @@ void ASTChecker::visitEAdd(EAdd* eadd)
 
 void ASTChecker::visitERel(ERel* erel)
 {
-    /* Code For ERel Goes Here*/
-
+    this->last_line_number = erel->line_number;
     erel->expr_1->accept(this);
     erel->relop_->accept(this);
     erel->expr_2->accept(this);
@@ -489,8 +521,7 @@ void ASTChecker::visitERel(ERel* erel)
 
 void ASTChecker::visitEAnd(EAnd* eand)
 {
-    /* Code For EAnd Goes Here*/
-
+    this->last_line_number = eand->line_number;
     eand->expr_1->accept(this);
     eand->expr_2->accept(this);
 
@@ -498,8 +529,7 @@ void ASTChecker::visitEAnd(EAnd* eand)
 
 void ASTChecker::visitEOr(EOr* eor)
 {
-    /* Code For EOr Goes Here*/
-
+    this->last_line_number = eor->line_number;
     eor->expr_1->accept(this);
     eor->expr_2->accept(this);
 
@@ -507,78 +537,56 @@ void ASTChecker::visitEOr(EOr* eor)
 
 void ASTChecker::visitPlus(Plus* plus)
 {
-    /* Code For Plus Goes Here*/
-
 
 }
 
 void ASTChecker::visitMinus(Minus* minus)
 {
-    /* Code For Minus Goes Here*/
-
 
 }
 
 void ASTChecker::visitTimes(Times* times)
 {
-    /* Code For Times Goes Here*/
-
 
 }
 
 void ASTChecker::visitDiv(Div* div)
 {
-    /* Code For Div Goes Here*/
-
 
 }
 
 void ASTChecker::visitMod(Mod* mod)
 {
-    /* Code For Mod Goes Here*/
-
 
 }
 
 void ASTChecker::visitLTH(LTH* lth)
 {
-    /* Code For LTH Goes Here*/
-
 
 }
 
 void ASTChecker::visitLE(LE* le)
 {
-    /* Code For LE Goes Here*/
-
 
 }
 
 void ASTChecker::visitGTH(GTH* gth)
 {
-    /* Code For GTH Goes Here*/
-
 
 }
 
 void ASTChecker::visitGE(GE* ge)
 {
-    /* Code For GE Goes Here*/
-
 
 }
 
 void ASTChecker::visitEQU(EQU* equ)
 {
-    /* Code For EQU Goes Here*/
-
 
 }
 
 void ASTChecker::visitNE(NE* ne)
 {
-    /* Code For NE Goes Here*/
-
 
 }
 
@@ -623,33 +631,44 @@ void ASTChecker::visitListType(ListType* listtype)
     }
 }
 
+/* Used to check arguments in time of function call,
+ * and only in this case!
+ */
 void ASTChecker::visitListExpr(ListExpr* listexpr)
 {
+    Ident fun_arg("function ");
+    fun_arg += this->last_function_ident;
+    fun_arg += " argument";
+
+    int n = 0;
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
+        n++;
+        Ident arg_no("argument number ");
+        arg_no += n;
+
         (*i)->accept(this);
+        if (this->last_arguments_iterator == this->last_arguments_end)
+            return;
+        this->check_type(fun_arg, (*(this->last_arguments_iterator))->type, arg_no, this->last_type, this->last_line_number);
     }
 }
 
 
 void ASTChecker::visitInteger(Integer x)
 {
-    /* Code for Integer Goes Here*/
 }
 
 void ASTChecker::visitChar(Char x)
 {
-    /* Code for Char Goes Here*/
 }
 
 void ASTChecker::visitDouble(Double x)
 {
-    /* Code for Double Goes Here*/
 }
 
 void ASTChecker::visitString(String x)
 {
-    /* Code for String Goes Here*/
 }
 
 void ASTChecker::visitIdent(Ident x)
