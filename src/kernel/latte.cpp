@@ -14,6 +14,7 @@
 #include "FunctionLoader.h"
 #include "TreeOptimizer.h"
 #include "ReturnsChecker.h"
+#include "JVMGenerator.h"
 
 using std::cerr;
 using std::cout;
@@ -77,6 +78,9 @@ Arguments parse_args(int argc, char** argv)
     return args;
 }
 
+/*
+ * open stream (file or stdio)
+ */
 FILE* open_file(short files, char* file_name)
 {
     FILE* input = 0;
@@ -100,6 +104,74 @@ FILE* open_file(short files, char* file_name)
     return input;
 }
 
+/*
+ * will close file after parse, or in case of an error
+ */
+int check_file(FILE* input, const char* file_name,
+        frontend::ParserManager& parser_mngr,
+        frontend::Environment& env,
+        Visitable*& ast_root)
+{
+    if (not parser_mngr.try_to_parse())
+    {
+        if (fclose(input) != 0) {
+            cerr << "ERROR" << endl;
+            cerr << "Cannot close file stream " << file_name << endl;
+        }
+        std::cerr << "ERROR" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    // Parse.
+    ast_root = parser_mngr.get();
+
+    // Close file.
+    if (fclose(input) != 0) {
+        cerr << "ERROR" << endl;
+        cerr << "Cannot close file stream " << file_name << endl;
+    }
+
+    frontend::ErrorHandler file_error_handler(file_name);
+
+    // Load functions.
+    frontend::FunctionLoader function_loader(file_error_handler, env);
+    function_loader.check(ast_root);
+
+    if (!file_error_handler.has_errors()){
+        // Type check (without returns).
+        Ident pr_name(file_name);
+        frontend::ASTChecker checker(file_error_handler, env, pr_name);
+        checker.check(ast_root);
+    }
+
+    if (!file_error_handler.has_errors()){
+        // Returns checker.
+        frontend::ReturnsChecker returns_checker(file_error_handler, env);
+        returns_checker.check(ast_root);
+    }
+
+    // End of semantic check, typecheck and tree optimization.
+    if (file_error_handler.has_errors()){
+        std::cerr << "ERROR" << std::endl;
+        file_error_handler.flush();
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+void compile_file(Visitable*& ast_root, const char* output_file_name)
+{
+    // Compilation
+    jvm::JVMGenerator jvm_generator(output_file_name);
+    jvm_generator.generate(ast_root);
+    std::cerr << "OK" << std::endl;
+}
+
+
+/*
+ * Parse arguments, open files, check and compile all of it.
+ */
 int main(int argc, char** argv)
 {
     // Parse arguments.
@@ -112,67 +184,35 @@ int main(int argc, char** argv)
 
     short number_of_inputs =
             arguments.input_count == 0 ? 1 : arguments.input_count;
+
+    char* output_file_name = arguments.output_file;
+
     for(short i = 0; i < number_of_inputs; i++)
     {
         if (debug)
             std::cout << std::endl << "-- new file "
-            << ((arguments.input_count > 0) ? arguments.input_files[i] : "stdin")
+            << ((arguments.input_count > 0)
+                    ? arguments.input_files[i] : "stdin")
             << " --" << std::endl << std::endl;
+
         FILE* input = open_file(arguments.input_count,
                 (arguments.input_count > 0)
                     ? arguments.input_files[i]
                     : NULL);
+
         frontend::ParserManager parser_mngr(input);
-        if (not parser_mngr.try_to_parse())
-        {
-            if (fclose(input) != 0)
-                cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
-            std::cerr << "ERROR" << std::endl;
-            return EXIT_FAILURE;
-        }
-
-        // Parse.
-        Visitable* ast_root;
-        ast_root = parser_mngr.get();
-
-        // Close file.
-        if (fclose(input) != 0)
-            cerr << "Cannot close file stream " << arguments.input_files[i] << endl;
-
-        // Used in all checkers as references!!! Delete in this same time!!!
         frontend::Environment env;
-        frontend::ErrorHandler file_error_handler(
-                (arguments.input_count > 0) ? arguments.input_files[i] : NULL);
-
-        // Load functions.
-        frontend::FunctionLoader function_loader(file_error_handler, env);
-        function_loader.check(ast_root);
-        if (!file_error_handler.has_errors()){
-            // Type check (without returns).
-            Ident pr_name((arguments.input_count > 0) ? arguments.input_files[i] : "stdin");
-            frontend::ASTChecker checker(file_error_handler, env, pr_name);
-            checker.check(ast_root);
-        }
-
-        // Optimizer TODO: next part of assignment. Tree optimization.
-
-        if (!file_error_handler.has_errors()){
-            // Returns checker.
-            frontend::ReturnsChecker returns_checker(file_error_handler, env);
-            returns_checker.check(ast_root);
-        }
+        Visitable* ast_root;
 
 
-        // End of semantic check, typecheck and tree optimization.
-        if (file_error_handler.has_errors()){
-            std::cerr << "ERROR" << std::endl;
-            file_error_handler.flush();
+        int check_status = check_file(input,
+            (arguments.input_count > 0) ? arguments.input_files[i] : "stdin",
+            parser_mngr, env, ast_root);
+
+        if (check_status == 0) {
+            compile_file(ast_root, output_file_name);
+        } else {
             return EXIT_FAILURE;
-        }
-
-        if (!file_error_handler.has_errors()){
-            std::cerr << "OK" << std::endl;
-            // COMPILE IT!
         }
     }
 

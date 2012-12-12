@@ -12,7 +12,7 @@
 namespace frontend
 {
 
-ErrorHandler::ErrorHandler(char* input_file)
+ErrorHandler::ErrorHandler(const char* input_file)
 {
     if (input_file != NULL)
     {

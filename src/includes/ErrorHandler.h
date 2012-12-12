@@ -30,7 +30,7 @@ private:
     std::string get_line(int pos);
 
 public:
-    ErrorHandler(char* input_file);
+    ErrorHandler(const char* input_file);
     ~ErrorHandler();
     void handle(int line, error_type error);
     void error(int line, std::string msg);
