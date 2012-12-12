@@ -3,7 +3,7 @@
 include bin/Paths.mk
 
 PROJECT=Latte
-BINARY=latec
+BINARY=latc
 GRAMMAR_OBJ=Absyn.o Lexer.o Parser.o Printer.o
 
 OBJECTS:=$(patsubst $(SRC)/kernel/%.cpp,$(BIN)/%.o,$(wildcard $(SRC)/kernel/*.cpp))
