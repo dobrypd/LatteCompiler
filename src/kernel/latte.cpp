@@ -31,7 +31,8 @@ void show_help(char* prog_name)
     cout << "using " << prog_name << " [options] infile..." << endl
             << "options:" << endl
             << "-h\t- show this help message," << endl
-            << "-o\t- define output file." << endl
+            << "-o\t- define output file "
+            << "(default this same as infile *.j *.class)." << endl
             << endl
             << "infile...\t- list of input files, if none - get from stdin."
             << endl;
@@ -160,6 +161,9 @@ int check_file(FILE* input, const char* file_name,
     return EXIT_SUCCESS;
 }
 
+/*
+ * Compile using ast.
+ */
 void compile_file(Visitable*& ast_root, const char* output_file_name)
 {
     // Compilation

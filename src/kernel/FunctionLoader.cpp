@@ -11,7 +11,8 @@
 namespace frontend
 {
 
-FunctionLoader::FunctionLoader(ErrorHandler& error_handler, Environment& env)
+FunctionLoader::FunctionLoader(ErrorHandler& error_handler,
+        Environment& env)
     : error_handler(error_handler), env(env)
 {
 }
@@ -26,7 +27,9 @@ void FunctionLoader::check(Visitable* v)
     Ident main_idnt("main");
     Environment::FunInfoPtr fun_ptr = this->env.get_function(main_idnt);
     // Check if function exists.
-    if ((!fun_ptr) || (!fun_ptr->arguments.empty()) || (!check_is<Int*>(fun_ptr->ret_type)))
+    if ((!fun_ptr)
+            || (!fun_ptr->arguments.empty())
+            || (!check_is<Int*>(fun_ptr->ret_type)))
     {
         std::string msg = "function `";
         msg += main_idnt;
