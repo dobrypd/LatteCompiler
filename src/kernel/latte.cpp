@@ -105,6 +105,18 @@ FILE* open_file(short files, char* file_name)
     return input;
 }
 
+std::string create_out_name(const char* input_file_name)
+{
+    std::string ofn(input_file_name);
+    size_t found = ofn.rfind('.');
+    if (found != std::string::npos){
+        ofn = ofn.substr(0, found);
+    }
+    ofn += ".j";
+    return ofn;
+}
+
+
 /*
  * will close file after parse, or in case of an error
  */
@@ -164,11 +176,14 @@ int check_file(FILE* input, const char* file_name,
 /*
  * Compile using ast.
  */
-void compile_file(Visitable*& ast_root, const char* output_file_name)
+void compile_file(Visitable* ast_root, const char* input_file_name)
 {
-    // Compilation
-    jvm::JVMGenerator jvm_generator(output_file_name);
+    // Create jasmin file.
+    std::string jasmin_file = create_out_name(input_file_name);
+    jvm::JVMGenerator jvm_generator(jasmin_file);
     jvm_generator.generate(ast_root);
+    // Call jasmin.jar to create *.class file.
+    // TODO: call jasmin.jar
     std::cerr << "OK" << std::endl;
 }
 
@@ -188,8 +203,6 @@ int main(int argc, char** argv)
 
     short number_of_inputs =
             arguments.input_count == 0 ? 1 : arguments.input_count;
-
-    char* output_file_name = arguments.output_file;
 
     for(short i = 0; i < number_of_inputs; i++)
     {
@@ -214,7 +227,9 @@ int main(int argc, char** argv)
             parser_mngr, env, ast_root);
 
         if (check_status == 0) {
-            compile_file(ast_root, output_file_name);
+            compile_file(ast_root,
+                    (arguments.input_count > 0)
+                    ? arguments.input_files[i] : "from_stdin");
         } else {
             return EXIT_FAILURE;
         }

@@ -9,3 +9,5 @@ Latte
 latec
 Latte.tar.gz
 latc
+*.j
+*.class
