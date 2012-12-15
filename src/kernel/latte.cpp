@@ -176,11 +176,12 @@ int check_file(FILE* input, const char* file_name,
 /*
  * Compile using ast.
  */
-void compile_file(Visitable* ast_root, const char* input_file_name)
+void compile_file(Visitable* ast_root, const char* input_file_name,
+        frontend::Environment& env)
 {
     // Create jasmin file.
     std::string jasmin_file = create_out_name(input_file_name);
-    jvm::JVMGenerator jvm_generator(jasmin_file);
+    jvm::JVMGenerator jvm_generator(jasmin_file, env);
     jvm_generator.generate(ast_root);
     // Call jasmin.jar to create *.class file.
     // TODO: call jasmin.jar
@@ -229,7 +230,8 @@ int main(int argc, char** argv)
         if (check_status == 0) {
             compile_file(ast_root,
                     (arguments.input_count > 0)
-                    ? arguments.input_files[i] : "from_stdin");
+                    ? arguments.input_files[i] : "from_stdin",
+                    env);
         } else {
             return EXIT_FAILURE;
         }

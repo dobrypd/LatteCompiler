@@ -8,8 +8,11 @@
 #define JVMGENERATOR_H_
 
 #include <string>
+#include <sstream>
 #include <fstream>
+#include <iostream>
 #include "Absyn.H"
+#include "Environment.h"
 
 namespace jvm
 {
@@ -18,10 +21,19 @@ class JVMGenerator : public Visitor
 {
 private:
     std::string jasmin_file_name;
-    std::ofstream jvm_output_file;
+    std::stringstream* jvm;
+
+    std::string class_name;
+
+    frontend::Environment& env;
+
+    int current_function_locals_size;
+    int current_function_stack_size;
+
+    std::string type_to_jvm_type(Type* type, bool is_arg);
 
 public:
-    JVMGenerator(std::string output_file_name);
+    JVMGenerator(std::string output_file_name, frontend::Environment& env);
 
     void generate(Visitable* ast_root);
 

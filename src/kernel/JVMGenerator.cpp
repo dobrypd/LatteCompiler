@@ -4,29 +4,79 @@
  *
  */
 
-#include <iostream> // TODO: remove
+#include <iostream>
+#include <sstream>
+#include <fstream>
 #include <string>
 #include "JVMGenerator.h"
+#include "global.h"
+#include "Environment.h"
+
+using std::endl;
 
 namespace jvm
 {
 
-JVMGenerator::JVMGenerator(std::string output_file_name)
-    : jasmin_file_name(output_file_name)
-{
 
+#define JVM (*(this->jvm))
+
+
+JVMGenerator::JVMGenerator(std::string output_file_name,
+        frontend::Environment& env)
+    : jasmin_file_name(output_file_name),
+      jvm(0),
+      env(env)
+{
+    size_t found_dot = this->jasmin_file_name.rfind('.');
+    size_t found_slash = this->jasmin_file_name.rfind('/');
+    if (found_slash == std::string::npos) found_slash = 0; else found_slash++;
+    this->class_name = this->jasmin_file_name.substr(found_slash,
+            found_dot - found_slash);
 }
 
 void JVMGenerator::generate(Visitable *ast_root)
 {
     // Open file.
-    this->jvm_output_file.open(this->jasmin_file_name.c_str());
+    std::ofstream file;
+    file.open(this->jasmin_file_name.c_str());
+
+    std::stringstream jvm_current_block(std::stringstream::in | std::stringstream::out);
+    this->jvm = &jvm_current_block;
 
     // Generate.
     ast_root->accept(this);
 
+    // Stream to file;
+    file << (this->jvm->str());
+
     // Close file.
-    this->jvm_output_file.close();
+    file.close();
+}
+
+
+std::string JVMGenerator::type_to_jvm_type(Type* type, bool is_arg=false)
+{
+    if (frontend::check_is<Int*>(type)) {
+        if (is_arg)
+            return "I";
+        return "i";
+    }
+    else if (frontend::check_is<Str*>(type)) {
+        if (is_arg)
+            return "Ljava/lang/String;";
+        return ""; // should not happend
+    }
+    else if (frontend::check_is<Bool*>(type)) {
+        if (is_arg)
+            return "B";
+        return "b";
+    }
+    else if (frontend::check_is<Void*>(type)) {
+        if (is_arg)
+            return "V";
+        return "v";
+    }
+    return "";
 }
 
 
@@ -47,30 +97,70 @@ void JVMGenerator::visitProgram(Program* program)
 {
     // Only file name.
     size_t found = this->jasmin_file_name.rfind('/');
-    std::string file_name;
-    if (found != std::string::npos){
-        file_name = this->jasmin_file_name.substr(found, std::string::npos);
-    } else {
-        file_name = this->jasmin_file_name;
-    }
-    this->jvm_output_file << ".source " << file_name << std::endl;
+    if (found == std::string::npos) found = 0; else found++;
+    JVM << ".source " << this->jasmin_file_name.substr(found) << endl;
+    JVM << ".class public " << this->class_name << endl;
+    JVM << ".super java/lang/Object" << endl;
+    JVM << endl << endl;
+    /*
+     * Standard constructor.
+     */
+    JVM << "; standard initializer" << endl;
+    JVM << ".method public <init>()V" << endl;
+    JVM << "    aload_0" << endl;
+    JVM << "    invokenonvirtual java/lang/Object/<init>()V" << endl;
+    JVM << "    return" << endl;
+    JVM << ".end method" << endl;
+    /*
+     * Default Java main function declaration.
+     * Just invoke main()I in it.
+     */
+    JVM << ".method public static main([Ljava/lang/String;)V" << endl;
+    JVM << ".limit stack 1" << endl;
+    JVM << "    invokestatic " << this->class_name << "/main()I" << endl;
+    JVM << "    return" << endl;
+    JVM << ".end method" << endl;
+    JVM << endl << endl;
 
-    this->jvm_output_file << std::endl;
     program->listtopdef_->accept(this);
 }
 
 void JVMGenerator::visitFnDef(FnDef* fndef)
 {
+    std::stringstream* tmp_jvm = this->jvm;
+
+    std::stringstream current_block_jvm(std::stringstream::in | std::stringstream::out);
+    std::stringstream arguments_types_jvm(std::stringstream::in | std::stringstream::out);
+
+    this->current_function_locals_size = 0;
+    this->current_function_stack_size = 0;
+
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);
+
+    this->jvm = &arguments_types_jvm;
     fndef->listarg_->accept(this);
+
+    this->jvm = &current_block_jvm;
     fndef->blk_->accept(this);
+
+    this->jvm = tmp_jvm;
+    JVM << ".method static public " << fndef->ident_ << "(";
+    JVM << arguments_types_jvm.str();
+    JVM << ")" << this->type_to_jvm_type(fndef->type_, true) << endl;
+    JVM << ".limit locals " << this->current_function_locals_size << endl;
+    JVM << ".limit stack " << this->current_function_stack_size << endl;
+    JVM << current_block_jvm.str();
+    JVM << ".end method"<< endl;
+    JVM << endl << endl;
 
 }
 
 void JVMGenerator::visitArgument(Argument* argument)
 {
     argument->type_->accept(this);
+    JVM << this->type_to_jvm_type(argument->type_, true);
+    this->current_function_locals_size += 1;
     visitIdent(argument->ident_);
 }
 
@@ -98,6 +188,10 @@ void JVMGenerator::visitStmAss(StmAss* stmass)
 {
     visitIdent(stmass->ident_);
     stmass->expr_->accept(this);
+    //JVM << "    " << this->type_to_jvm_type(this->env->variable_type(
+    //        stmass->ident_))
+    //        << "store "
+    //        << this->env->variable_no(stmass->ident_) << endl;
 }
 
 void JVMGenerator::visitStmIncr(StmIncr* stmincr)
@@ -304,6 +398,7 @@ void JVMGenerator::visitListTopDef(ListTopDef* listtopdef)
 
 void JVMGenerator::visitListArg(ListArg* listarg)
 {
+    // Add arguments to jvm by types.
     for (ListArg::iterator i = listarg->begin() ; i != listarg->end() ; ++i)
     {
         (*i)->accept(this);
