@@ -13,6 +13,7 @@
 #include <iostream>
 #include "Absyn.H"
 #include "Environment.h"
+#include "JVMEnvironment.h"
 
 namespace jvm
 {
@@ -25,10 +26,18 @@ private:
 
     std::string class_name;
 
-    frontend::Environment& env;
+    frontend::Environment& env; // Only for functions.
+    JVMEnvironment jvm_e;
 
     int current_function_locals_size;
     int current_function_stack_size;
+    int max_stack_size;
+
+    Type* last_declaration_type;
+    Type* last_function_type;
+    Type* last_type; // In expression.
+
+    int next_label;
 
     std::string type_to_jvm_type(Type* type, bool is_arg);
 
