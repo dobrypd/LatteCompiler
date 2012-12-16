@@ -521,22 +521,11 @@ void JVMGenerator::visitNeg(Neg* neg)
 
 void JVMGenerator::visitNot(Not* not_field)
 {
-    int label_t = this->next_label++;
-    int label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
+    int tmp = this->last_true_label;
+    this->last_true_label = this->last_false_label;
+    this->last_false_label = tmp;
     not_field->expr_->accept(this);
-    if (this->e_was_rel)
-        this->bool_expr_to_stack(label_t, label_f);
-    int labelT = this->next_label++;
-    int labelF = this->next_label++;
-    JVM << "    ifne L" << labelF << endl;
-    JVM << "    iconst_1" << endl;
-    JVM << "    goto L" << labelT << endl;
-    JVM << "L" << labelF << ":" << endl;
-    JVM << "    iconst_0" << endl;
-    JVM << "L" << labelT << ":" << endl;
-    this->e_was_rel = false;
+    this->e_was_rel = true;
 }
 
 void JVMGenerator::visitEMul(EMul* emul)
