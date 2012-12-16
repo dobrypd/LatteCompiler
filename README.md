@@ -33,6 +33,14 @@ Używane narzędzia i biblioteki:
 Do budowania parsera korzystam z narzędzia `bnfc`.
 Oprócz standardowych bibliotek (stl) korzystam z boost'a (shared pointery).
 
+Do budowania kodu jvm korzystam z `jasmina`, (który zgodnie ze specyfikacją
+powinien znajdować się w katalogu `lib`).
+
+Ponadto predefiniowane funkcje powinny znajdować się w takim katalogu
+aby mogły zostać znalezione przez classloader. Najlepiej w tym samym co
+wykonanie. Predefiniowane funkcje znajdują się w katalogu `lib` w pliku
+`Runtime.class`. 
+
 Zaimplementowane rozszerzenia:
 ------------------------------
 
