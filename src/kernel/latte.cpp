@@ -26,6 +26,8 @@ using std::endl;
     const bool debug=false;
 #endif
 
+const char* default_jasmin_path = "lib/jasmin.jar";
+
 void show_help(char* prog_name)
 {
     cout << "using " << prog_name << " [options] infile..." << endl
@@ -184,7 +186,24 @@ void compile_file(Visitable* ast_root, const char* input_file_name,
     jvm::JVMGenerator jvm_generator(jasmin_file, env);
     jvm_generator.generate(ast_root);
     // Call jasmin.jar to create *.class file.
-    // TODO: call jasmin.jar
+
+    // Like this one
+    // java -jar lib/jasmin.jar -d ./dir/ ./dir/core001.j
+    FILE* cmd = NULL;
+    std::string command("java -jar ");
+    command.append(default_jasmin_path);
+    command.append(" -d ");
+    size_t found = jasmin_file.rfind('/');
+    std::string dir(jasmin_file);
+    if (found != std::string::npos) {
+        dir = jasmin_file.substr(0, found);
+    }
+    command.append(dir);
+    command.append(" ");
+    command.append(jasmin_file);
+    cmd = popen(command.c_str(), "r");
+    pclose(cmd);
+
     std::cerr << "OK" << std::endl;
 }
 
