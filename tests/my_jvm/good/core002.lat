@@ -1,0 +1,11 @@
+int main()
+{
+    int a;
+    boolean b = ((2 > 4) == (!(a < 2)));
+    if (b) {
+        printString("true");
+    } else {
+        printString("false");
+    }
+    return 0;
+}

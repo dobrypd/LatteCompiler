@@ -1,0 +1,9 @@
+int main()
+{
+    string a;
+    string b;
+    a = "Hello ";
+    b = "dude!";
+    printString(a+b);
+    return 0;
+}

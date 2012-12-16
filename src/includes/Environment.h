@@ -29,6 +29,7 @@ public:
     typedef boost::shared_ptr<MapType> MapPtr;
 
     typedef struct {
+        bool is_extern;
         Type* ret_type;
         std::vector<VarInfoPtr> arguments;
     } fun_info;
@@ -73,7 +74,7 @@ public:
     void back();
 
     void add_variable(Type* t, Ident& ident);
-    void add_function(FnDef* function_definition);
+    void add_function(FnDef* function_definition, bool is_extern);
 
     bool can_add_variable(Ident& ident) const;
     bool can_add_funciton(FnDef* function_definition) const;

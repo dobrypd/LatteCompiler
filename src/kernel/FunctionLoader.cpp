@@ -63,7 +63,7 @@ void FunctionLoader::visitFnDef(FnDef* fndef)
                 << fndef->ident_ << "` definition." << std::endl;
     }
     if (this->env.can_add_funciton(fndef))
-        this->env.add_function(fndef);
+        this->env.add_function(fndef, false);
     else
     {
         std::string comunicate;

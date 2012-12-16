@@ -21,6 +21,8 @@ namespace jvm
 class JVMGenerator : public Visitor
 {
 private:
+    static const char* runtime_lib;
+
     std::string jasmin_file_name;
     std::stringstream* jvm;
 
@@ -37,9 +39,20 @@ private:
     Type* last_function_type;
     Type* last_type; // In expression.
 
+    // Literal types;
+    Int literal_int;
+    Bool literal_bool;
+    Str literal_string;
+
     int next_label;
+    int last_true_label;
+    int last_false_label;
+    bool last_is_zero;
+    bool pop_if_zero;
+    bool e_was_rel;
 
     std::string type_to_jvm_type(Type* type, bool is_arg);
+    void bool_expr_to_stack(int label_t, int label_f);
 
 public:
     JVMGenerator(std::string output_file_name, frontend::Environment& env);

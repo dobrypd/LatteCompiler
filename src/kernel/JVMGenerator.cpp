@@ -23,6 +23,8 @@ namespace jvm
 #define JVM (*(this->jvm))
 
 
+const char* JVMGenerator::runtime_lib = "Runtime";
+
 JVMGenerator::JVMGenerator(std::string output_file_name,
         frontend::Environment& env)
     : jasmin_file_name(output_file_name),
@@ -57,7 +59,7 @@ void JVMGenerator::generate(Visitable *ast_root)
 
 
 std::string JVMGenerator::type_to_jvm_type(Type* type, bool is_arg=false)
-{ // TODO: check it
+{
     if (frontend::check_is<Int*>(type)) {
         if (is_arg)
             return "I";
@@ -76,9 +78,20 @@ std::string JVMGenerator::type_to_jvm_type(Type* type, bool is_arg=false)
     else if (frontend::check_is<Void*>(type)) {
         if (is_arg)
             return "V";
-        return "v";
+        return "";
     }
     return "";
+}
+
+void JVMGenerator::bool_expr_to_stack(int label_t, int label_f)
+{
+    int label_end = this->next_label++;
+    JVM << "L" << label_t << ":" << endl;
+    JVM << "    iconst_1" << endl;
+    JVM << "    goto L" << label_end << endl;
+    JVM << "L" << label_f << ":" << endl;
+    JVM << "    iconst_0" << endl;
+    JVM << "L" << label_end << ":" << endl;
 }
 
 
@@ -125,8 +138,8 @@ void JVMGenerator::visitProgram(Program* program)
     JVM << endl << endl;
 
     this->next_label = 0;
-    this->max_stack_size =
-            std::max(this->current_function_stack_size, this->max_stack_size);
+    this->max_stack_size = 0;
+    this->e_was_rel = false;
     program->listtopdef_->accept(this);
 }
 
@@ -158,7 +171,8 @@ void JVMGenerator::visitFnDef(FnDef* fndef)
     JVM << ".limit locals " << this->current_function_locals_size << endl;
     JVM << ".limit stack " << this->max_stack_size << endl;
     JVM << current_block_jvm.str();
-    //TODO: if last character is ':' add 'nop'
+    //If last character is not ':' do not add 'nop'.
+    JVM << "    nop" << endl;
     JVM << ".end method"<< endl;
     JVM << endl << endl;
 }
@@ -186,7 +200,6 @@ void JVMGenerator::visitStmBStmt(StmBStmt* stmbstmt)
     this->jvm_e.prepare();
     stmbstmt->blk_->accept(this);
     this->jvm_e.back();
-    // TODO: free variables.
 }
 
 void JVMGenerator::visitStmDecl(StmDecl* stmdecl)
@@ -199,7 +212,13 @@ void JVMGenerator::visitStmDecl(StmDecl* stmdecl)
 void JVMGenerator::visitStmAss(StmAss* stmass)
 {
     visitIdent(stmass->ident_);
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     stmass->expr_->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
     assert(this->current_function_stack_size > 0);
     JVMEnvironment::VarInfoPtr var_info = this->jvm_e.get_variable(stmass->ident_);
 
@@ -230,9 +249,12 @@ void JVMGenerator::visitStmDecr(StmDecr* stmdecr)
 
 void JVMGenerator::visitStmRet(StmRet* stmret)
 {
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
     stmret->expr_->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
     assert(this->current_function_stack_size > 0);
-
     JVM << "    " << this->type_to_jvm_type(this->last_function_type, false)
             << "return" << endl;
 }
@@ -244,50 +266,55 @@ void JVMGenerator::visitStmVRet(StmVRet* stmvret)
 
 void JVMGenerator::visitStmCond(StmCond* stmcond)
 {
-    int label = this->next_label++;
-    stmcond->expr_->accept(this);
-    assert(this->current_function_stack_size > 0);
-    JVM << "    if_icmpge?? " << label << endl; // TODO:!
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
 
+    stmcond->expr_->accept(this);
+    JVM << "L" << label_t << ":" << endl;
     stmcond->stmt_->accept(this);
-    JVM << "L" << label << ":" << endl;
+    JVM << "L" << label_f << ":" << endl;
 }
 
 void JVMGenerator::visitStmCondElse(StmCondElse* stmcondelse)
 {
-    int label1 = this->next_label++, label2 = this->next_label++;
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    int label_end = this->next_label++;
+
+    this->last_false_label = label_f;
+    this->last_true_label = label_t;
     stmcondelse->expr_->accept(this);
-    assert(this->current_function_stack_size > 0);
-    JVM << "    if_icmpge?? " << label1 << endl; // TODO:
-
+    JVM << "L" << label_t << ":" << endl;
     stmcondelse->stmt_1->accept(this);
-    JVM << "    goto " << "L" << label2 << endl;
-
-    JVM << "L" << label1 << ":" << endl;
+    JVM << "    goto " << "L" << label_end << endl;
+    JVM << "L" << label_f << ":" << endl;
     stmcondelse->stmt_2->accept(this);
-    JVM << "L" << label2 << ":" << endl;
+    JVM << "L" << label_end << ":" << endl;
 }
 
 void JVMGenerator::visitStmWhile(StmWhile* stmwhile)
 {
     int before_lbl = this->next_label++;
     int after_lbl = this->next_label++;
+    int block_start = this->next_label++;
 
     JVM << "L" << before_lbl << ":" << endl;
+    this->last_false_label = after_lbl;
+    this->last_true_label = block_start;
     stmwhile->expr_->accept(this);
-    assert(this->current_function_stack_size > 0);
-    JVM << "    if_icmpge?? " << after_lbl << endl; // TODO:
-
+    JVM << "L" << block_start << ":" << endl;
     stmwhile->stmt_->accept(this);
     JVM << "    goto " << "L" << before_lbl << endl;
-    JVM << "L" << after_lbl << ":" << endl; // TODO: look if next is .end method!
+    JVM << "L" << after_lbl << ":" << endl;
 }
 
 void JVMGenerator::visitStmSExp(StmSExp* stmsexp)
 {
     stmsexp->expr_->accept(this);
-    //JVM << "    pop" << endl;
-    // TODO: check it! not always because it could be void
+    if ((!this->e_was_rel) && (!frontend::check_is<Void*>(this->last_type)))
+        JVM << "    pop" << endl;
 }
 
 void JVMGenerator::visitStmNoInit(StmNoInit* stmnoinit)
@@ -322,18 +349,27 @@ void JVMGenerator::visitStmInit(StmInit* stminit)
 {
     visitIdent(stminit->ident_);
     int var_id = this->current_function_locals_size++;
-    stminit->expr_->accept(this);
-    assert(this->current_function_stack_size > 0);
-    // Should has initial value on stack.
 
     this->jvm_e.add_variable(this->last_declaration_type, stminit->ident_,
                 var_id);
-    if (frontend::check_is<Int*>(this->last_declaration_type))
+    if (frontend::check_is<Int*>(this->last_declaration_type)) {
+        stminit->expr_->accept(this);
+        assert(this->current_function_stack_size > 0);
         JVM << "    istore " << var_id << endl;
-    else if (frontend::check_is<Str*>(this->last_declaration_type))
+    } else if (frontend::check_is<Str*>(this->last_declaration_type)) {
+        stminit->expr_->accept(this);
+        assert(this->current_function_stack_size > 0);
         JVM << "    astore " << var_id << endl;
-    else if (frontend::check_is<Bool*>(this->last_declaration_type))
+    } else if (frontend::check_is<Bool*>(this->last_declaration_type)) {
+        int label_t = this->next_label++;
+        int label_f = this->next_label++;
+        this->last_true_label = label_t;
+        this->last_false_label = label_f;
+        stminit->expr_->accept(this);
+        if (this->e_was_rel)
+            this->bool_expr_to_stack(label_t, label_f);
         JVM << "    istore " << var_id << endl;
+    }
 
     this->current_function_stack_size--;
 }
@@ -371,15 +407,30 @@ void JVMGenerator::visitEVar(EVar* evar)
                 evar->ident_);
     JVM << "    " << this->type_to_jvm_type(var_info->type, false)
             << "load " << var_info->local_v << endl;
+    this->last_type = var_info->type;
+
+    if (frontend::check_is<Bool*>(var_info->type)) {
+        JVM << "    ifne L" << this->last_true_label << endl;
+        JVM << "    goto L" << this->last_false_label << endl;
+        this->e_was_rel = true;
+    } else {
+        this->e_was_rel = false;
+    }
 }
 
 void JVMGenerator::visitELitInt(ELitInt* elitint)
 {
     visitInteger(elitint->integer_);
-    this->current_function_stack_size += 1;
-    this->max_stack_size =
+    if (this->pop_if_zero && (elitint->integer_ == 0)) {
+        this->last_is_zero = true;
+    } else {
+        this->current_function_stack_size += 1;
+        this->max_stack_size =
             std::max(this->current_function_stack_size, this->max_stack_size);
-    JVM << "    ldc " << elitint->integer_ << endl;
+        JVM << "    ldc " << elitint->integer_ << endl;
+    }
+    this->last_type = &(this->literal_int);
+    this->e_was_rel = false;
 }
 
 void JVMGenerator::visitELitTrue(ELitTrue* elittrue)
@@ -388,6 +439,8 @@ void JVMGenerator::visitELitTrue(ELitTrue* elittrue)
     this->max_stack_size =
             std::max(this->current_function_stack_size, this->max_stack_size);
     JVM << "    iconst_1" << endl;
+    this->last_type = &(this->literal_bool);
+    this->e_was_rel = false;
 }
 
 void JVMGenerator::visitELitFalse(ELitFalse* elitfalse)
@@ -396,6 +449,8 @@ void JVMGenerator::visitELitFalse(ELitFalse* elitfalse)
     this->max_stack_size =
             std::max(this->current_function_stack_size, this->max_stack_size);
     JVM << "    iconst_0" << endl;
+    this->last_type = &(this->literal_bool);
+    this->e_was_rel = false;
 }
 
 void JVMGenerator::visitEApp(EApp* eapp)
@@ -411,8 +466,13 @@ void JVMGenerator::visitEApp(EApp* eapp)
     frontend::Environment::FunInfoPtr fun =
             this->env.get_function(eapp->ident_);
 
-    JVM << "    invokestatic " << this->class_name << "/" << eapp->ident_ // TODO: or runtime
-            << "(";
+    if (fun->is_extern) {
+        JVM << "    invokestatic " << JVMGenerator::runtime_lib
+                << "/" << eapp->ident_ << "(";
+    } else {
+        JVM << "    invokestatic " << this->class_name
+                << "/" << eapp->ident_ << "(";
+    }
 
     // Collect arguments
     for (std::vector<frontend::Environment::VarInfoPtr>::iterator it =
@@ -424,6 +484,8 @@ void JVMGenerator::visitEApp(EApp* eapp)
     JVM << ")" << this->type_to_jvm_type(fun->ret_type, true) << endl;
     if (!frontend::check_is<Void *>(fun->ret_type))
         this->current_function_stack_size += 1;
+    this->last_type = fun->ret_type;
+    this->e_was_rel = false;
 }
 
 void JVMGenerator::visitEString(EString* estring)
@@ -433,6 +495,8 @@ void JVMGenerator::visitEString(EString* estring)
     this->current_function_stack_size += 1;
     this->max_stack_size =
             std::max(this->current_function_stack_size, this->max_stack_size);
+    this->last_type = &(this->literal_string);
+    this->e_was_rel = false;
 }
 
 void JVMGenerator::visitNeg(Neg* neg)
@@ -444,7 +508,13 @@ void JVMGenerator::visitNeg(Neg* neg)
 
 void JVMGenerator::visitNot(Not* not_field)
 {
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     not_field->expr_->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
     int labelT = this->next_label++;
     int labelF = this->next_label++;
     JVM << "    ifne L" << labelF << endl;
@@ -453,6 +523,7 @@ void JVMGenerator::visitNot(Not* not_field)
     JVM << "L" << labelF << ":" << endl;
     JVM << "    iconst_0" << endl;
     JVM << "L" << labelT << ":" << endl;
+    this->e_was_rel = false;
 }
 
 void JVMGenerator::visitEMul(EMul* emul)
@@ -468,72 +539,143 @@ void JVMGenerator::visitEMul(EMul* emul)
 
 void JVMGenerator::visitEAdd(EAdd* eadd)
 {
-    // save string stream, and check type
+    std::stringstream* tmp_jvm = this->jvm;
+    std::stringstream current_block_jvm_e1(std::stringstream::in | std::stringstream::out);
+    std::stringstream current_block_jvm_e2(std::stringstream::in | std::stringstream::out);
+
+    this->jvm = &current_block_jvm_e1;
     eadd->expr_1->accept(this);
     assert(this->current_function_stack_size > 0);
+    this->jvm = &current_block_jvm_e2;
     eadd->expr_2->accept(this);
     assert(this->current_function_stack_size > 1);
 
-    /*if (frontend::check_is<Str *>(this->last_type)) {
-        // Add two strings.
-        JVM << "    new     #4; //class java/lang/StringBuilder" << endl;
-        JVM << "    dup" << endl;
-        JVM << "    invokespecial   #5; //Method java/lang/StringBuilder.\"<init>\":()V" << endl;
-        JVM << "    aload_0" << endl;
-        JVM << "    invokevirtual   #6; //Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;" << endl;
-        JVM << "    aload_1" << endl;
-        JVM << "    invokevirtual   #6; //Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;" << endl;
-        JVM << "    invokevirtual   #7; //Method java/lang/StringBuilder.toString:()Ljava/lang/String;" << endl;
-    }*/
+    this->jvm = tmp_jvm;
 
-    eadd->addop_->accept(this);
-    this->current_function_stack_size -= 1;
+    if (frontend::check_is<Str *>(this->last_type)) {
+        // Add two strings.
+        JVM << "    new java/lang/StringBuilder" << endl;
+        JVM << "    dup" << endl;
+        JVM << "    invokespecial java/lang/StringBuilder/<init>()V" << endl;
+        JVM << current_block_jvm_e1.str();
+        JVM << "    invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;" << endl;
+        JVM << current_block_jvm_e2.str();
+        JVM << "    invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;" << endl;
+        JVM << "    invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;" << endl;
+    }
+    else
+    {
+        JVM << current_block_jvm_e1.str();
+        JVM << current_block_jvm_e2.str();
+        eadd->addop_->accept(this);
+        this->current_function_stack_size -= 1;
+    }
 }
 
 void JVMGenerator::visitERel(ERel* erel)
 {
+    int this_last_f_label = this->last_false_label;
+    int this_last_t_label = this->last_true_label;
+
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     erel->expr_1->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    this->last_is_zero = false;
+    this->pop_if_zero = true;
+    label_t = this->next_label++;
+    label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     erel->expr_2->accept(this);
 
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+
+    if (this->last_is_zero) {
+        JVM << "    if";
+    } else {
+        if (frontend::check_is<Str*>(this->last_type)){
+            JVM << "    if_acmp";
+        } else {
+            JVM << "    if_icmp";
+        }
+    }
+    this->pop_if_zero = false;
+    this->last_is_zero = false;
+
     erel->relop_->accept(this);
-    // TODO: check if in condition.
-    this->current_function_stack_size -= 1;
+    JVM << " L" << this_last_t_label << endl;
+    JVM << "    goto L" << this_last_f_label << endl;
+
+    this->current_function_stack_size -= 1; // maybe two
+    this->last_type = &(this->literal_bool);
+    this->e_was_rel = true;
+    this->last_false_label = this_last_f_label;
+    this->last_true_label = this_last_t_label;
 }
 
 void JVMGenerator::visitEAnd(EAnd* eand)
 {
-    int labelT = this->next_label++;
-    int labelF = this->next_label++;
+    int this_true_label = this->last_true_label;
+    int this_false_label = this->last_false_label;
 
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     eand->expr_1->accept(this);
-    JVM << "    ifeq L" << labelF << endl;
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    JVM << "    ifeq L" << this_false_label << endl;
+
+    label_t = this->next_label++;
+    label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     eand->expr_2->accept(this);
-    JVM << "    ifeq L" << labelF << endl;
-    JVM << "    iconst_1" << endl;
-    JVM << "    goto L" << labelT << endl;
-    JVM << "  L" << labelF << ":" << endl;
-    JVM << "    iconst_0" << endl;
-    JVM << "  L" << labelT << ":" << endl;
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    JVM << "    ifeq L" << this_false_label << endl;
+    JVM << "    goto L" << this_true_label << endl;
     this->current_function_stack_size -= 1;
+
+    this->last_true_label = this_true_label;
+    this->last_false_label = this_false_label;
+    this->e_was_rel = true;
 }
 
 void JVMGenerator::visitEOr(EOr* eor)
 {
-    int labelE = this->next_label++;
-    int labelTT = this->next_label++;
-    int labelF = this->next_label++;
+    int this_true_label = this->last_true_label;
+    int this_false_label = this->last_false_label;
 
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     eor->expr_1->accept(this);
-    JVM << "    ifne L" << labelTT << endl;
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    JVM << "    ifne L" << this_true_label << endl;
+
+
+    label_t = this->next_label++;
+    label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     eor->expr_2->accept(this);
-    JVM << "    ifeq L" << labelF << endl;
-    JVM << "  L " << labelTT << endl;
-    JVM << "    iconst_1" << endl;
-    JVM << "    goto L " << labelE << endl;
-    JVM << "  L" << labelF << ":" << endl;
-    JVM << "    iconst_0" << endl;
-    JVM << "  L" << labelE << ":" << endl;
-    this->current_function_stack_size -= 1;
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    JVM << "    ifeq L" << this_false_label << endl;
+    JVM << "    goto L" << this_true_label << endl;
+
+    this->last_true_label = this_true_label;
+    this->last_false_label = this_false_label;
+    this->e_was_rel = true;
 }
 
 void JVMGenerator::visitPlus(Plus* plus)
@@ -565,32 +707,32 @@ void JVMGenerator::visitMod(Mod* mod)
 
 void JVMGenerator::visitLTH(LTH* lth)
 {
-    // TODO:
+    JVM << "lt";
 }
 
 void JVMGenerator::visitLE(LE* le)
 {
-    // TODO:
+    JVM << "le";
 }
 
 void JVMGenerator::visitGTH(GTH* gth)
 {
-    // TODO:
+    JVM << "gt";
 }
 
 void JVMGenerator::visitGE(GE* ge)
 {
-    // TODO:
+    JVM << "ge";
 }
 
 void JVMGenerator::visitEQU(EQU* equ)
 {
-    // TODO:
+    JVM << "eq";
 }
 
 void JVMGenerator::visitNE(NE* ne)
 {
-    // TODO:
+    JVM << "ne";
 }
 
 
@@ -639,7 +781,13 @@ void JVMGenerator::visitListExpr(ListExpr* listexpr)
 {
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
+        int label_t = this->next_label++;
+        int label_f = this->next_label++;
+        this->last_true_label = label_t;
+        this->last_false_label = label_f;
         (*i)->accept(this);
+        if (this->e_was_rel)
+            this->bool_expr_to_stack(label_t, label_f);
     }
 }
 

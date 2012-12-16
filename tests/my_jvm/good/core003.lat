@@ -1,0 +1,9 @@
+int main()
+{
+    int a = readInt();
+    int b = readInt();
+    if ((a > 0) && (b > 0)){
+        printString("juhu");
+    }
+    return 0;
+}
