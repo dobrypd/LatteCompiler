@@ -49,7 +49,7 @@ private:
     int last_false_label;
     bool last_is_zero;
     bool pop_if_zero;
-    bool e_was_rel;
+    bool e_was_rel;  // True if not in stack.
 
     std::string type_to_jvm_type(Type* type, bool is_arg);
     void bool_expr_to_stack(int label_t, int label_f);

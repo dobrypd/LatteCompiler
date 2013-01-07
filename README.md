@@ -5,6 +5,16 @@ Author Piotr Dobrowolski
 
 pd291528@students.mimuw.edu.pl
 
+Uwaga:
+------
+
+Nie byłem pewien gdzie `Runtime.class` ma się znajdować podczas uruchomienia programu.
+(Albo inaczej gdzie program będzie uruchamiany, aby ustawić classpath).
+Więc przyjąłem, że `Runtime.class` powinien być w `./lib/` oraz przy uruchamianiu
+w tym samym katalogu co program `*.class`.
+Jest to zakodowane w programie w pliku `./src/kernel/JVMGenerator.cpp:26`,
+zmienna `JVMGenerator::runtime_lib`.
+
 Kompilacja:
 -----------
 

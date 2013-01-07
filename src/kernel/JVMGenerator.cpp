@@ -628,7 +628,6 @@ void JVMGenerator::visitEAnd(EAnd* eand)
 
     int label_t = this->next_label++;
     int label_f = this->next_label++;
-    //this->if_bool_exp_to_stack(eand->expr_1, label_t, label_f);
     this->last_true_label = label_t;
     this->last_false_label = label_f;
     eand->expr_1->accept(this);
@@ -685,9 +684,9 @@ void JVMGenerator::visitEOr(EOr* eor)
 
 void JVMGenerator::visitPlus(Plus* plus)
 {
-    //if (!frontend::check_is<Str *>(this->last_type)){
+    if (!frontend::check_is<Str *>(this->last_type)){
         JVM << "    iadd" << endl;
-    //}
+    }
 }
 
 void JVMGenerator::visitMinus(Minus* minus)
