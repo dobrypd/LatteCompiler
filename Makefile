@@ -2,9 +2,12 @@
 # pd291528@students.mimuw.edu.pl
 include bin/Paths.mk
 
+ARCH=x86
+
 PROJECT=Latte
-BINARY=latc
+BINARY=latc_$(ARCH)
 GRAMMAR_OBJ=Absyn.o Lexer.o Parser.o Printer.o
+GRAMMAR_SUFIX=
 
 OBJECTS:=$(patsubst $(SRC)/kernel/%.cpp,$(BIN)/%.o,$(wildcard $(SRC)/kernel/*.cpp))
 
@@ -17,7 +20,7 @@ endif
 BNFC=bnfc
 BNFC_FLAGS=-m -cpp_stl -l
 CC=g++
-CFLAGS=-Wall -c $(OPTDBG)
+CFLAGS=-Wall -c $(OPTDBG) -D_ARCH_$(ARCH)
 LFLAGS=-Wall $(OPTDBG)
 
 all : $(GRAMMAR_BIN)/Parser.C $(PROJECT)
@@ -25,10 +28,10 @@ all : $(GRAMMAR_BIN)/Parser.C $(PROJECT)
 $(GRAMMAR_BIN)/Parser.C: $(GRAMMAR)/$(PROJECT).cf
 	@echo -en "\033[38m\033[32mCompiling grammar...\033[0m\n"
 	mkdir -p $(GRAMMAR_BIN)
-	cd $(GRAMMAR_BIN) && $(BNFC) $(BNFC_FLAGS) $(GRAMMAR)/$(PROJECT).cf
+	cd $(GRAMMAR_BIN) && $(BNFC) $(BNFC_FLAGS) $(GRAMMAR)/$(PROJECT)$(GRAMMAR_SUFIX).cf
 	@echo Fixing bison file
-	@sed "3 a #include <algorithm>" $(GRAMMAR_BIN)/Latte.y > $(GRAMMAR_BIN)/Latte.y.tmp
-	@mv $(GRAMMAR_BIN)/Latte.y.tmp $(GRAMMAR_BIN)/Latte.y
+	@sed "3 a #include <algorithm>" $(GRAMMAR_BIN)/$(PROJECT)$(GRAMMAR_SUFIX).y > $(GRAMMAR_BIN)/$(PROJECT)$(GRAMMAR_SUFIX).y.tmp
+	@mv $(GRAMMAR_BIN)/Latte.y.tmp $(GRAMMAR_BIN)/$(PROJECT)$(GRAMMAR_SUFIX).y
 	@echo Adding fixups to Parser.C
 	@$(MAKE) -C $(GRAMMAR_BIN) Parser.C
 	$(SCRIPTS)/fix_grammar.sh

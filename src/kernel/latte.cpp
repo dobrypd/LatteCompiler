@@ -26,6 +26,19 @@ using std::endl;
     const bool debug=false;
 #endif
 
+
+enum arch_t {x86, x86_64};
+
+#ifdef _ARCH_x86_64
+    const int arch = x86_64;
+#else
+    #ifdef _ARCH_x86
+        const int arch = x86;
+    #else
+        #error You must define _ARCH as x86 or x86_64.
+    #endif
+#endif
+
 const char* default_jasmin_path = "lib/jasmin.jar";
 
 void show_help(char* prog_name)

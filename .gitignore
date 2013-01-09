@@ -11,3 +11,5 @@ Latte.tar.gz
 latc
 *.j
 *.class
+latc_x86
+latc_x86_64
