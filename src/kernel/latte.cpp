@@ -14,7 +14,7 @@
 #include "FunctionLoader.h"
 #include "TreeOptimizer.h"
 #include "ReturnsChecker.h"
-#include "JVMGenerator.h"
+#include "ASCreator.h"
 
 using std::cerr;
 using std::cout;
@@ -31,15 +31,32 @@ enum arch_t {x86, x86_64};
 
 #ifdef _ARCH_x86_64
     const int arch = x86_64;
+    #error Currently cannot build x86_64 late compiler.
 #else
     #ifdef _ARCH_x86
         const int arch = x86;
     #else
-        #error You must define _ARCH as x86 or x86_64.
+        #error You must define one of _ARCH_x86 _ARCH_x86_64.
     #endif
 #endif
 
-const char* default_jasmin_path = "lib/jasmin.jar";
+const char* compiler_executable = "gcc";
+const char* linker_executable = "ld";
+
+const char* compiler_flags = "-c";
+const char* linker_flags = "";
+
+#ifdef _ARCH_x86_64
+    const char* compiler_arch_flags = "-m64";
+    const char* linker_arch_flags = "";
+#endif
+#ifdef _ARCH_x86
+    const char* compiler_arch_flags = "-m32";
+    const char* linker_arch_flags = "-melf_i386 -l:./lib/lib32/libc.a ./lib/lib32/crt?.o";
+#endif
+
+const char* compiler_flags
+
 
 void show_help(char* prog_name)
 {
@@ -47,8 +64,8 @@ void show_help(char* prog_name)
             << "options:" << endl
             << "-h\t- show this help message," << endl
             << "-o\t- define output file "
-            << "(default this same as infile *.j *.class)." << endl
-            << endl
+            << "(default this same as infile for assembler code (*.s) "
+            << "and a.out for binary)." << endl << endl
             << "infile...\t- list of input files, if none - get from stdin."
             << endl;
 }
@@ -95,7 +112,7 @@ Arguments parse_args(int argc, char** argv)
 }
 
 /*
- * open stream (file or stdio)
+ * Open stream (file or stdio).
  */
 FILE* open_file(short files, char* file_name)
 {
@@ -120,20 +137,22 @@ FILE* open_file(short files, char* file_name)
     return input;
 }
 
-std::string create_out_name(const char* input_file_name)
+std::string create_out_name(const char* input_file_name,
+        const char* extension)
 {
     std::string ofn(input_file_name);
     size_t found = ofn.rfind('.');
     if (found != std::string::npos){
         ofn = ofn.substr(0, found);
     }
-    ofn += ".j";
+    ofn += ".";
+    ofn += extension;
     return ofn;
 }
 
 
 /*
- * will close file after parse, or in case of an error
+ * Will close file after parse, or in case of an error.
  */
 int check_file(FILE* input, const char* file_name,
         frontend::ParserManager& parser_mngr,
@@ -194,28 +213,40 @@ int check_file(FILE* input, const char* file_name,
 void compile_file(Visitable* ast_root, const char* input_file_name,
         frontend::Environment& env)
 {
-    // Create jasmin file.
-    std::string jasmin_file = create_out_name(input_file_name);
-    jvm::JVMGenerator jvm_generator(jasmin_file, env);
-    jvm_generator.generate(ast_root);
-    // Call jasmin.jar to create *.class file.
+    // Create assembly file.
+    std::string assembly_file_name = create_out_name(input_file_name, "s");
+    backend::ASCreator as_generator(assembly_file_name, env);
+    as_generator.generate(ast_root);
 
-    // Like this one
-    // java -jar lib/jasmin.jar -d ./dir/ ./dir/core001.j
-    FILE* cmd = NULL;
-    std::string command("java -jar ");
-    command.append(default_jasmin_path);
-    command.append(" -d ");
-    size_t found = jasmin_file.rfind('/');
-    std::string dir(jasmin_file);
-    if (found != std::string::npos) {
-        dir = jasmin_file.substr(0, found);
-    }
-    command.append(dir);
+
+    // Call assembler to create output binary file.
+    FILE* ccmd = NULL;
+    std::string command(compiler_executable);
     command.append(" ");
-    command.append(jasmin_file);
-    cmd = popen(command.c_str(), "r");
-    pclose(cmd);
+    command.append(compiler_flags);
+    command.append(" ");
+    command.append(compiler_arch_flags);
+    command.append(" -o");
+    command.append(create_out_name(input_file_name, "o"));
+    command.append(" ");
+    command.append(assembly_file_name);
+    ccmd = popen(command.c_str(), "r");
+    pclose(ccmd);
+
+    // Call linker.
+    FILE* lcmd = NULL;
+    std::string lcommand(linker_executable);
+    lcommand.append(" ");
+    lcommand.append(linker_flags);
+    lcommand.append(" ");
+    lcommand.append(linker_arch_flags);
+    lcommand.append(" -o");
+    lcommand.append("a.out"); // TODO: outputfilename
+    lcommand.append(" ");
+    lcommand.append(create_out_name(input_file_name, "o"));
+    ccmd = popen(lcommand.c_str(), "r");
+    pclose(ccmd);
+
 
     std::cerr << "OK" << std::endl;
 }
