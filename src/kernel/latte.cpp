@@ -53,12 +53,14 @@ const char* linker_flags = "";
 #endif
 #ifdef _ARCH_x86
     const char* compiler_arch_flags = "-m32";
-    const char* linker_arch_flags = "-melf_i386 -l:./lib/lib32/libc.a ./lib/lib32/crt?.o";
+    const char* linker_arch_flags =
+            "-melf_i386 -l:./lib/lib32/libc.a ./lib/lib32/crt?.o";
 #endif
 
 
 const char* stdin_in_filename = "from_stdin.lat";
 const char* default_output_filename = "a.out";
+
 // Constants end.
 
 
@@ -182,6 +184,7 @@ int check_file(FILE* input, const char* file_name,
     if (fclose(input) != 0) {
         cerr << "ERROR" << endl;
         cerr << "Cannot close file stream " << file_name << endl;
+        return EXIT_FAILURE;
     }
 
     frontend::ErrorHandler file_error_handler(file_name);
@@ -221,8 +224,8 @@ void compile_file(Visitable* ast_root, const char* input_file_name,
 {
     // Create assembly file.
     std::string assembly_file_name = create_out_name(input_file_name, "s");
-    //backend::ASCreator as_generator(assembly_file_name, env);
-    //as_generator.generate(ast_root);
+    backend::ASCreator as_generator(assembly_file_name, env);
+    as_generator.generate(ast_root);
 
 
     // Call assembler to create output binary file.
@@ -289,7 +292,7 @@ int main(int argc, char** argv)
     for(short i = 0; i < number_of_inputs; i++)
     {
         if (debug)
-            std::cout << std::endl << "-- new file "
+            std::cout << std::endl << "-- checking file "
             << ((arguments.input_count > 0)
                     ? arguments.input_files[i] : stdin_in_filename)
             << " --" << std::endl << std::endl;

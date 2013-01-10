@@ -11,7 +11,7 @@ DEBUG_OUT=1
 PROJECT_DIR=`pwd`/../
 TESTS_IN_DIR=$PROJECT_DIR./tests/
 BIN=$PROJECT_DIR/bin/
-LATTE=../latec
+LATTE=../latc_x86
 
 
 for i in `find  $TESTS_IN_DIR -iname "*.lat"`
