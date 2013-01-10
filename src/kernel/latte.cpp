@@ -26,6 +26,7 @@ using std::endl;
     const bool debug=false;
 #endif
 
+// Architecture and system based constants.
 
 enum arch_t {x86, x86_64};
 
@@ -55,7 +56,12 @@ const char* linker_flags = "";
     const char* linker_arch_flags = "-melf_i386 -l:./lib/lib32/libc.a ./lib/lib32/crt?.o";
 #endif
 
-const char* compiler_flags
+
+const char* stdin_in_filename = "from_stdin.lat";
+const char* default_output_filename = "a.out";
+// Constants end.
+
+
 
 
 void show_help(char* prog_name)
@@ -215,12 +221,12 @@ void compile_file(Visitable* ast_root, const char* input_file_name,
 {
     // Create assembly file.
     std::string assembly_file_name = create_out_name(input_file_name, "s");
-    backend::ASCreator as_generator(assembly_file_name, env);
-    as_generator.generate(ast_root);
+    //backend::ASCreator as_generator(assembly_file_name, env);
+    //as_generator.generate(ast_root);
 
 
     // Call assembler to create output binary file.
-    FILE* ccmd = NULL;
+    FILE* cmd = NULL;
     std::string command(compiler_executable);
     command.append(" ");
     command.append(compiler_flags);
@@ -230,25 +236,37 @@ void compile_file(Visitable* ast_root, const char* input_file_name,
     command.append(create_out_name(input_file_name, "o"));
     command.append(" ");
     command.append(assembly_file_name);
-    ccmd = popen(command.c_str(), "r");
-    pclose(ccmd);
+    if (debug) cout << command << endl;
+    cmd = popen(command.c_str(), "r");
+    pclose(cmd);
+}
 
+
+/*
+ * Link compiled files.
+ */
+void link_files(const int number_of_inputs, char** input_files,
+        bool is_from_stdin, const char* output_file_name)
+{
     // Call linker.
-    FILE* lcmd = NULL;
-    std::string lcommand(linker_executable);
-    lcommand.append(" ");
-    lcommand.append(linker_flags);
-    lcommand.append(" ");
-    lcommand.append(linker_arch_flags);
-    lcommand.append(" -o");
-    lcommand.append("a.out"); // TODO: outputfilename
-    lcommand.append(" ");
-    lcommand.append(create_out_name(input_file_name, "o"));
-    ccmd = popen(lcommand.c_str(), "r");
-    pclose(ccmd);
-
-
-    std::cerr << "OK" << std::endl;
+    FILE* cmd = NULL;
+    std::string command(linker_executable);
+    command.append(" ");
+    command.append(linker_flags);
+    command.append(" ");
+    command.append(linker_arch_flags);
+    command.append(" -o");
+    command.append(output_file_name);
+    for(short i = 0; i < number_of_inputs; i++) {
+        command.append(" ");
+        if (is_from_stdin)
+            command.append(create_out_name(stdin_in_filename, "o"));
+        else
+            command.append(create_out_name(input_files[i], "o"));
+    }
+    if (debug) cout << command << endl;
+    cmd = popen(command.c_str(), "r");
+    pclose(cmd);
 }
 
 
@@ -273,7 +291,7 @@ int main(int argc, char** argv)
         if (debug)
             std::cout << std::endl << "-- new file "
             << ((arguments.input_count > 0)
-                    ? arguments.input_files[i] : "stdin")
+                    ? arguments.input_files[i] : stdin_in_filename)
             << " --" << std::endl << std::endl;
 
         FILE* input = open_file(arguments.input_count,
@@ -287,18 +305,26 @@ int main(int argc, char** argv)
 
 
         int check_status = check_file(input,
-            (arguments.input_count > 0) ? arguments.input_files[i] : "stdin",
+            (arguments.input_count > 0)
+            ? arguments.input_files[i] : stdin_in_filename,
             parser_mngr, env, ast_root);
 
         if (check_status == 0) {
             compile_file(ast_root,
                     (arguments.input_count > 0)
-                    ? arguments.input_files[i] : "from_stdin",
+                    ? arguments.input_files[i] : stdin_in_filename,
                     env);
         } else {
             return EXIT_FAILURE;
         }
     }
 
+    link_files(number_of_inputs, arguments.input_files,
+               (arguments.input_count == 0),
+               (arguments.output_file != NULL)
+                   ? arguments.output_file
+                   : default_output_filename);
+
+    std::cerr << "OK" << std::endl;
     return EXIT_SUCCESS;
 }
