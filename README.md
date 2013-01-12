@@ -5,16 +5,6 @@ Author Piotr Dobrowolski
 
 pd291528@students.mimuw.edu.pl
 
-Uwaga:
-------
-
-Nie byłem pewien gdzie `Runtime.class` ma się znajdować podczas uruchomienia programu.
-(Albo inaczej gdzie program będzie uruchamiany, aby ustawić classpath).
-Więc przyjąłem, że `Runtime.class` powinien być w `./lib/` oraz przy uruchamianiu
-w tym samym katalogu co program `*.class`.
-Jest to zakodowane w programie w pliku `./src/kernel/JVMGenerator.cpp:26`,
-zmienna `JVMGenerator::runtime_lib`.
-
 Kompilacja:
 -----------
 
@@ -31,11 +21,11 @@ Uruchamianie:
 
 W katalogu głównym:
 
-`$ ./latec nazwa_pliku`
+`$ ./latc_x86 nazwa_pliku`
 
 Uruchom:
 
-`$ ./latec -h` żeby uzyskać więcej informacji.
+`$ ./latc_x86 -h` żeby uzyskać więcej informacji.
 
 Używane narzędzia i biblioteki:
 -------------------------------
@@ -43,18 +33,16 @@ Używane narzędzia i biblioteki:
 Do budowania parsera korzystam z narzędzia `bnfc`.
 Oprócz standardowych bibliotek (stl) korzystam z boost'a (shared pointery).
 
-Do budowania kodu jvm korzystam z `jasmina`, (który zgodnie ze specyfikacją
-powinien znajdować się w katalogu `lib`).
+Do zamiany kodu asemblera na program wykonywalny używam `gcc`.
+Do linkowania `ld`.
 
-Ponadto predefiniowane funkcje powinny znajdować się w takim katalogu
-aby mogły zostać znalezione przez classloader. Najlepiej w tym samym co
-wykonanie. Predefiniowane funkcje znajdują się w katalogu `lib` w pliku
-`Runtime.class`. 
+Predefiniowane funkcje znajdują się w katalogu `lib` w pliku
+`runtime.c`, skompilowane `runtime.o`. 
 
 Zaimplementowane rozszerzenia:
 ------------------------------
 
-W obecnej wersji nie zostały zaimplementowane rozszerzenia.
+Zaimplementowałem tablice oraz obiekty (wraz z metodami wirtualnymi).
 
 Struktura karalogów:
 --------------------
