@@ -6,11 +6,22 @@ Program.    Prog ::= [TopDef] ;
 
 FnDef.      TopDef ::= Type Ident "(" [Arg] ")" Blk ;
 
+ClsDefNoInher.      TopDef ::= "class" Ident "{" [ ClsDef ] "}" ;
+
+ClsDefInher.        TopDef ::= "class" Ident "extends" Ident "{" [ ClsDef ] "}" ; 
+
 separator nonempty TopDef "" ;
 
 Argument.   Arg ::= Type Ident;
 
 separator   Arg "," ;
+
+MethodDef.  ClsDef ::= Type Ident "(" [Arg] ")" Blk ;
+
+FieldDef.   ClsDef ::= Type Ident ";" ;
+
+separator ClsDef "" ;
+
 
 -- statements ----------------------------------------------
 
@@ -24,17 +35,35 @@ StmBStmt.   Stmt ::= Blk ;
 
 StmDecl.    Stmt ::= Type [Item] ";" ;
 
-StmNoInit.  Item ::= Ident ; 
+StmNoInit.      Item ::= Ident ; 
 
-StmInit.    Item ::= Ident "=" Expr ;
+StmInit.        Item ::= Ident "=" Expr ;
 
-separator nonempty Item "," ;
+StmInitArray.   Item ::= Ident "=" "new" Type "[" [ArrayIndex] "]" ;
 
-StmAss.     Stmt ::= Ident "=" Expr  ";" ;
+StmInitObj.     Item ::= Ident "=" "new" Type ;
 
-StmIncr.    Stmt ::= Ident "++"  ";" ;
+separator nonempty Item "," ;   
 
-StmDecr.    Stmt ::= Ident "--"  ";" ;
+SingleIdent.    StructuredIdent ::= Ident ;
+
+TableVal.       StructuredIdent ::= Ident "[" [ArrayIndex] "]" ;
+
+ExprIndex.  ArrayIndex ::= Expr ;
+
+separator nonempty ArrayIndex "][" ;
+
+separator nonempty StructuredIdent "." ;
+
+StmAss.     Stmt ::= [StructuredIdent] "=" Expr  ";" ;
+
+StmAssArr.  Stmt ::= [StructuredIdent] "=" "new" Type "[" [ArrayIndex] "]" ;
+
+StmAssObj.  Stmt ::= [StructuredIdent] "=" "new" Type ;
+
+StmIncr.    Stmt ::= [StructuredIdent] "++"  ";" ;
+
+StmDecr.    Stmt ::= [StructuredIdent] "--"  ";" ;
 
 StmRet.     Stmt ::= "return" Expr ";" ;
 
@@ -46,9 +75,13 @@ StmCondElse.  Stmt ::= "if" "(" Expr ")" Stmt "else" Stmt  ;
 
 StmWhile.   Stmt ::= "while" "(" Expr ")" Stmt ;
 
+StmForeach. Stmt ::= "for" "(" Type Ident ":" [StructuredIdent] ")" Stmt ;
+
 StmSExp.    Stmt ::= Expr  ";" ;
 
 -- Types ---------------------------------------------------
+
+Class.     Type ::= Ident ;
 
 Int.       Type ::= "int" ;
 
@@ -58,13 +91,15 @@ Bool.      Type ::= "boolean" ;
 
 Void.      Type ::= "void" ;
 
-internal   Fun. Type ::= Type "(" [Type] ")" ;
+--internal   Fun. Type ::= Type "(" [Type] ")" ;
 
-separator  Type "," ;
+TType.     Type ::= Type "[" "]" ;
+
+--separator  Type "," ;
 
 -- Expressions ---------------------------------------------
 
-EVar.      Expr6 ::= Ident ;
+EVar.      Expr6 ::= [StructuredIdent] ;
 
 ELitInt.   Expr6 ::= Integer ;
 
@@ -72,13 +107,15 @@ ELitTrue.  Expr6 ::= "true" ;
 
 ELitFalse. Expr6 ::= "false" ;
 
-EApp.      Expr6 ::= Ident "(" [Expr] ")" ;
+EApp.      Expr6 ::= [StructuredIdent] "(" [Expr] ")" ;
 
 EString.   Expr6 ::= String ;
 
 Neg.       Expr5 ::= "-" Expr6 ;
 
 Not.       Expr5 ::= "!" Expr6 ;
+
+EDynamicCast. Expr5 ::= "(" Ident ")" Expr6 ;
 
 EMul.      Expr4 ::= Expr4 MulOp Expr5 ;
 

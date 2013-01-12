@@ -27,7 +27,6 @@ do
     BN=$(basename $i)
     DN=$(dirname $i)
     
-    echo "$DN/a.out > $i.PROUT"
     $DN/a.out > $i.PROUT
     
     echo -en "\033[38m\033[33mChecking outputs for: \033[0m"$i"\n"
