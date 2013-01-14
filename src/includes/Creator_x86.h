@@ -4,26 +4,28 @@
  *
  */
 
-#ifndef TREEOPTIMIZER_H_
-#define TREEOPTIMIZER_H_
+#ifndef CREATOR_X86_H_
+#define CREATOR_X86_H_
+/* You might want to change the above name. */
 
 #include "Absyn.H"
 
-namespace frontend
+
+namespace backend
 {
 
-class TreeOptimizer : public Visitor
+class Skeleton : public Visitor
 {
 public:
-    TreeOptimizer();
-    void optimize(Visitable* v);
-
     void visitProg(Prog* p);
     void visitTopDef(TopDef* p);
     void visitArg(Arg* p);
+    void visitClsDef(ClsDef* p);
     void visitBlk(Blk* p);
     void visitStmt(Stmt* p);
     void visitItem(Item* p);
+    void visitStructuredIdent(StructuredIdent* p);
+    void visitArrayIndex(ArrayIndex* p);
     void visitType(Type* p);
     void visitExpr(Expr* p);
     void visitAddOp(AddOp* p);
@@ -31,14 +33,25 @@ public:
     void visitRelOp(RelOp* p);
     void visitProgram(Program* p);
     void visitFnDef(FnDef* p);
+    void visitClsDefNoInher(ClsDefNoInher* p);
+    void visitClsDefInher(ClsDefInher* p);
     void visitArgument(Argument* p);
+    void visitMethodDef(MethodDef* p);
+    void visitFieldDef(FieldDef* p);
     void visitStmBlock(StmBlock* p);
     void visitStmEmpty(StmEmpty* p);
     void visitStmBStmt(StmBStmt* p);
     void visitStmDecl(StmDecl* p);
     void visitStmNoInit(StmNoInit* p);
     void visitStmInit(StmInit* p);
+    void visitStmInitArray(StmInitArray* p);
+    void visitStmInitObj(StmInitObj* p);
+    void visitSingleIdent(SingleIdent* p);
+    void visitTableVal(TableVal* p);
+    void visitExprIndex(ExprIndex* p);
     void visitStmAss(StmAss* p);
+    void visitStmAssArr(StmAssArr* p);
+    void visitStmAssObj(StmAssObj* p);
     void visitStmIncr(StmIncr* p);
     void visitStmDecr(StmDecr* p);
     void visitStmRet(StmRet* p);
@@ -46,12 +59,14 @@ public:
     void visitStmCond(StmCond* p);
     void visitStmCondElse(StmCondElse* p);
     void visitStmWhile(StmWhile* p);
+    void visitStmForeach(StmForeach* p);
     void visitStmSExp(StmSExp* p);
+    void visitClass(Class* p);
     void visitInt(Int* p);
     void visitStr(Str* p);
     void visitBool(Bool* p);
     void visitVoid(Void* p);
-    void visitFun(Fun* p);
+    void visitTType(TType* p);
     void visitEVar(EVar* p);
     void visitELitInt(ELitInt* p);
     void visitELitTrue(ELitTrue* p);
@@ -60,6 +75,7 @@ public:
     void visitEString(EString* p);
     void visitNeg(Neg* p);
     void visitNot(Not* p);
+    void visitEDynamicCast(EDynamicCast* p);
     void visitEMul(EMul* p);
     void visitEAdd(EAdd* p);
     void visitERel(ERel* p);
@@ -78,9 +94,11 @@ public:
     void visitNE(NE* p);
     void visitListTopDef(ListTopDef* p);
     void visitListArg(ListArg* p);
+    void visitListClsDef(ListClsDef* p);
     void visitListStmt(ListStmt* p);
     void visitListItem(ListItem* p);
-    void visitListType(ListType* p);
+    void visitListArrayIndex(ListArrayIndex* p);
+    void visitListStructuredIdent(ListStructuredIdent* p);
     void visitListExpr(ListExpr* p);
 
     void visitInteger(Integer x);
@@ -88,7 +106,10 @@ public:
     void visitDouble(Double x);
     void visitString(String x);
     void visitIdent(Ident x);
+
 };
 
-} /* namespace frontend */
-#endif /* TREEOPTIMIZER_H_ */
+
+} /* namespace backend */
+
+#endif /* CREATOR_X86_H_ */

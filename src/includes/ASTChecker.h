@@ -27,7 +27,7 @@ private:
     Type* last_declaration_type;
     Type* last_type;  // For expressions.
     Type* last_function_type;
-    Ident last_function_ident;  // Will be copied, but it's ok.
+    ListStructuredIdent* last_function_ident;
     std::vector<Environment::VarInfoPtr>::const_iterator last_arguments_iterator;
     std::vector<Environment::VarInfoPtr>::const_iterator last_arguments_end;
 
@@ -37,7 +37,7 @@ private:
     Str literal_string;
 
     void add_variable(Type* t, Ident& ident, int line_number);
-    void check_type(Ident& i1, Type* t1, Ident& i2, Type* t2, int line_number);
+    void check_type(ListStructuredIdent* i1, Type* t1, ListStructuredIdent* i2, Type* t2, int line_number);
     std::string args_pretty_print(std::vector<Environment::VarInfoPtr>::const_iterator it,
             std::vector<Environment::VarInfoPtr>::const_iterator end);
 
@@ -48,9 +48,12 @@ public:
     void visitProg(Prog* p);
     void visitTopDef(TopDef* p);
     void visitArg(Arg* p);
+    void visitClsDef(ClsDef* p);
     void visitBlk(Blk* p);
     void visitStmt(Stmt* p);
     void visitItem(Item* p);
+    void visitStructuredIdent(StructuredIdent* p);
+    void visitArrayIndex(ArrayIndex* p);
     void visitType(Type* p);
     void visitExpr(Expr* p);
     void visitAddOp(AddOp* p);
@@ -58,14 +61,25 @@ public:
     void visitRelOp(RelOp* p);
     void visitProgram(Program* p);
     void visitFnDef(FnDef* p);
+    void visitClsDefNoInher(ClsDefNoInher* p);
+    void visitClsDefInher(ClsDefInher* p);
     void visitArgument(Argument* p);
+    void visitMethodDef(MethodDef* p);
+    void visitFieldDef(FieldDef* p);
     void visitStmBlock(StmBlock* p);
     void visitStmEmpty(StmEmpty* p);
     void visitStmBStmt(StmBStmt* p);
     void visitStmDecl(StmDecl* p);
     void visitStmNoInit(StmNoInit* p);
     void visitStmInit(StmInit* p);
+    void visitStmInitArray(StmInitArray* p);
+    void visitStmInitObj(StmInitObj* p);
+    void visitSingleIdent(SingleIdent* p);
+    void visitTableVal(TableVal* p);
+    void visitExprIndex(ExprIndex* p);
     void visitStmAss(StmAss* p);
+    void visitStmAssArr(StmAssArr* p);
+    void visitStmAssObj(StmAssObj* p);
     void visitStmIncr(StmIncr* p);
     void visitStmDecr(StmDecr* p);
     void visitStmRet(StmRet* p);
@@ -73,12 +87,14 @@ public:
     void visitStmCond(StmCond* p);
     void visitStmCondElse(StmCondElse* p);
     void visitStmWhile(StmWhile* p);
+    void visitStmForeach(StmForeach* p);
     void visitStmSExp(StmSExp* p);
+    void visitClass(Class* p);
     void visitInt(Int* p);
     void visitStr(Str* p);
     void visitBool(Bool* p);
     void visitVoid(Void* p);
-    void visitFun(Fun* p);
+    void visitTType(TType* p);
     void visitEVar(EVar* p);
     void visitELitInt(ELitInt* p);
     void visitELitTrue(ELitTrue* p);
@@ -87,6 +103,7 @@ public:
     void visitEString(EString* p);
     void visitNeg(Neg* p);
     void visitNot(Not* p);
+    void visitEDynamicCast(EDynamicCast* p);
     void visitEMul(EMul* p);
     void visitEAdd(EAdd* p);
     void visitERel(ERel* p);
@@ -105,9 +122,11 @@ public:
     void visitNE(NE* p);
     void visitListTopDef(ListTopDef* p);
     void visitListArg(ListArg* p);
+    void visitListClsDef(ListClsDef* p);
     void visitListStmt(ListStmt* p);
     void visitListItem(ListItem* p);
-    void visitListType(ListType* p);
+    void visitListArrayIndex(ListArrayIndex* p);
+    void visitListStructuredIdent(ListStructuredIdent* p);
     void visitListExpr(ListExpr* p);
 
     void visitInteger(Integer x);

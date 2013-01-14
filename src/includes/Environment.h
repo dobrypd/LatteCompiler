@@ -76,11 +76,11 @@ public:
     void add_variable(Type* t, Ident& ident);
     void add_function(FnDef* function_definition, bool is_extern);
 
-    bool can_add_variable(Ident& ident) const;
-    bool can_add_funciton(FnDef* function_definition) const;
+    bool can_add_variable(std::string& ident) const;
+    bool can_add_function(std::string& ident) const;
 
-    VarInfoPtr get_variable(Ident& ident) const;
-    FunInfoPtr get_function(Ident& ident) const;
+    VarInfoPtr get_variable(ListStructuredIdent* ident) const;
+    FunInfoPtr get_function(ListStructuredIdent* ident) const;
 };
 
 } /* namespace frontend */

@@ -24,27 +24,32 @@ void FunctionLoader::check(Visitable* v)
     /*
      * check if has main
      */
-    Ident main_idnt("main");
-    Environment::FunInfoPtr fun_ptr = this->env.get_function(main_idnt);
+    //Ident main_idnt("main");
+    //Environment::FunInfoPtr fun_ptr = this->env.get_function(main_idnt);
+    // TODO: Latte++
+
     // Check if function exists.
-    if ((!fun_ptr)
-            || (!fun_ptr->arguments.empty())
-            || (!check_is<Int*>(fun_ptr->ret_type)))
-    {
-        std::string msg = "function `";
-        msg += main_idnt;
-        msg += "` with 0 arguments and int return type does not exist.";
-        this->error_handler.error(1, msg);
-        return;
-    }
+//    if ((!fun_ptr)
+//            || (!fun_ptr->arguments.empty())
+//            || (!check_is<Int*>(fun_ptr->ret_type)))
+//    {
+//        std::string msg = "function `";
+//        msg += main_idnt;
+//        msg += "` with 0 arguments and int return type does not exist.";
+//        this->error_handler.error(1, msg);
+//        return;
+//    }
 }
 
-void FunctionLoader::visitProg(Prog* t) { } //abstract class
+void FunctionLoader::visitProg(Prog* t) {} //abstract class
 void FunctionLoader::visitTopDef(TopDef* t) {} //abstract class
 void FunctionLoader::visitArg(Arg* t) {} //abstract class
+void FunctionLoader::visitClsDef(ClsDef* t) {} //abstract class
 void FunctionLoader::visitBlk(Blk* t) {} //abstract class
 void FunctionLoader::visitStmt(Stmt* t) {} //abstract class
 void FunctionLoader::visitItem(Item* t) {} //abstract class
+void FunctionLoader::visitStructuredIdent(StructuredIdent* t) {} //abstract class
+void FunctionLoader::visitArrayIndex(ArrayIndex* t) {} //abstract class
 void FunctionLoader::visitType(Type* t) {} //abstract class
 void FunctionLoader::visitExpr(Expr* t) {} //abstract class
 void FunctionLoader::visitAddOp(AddOp* t) {} //abstract class
@@ -62,7 +67,7 @@ void FunctionLoader::visitFnDef(FnDef* fndef)
         std::cout << fndef->line_number << " found function `"
                 << fndef->ident_ << "` definition." << std::endl;
     }
-    if (this->env.can_add_funciton(fndef))
+    if (this->env.can_add_function(fndef->ident_))
         this->env.add_function(fndef, false);
     else
     {
@@ -74,10 +79,53 @@ void FunctionLoader::visitFnDef(FnDef* fndef)
     }
 }
 
+void FunctionLoader::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
+{
+    /* Code For ClsDefNoInher Goes Here */
+    /* Latte++ */
+
+    visitIdent(clsdefnoinher->ident_);
+    clsdefnoinher->listclsdef_->accept(this);
+
+}
+
+void FunctionLoader::visitClsDefInher(ClsDefInher *clsdefinher)
+{
+    /* Code For ClsDefInher Goes Here */
+    /* Latte++ */
+
+    visitIdent(clsdefinher->ident_1);
+    visitIdent(clsdefinher->ident_2);
+    clsdefinher->listclsdef_->accept(this);
+
+}
+
 void FunctionLoader::visitArgument(Argument* argument)
 {
     argument->type_->accept(this);
     visitIdent(argument->ident_);
+
+}
+
+void FunctionLoader::visitMethodDef(MethodDef *methoddef)
+{
+    /* Code For MethodDef Goes Here */
+    /* Latte++ */
+
+    methoddef->type_->accept(this);
+    visitIdent(methoddef->ident_);
+    methoddef->listarg_->accept(this);
+    methoddef->blk_->accept(this);
+
+}
+
+void FunctionLoader::visitFieldDef(FieldDef *fielddef)
+{
+    /* Code For FieldDef Goes Here */
+    /* Latte++ */
+
+    fielddef->type_->accept(this);
+    visitIdent(fielddef->ident_);
 
 }
 
@@ -103,18 +151,47 @@ void FunctionLoader::visitStmDecl(StmDecl* stmdecl)
 
 void FunctionLoader::visitStmAss(StmAss* stmass)
 {
-    visitIdent(stmass->ident_);
+    stmass->liststructuredident_->accept(this);
     stmass->expr_->accept(this);
 }
 
-void FunctionLoader::visitStmIncr(StmIncr* stmincr)
+void FunctionLoader::visitStmAssArr(StmAssArr *stmassarr)
 {
-    visitIdent(stmincr->ident_);
+    /* Code For StmAssArr Goes Here */
+    /* Latte++ */
+
+    stmassarr->liststructuredident_->accept(this);
+    stmassarr->type_->accept(this);
+    stmassarr->expr_->accept(this);
+
 }
 
-void FunctionLoader::visitStmDecr(StmDecr* stmdecr)
+void FunctionLoader::visitStmAssObj(StmAssObj *stmassobj)
 {
-visitIdent(stmdecr->ident_);
+    /* Code For StmAssObj Goes Here */
+    /* Latte++ */
+
+    stmassobj->liststructuredident_->accept(this);
+    stmassobj->type_->accept(this);
+
+}
+
+void FunctionLoader::visitStmIncr(StmIncr *stmincr)
+{
+    /* Code For StmIncr Goes Here */
+    /* Latte++ */
+
+    stmincr->liststructuredident_->accept(this);
+
+}
+
+void FunctionLoader::visitStmDecr(StmDecr *stmdecr)
+{
+    /* Code For StmDecr Goes Here */
+    /* Latte++ */
+
+    stmdecr->liststructuredident_->accept(this);
+
 }
 
 void FunctionLoader::visitStmRet(StmRet* stmret)
@@ -145,6 +222,18 @@ void FunctionLoader::visitStmWhile(StmWhile* stmwhile)
     stmwhile->stmt_->accept(this);
 }
 
+void FunctionLoader::visitStmForeach(StmForeach *stmforeach)
+{
+    /* Code For StmForeach Goes Here */
+    /* Latte++ */
+
+    stmforeach->type_->accept(this);
+    visitIdent(stmforeach->ident_);
+    stmforeach->liststructuredident_->accept(this);
+    stmforeach->stmt_->accept(this);
+
+}
+
 void FunctionLoader::visitStmSExp(StmSExp* stmsexp)
 {
     stmsexp->expr_->accept(this);
@@ -159,6 +248,64 @@ void FunctionLoader::visitStmInit(StmInit* stminit)
 {
     visitIdent(stminit->ident_);
     stminit->expr_->accept(this);
+}
+
+void FunctionLoader::visitStmInitArray(StmInitArray *stminitarray)
+{
+    /* Code For StmInitArray Goes Here */
+    /* Latte++ */
+
+    visitIdent(stminitarray->ident_);
+    stminitarray->type_->accept(this);
+    stminitarray->expr_->accept(this);
+
+}
+
+void FunctionLoader::visitStmInitObj(StmInitObj *stminitobj)
+{
+    /* Code For StmInitObj Goes Here */
+    /* Latte++ */
+
+    visitIdent(stminitobj->ident_);
+    stminitobj->type_->accept(this);
+
+}
+
+void FunctionLoader::visitSingleIdent(SingleIdent *singleident)
+{
+    /* Code For SingleIdent Goes Here */
+    /* Latte++ */
+
+    visitIdent(singleident->ident_);
+
+}
+
+void FunctionLoader::visitTableVal(TableVal *tableval)
+{
+    /* Code For TableVal Goes Here */
+    /* Latte++ */
+
+    visitIdent(tableval->ident_);
+    tableval->listarrayindex_->accept(this);
+
+}
+
+void FunctionLoader::visitExprIndex(ExprIndex *exprindex)
+{
+    /* Code For ExprIndex Goes Here */
+    /* Latte++ */
+
+    exprindex->expr_->accept(this);
+
+}
+
+void FunctionLoader::visitClass(Class *_class)
+{
+    /* Code For Class Goes Here */
+    /* Latte++ */
+
+    visitIdent(_class->ident_);
+
 }
 
 void FunctionLoader::visitInt(Int* integer)
@@ -177,15 +324,22 @@ void FunctionLoader::visitVoid(Void* void_field)
 {
 }
 
-void FunctionLoader::visitFun(Fun* fun)
+void FunctionLoader::visitTType(TType *ttype)
 {
-    fun->type_->accept(this);
-    fun->listtype_->accept(this);
+    /* Code For TType Goes Here */
+    /* Latte++ */
+
+    ttype->type_->accept(this);
+
 }
 
-void FunctionLoader::visitEVar(EVar* evar)
+void FunctionLoader::visitEVar(EVar *evar)
 {
-    visitIdent(evar->ident_);
+    /* Code For EVar Goes Here */
+    /* Latte++ */
+
+    evar->liststructuredident_->accept(this);
+
 }
 
 void FunctionLoader::visitELitInt(ELitInt* elitint)
@@ -201,10 +355,14 @@ void FunctionLoader::visitELitFalse(ELitFalse* elitfalse)
 {
 }
 
-void FunctionLoader::visitEApp(EApp* eapp)
+void FunctionLoader::visitEApp(EApp *eapp)
 {
-    visitIdent(eapp->ident_);
+    /* Code For EApp Goes Here */
+    /* Latte++ */
+
+    eapp->liststructuredident_->accept(this);
     eapp->listexpr_->accept(this);
+
 }
 
 void FunctionLoader::visitEString(EString* estring)
@@ -220,6 +378,16 @@ void FunctionLoader::visitNeg(Neg* neg)
 void FunctionLoader::visitNot(Not* not_field)
 {
     not_field->expr_->accept(this);
+}
+
+void FunctionLoader::visitEDynamicCast(EDynamicCast *edynamiccast)
+{
+    /* Code For EDynamicCast Goes Here */
+    /* Latte++ */
+
+    visitIdent(edynamiccast->ident_);
+    edynamiccast->expr_->accept(this);
+
 }
 
 void FunctionLoader::visitEMul(EMul* emul)
@@ -316,6 +484,15 @@ void FunctionLoader::visitListArg(ListArg* listarg)
     }
 }
 
+void FunctionLoader::visitListClsDef(ListClsDef* listclsdef)
+{
+    /* Latte++ */
+    for (ListClsDef::iterator i = listclsdef->begin() ; i != listclsdef->end() ; ++i)
+    {
+        (*i)->accept(this);
+    }
+}
+
 void FunctionLoader::visitListStmt(ListStmt* liststmt)
 {
     for (ListStmt::iterator i = liststmt->begin() ; i != liststmt->end() ; ++i)
@@ -332,9 +509,19 @@ void FunctionLoader::visitListItem(ListItem* listitem)
     }
 }
 
-void FunctionLoader::visitListType(ListType* listtype)
+void FunctionLoader::visitListArrayIndex(ListArrayIndex* listarrayindex)
 {
-    for (ListType::iterator i = listtype->begin() ; i != listtype->end() ; ++i)
+    /* Latte++ */
+    for (ListArrayIndex::iterator i = listarrayindex->begin() ; i != listarrayindex->end() ; ++i)
+    {
+        (*i)->accept(this);
+    }
+}
+
+void FunctionLoader::visitListStructuredIdent(ListStructuredIdent* liststructuredident)
+{
+    /* Latte++ */
+    for (ListStructuredIdent::iterator i = liststructuredident->begin() ; i != liststructuredident->end() ; ++i)
     {
         (*i)->accept(this);
     }
@@ -342,6 +529,7 @@ void FunctionLoader::visitListType(ListType* listtype)
 
 void FunctionLoader::visitListExpr(ListExpr* listexpr)
 {
+    /* Latte++ */
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
         (*i)->accept(this);

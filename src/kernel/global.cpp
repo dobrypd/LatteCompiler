@@ -29,8 +29,10 @@ etypes type_to_enum(Type *t)
         return VOID;
 
     else
-    if(dynamic_cast<Fun*>(t) != 0)
-        return FUN;
+    if(dynamic_cast<TType*>(t) != 0)
+        return TTYPE; // TODO: should be TTYPE of STH!
+    if (dynamic_cast<Class*>(t))
+        return CLASS; // TODO: should be named CLASS
 
     else
         return UNDEFINED;
@@ -47,8 +49,12 @@ std::string type_pretty_print(Type *t)
             return "string";
         case VOID:
             return "void";
-        case FUN:
-            return "function type";
+        case TTYPE:
+            // TODO: it's ugly, try to accept this node and has array of TYPE
+            return "array";
+        case CLASS:
+            // TODO: as TTYPE
+            return "class";
         case UNDEFINED:
             return "undefined";
         default:
@@ -65,5 +71,25 @@ bool operator==(Type & t1, Type & t2)
     return et1 == et2;
 }
 
+
+std::string ident_to_string(ListStructuredIdent* ident_list)
+{
+    std::string identifier;
+    for (ListStructuredIdent::iterator it = ident_list->begin();
+            it != ident_list->end(); it++) {
+        if (it != ident_list->begin())
+            identifier += ".";
+        if (dynamic_cast<SingleIdent*>(*it) != 0) {
+            SingleIdent* si = dynamic_cast<SingleIdent*>(*it);
+            identifier += si->ident_;
+        }
+        else if (dynamic_cast<TableVal*>(*it) != 0) {
+            TableVal* tv = dynamic_cast<TableVal*>(*it);
+            identifier += tv->ident_;
+            identifier += "[]";
+        }
+    }
+    return identifier;
+}
 
 } /* frontend */

@@ -12,7 +12,6 @@
 #include "ASTChecker.h"
 #include "ErrorHandler.h"
 #include "FunctionLoader.h"
-#include "TreeOptimizer.h"
 #include "ReturnsChecker.h"
 #include "ASCreator.h"
 
@@ -189,6 +188,11 @@ int check_file(FILE* input, const char* file_name,
 
     frontend::ErrorHandler file_error_handler(file_name);
 
+    /*
+     * Removed in this version.
+     *
+     *
+
     // Load functions.
     frontend::FunctionLoader function_loader(file_error_handler, env);
     function_loader.check(ast_root);
@@ -205,6 +209,11 @@ int check_file(FILE* input, const char* file_name,
         frontend::ReturnsChecker returns_checker(file_error_handler, env);
         returns_checker.check(ast_root);
     }
+
+     *
+     *
+     *
+     */
 
     // End of semantic check, typecheck and tree optimization.
     if (file_error_handler.has_errors()){

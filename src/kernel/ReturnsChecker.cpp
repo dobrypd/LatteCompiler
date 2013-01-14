@@ -31,12 +31,15 @@ void ReturnsChecker::check(Visitable* v)
     v->accept(this);
 }
 
-void ReturnsChecker::visitProg(Prog* t) { } //abstract class
+void ReturnsChecker::visitProg(Prog* t) {} //abstract class
 void ReturnsChecker::visitTopDef(TopDef* t) {} //abstract class
 void ReturnsChecker::visitArg(Arg* t) {} //abstract class
+void ReturnsChecker::visitClsDef(ClsDef* t) {} //abstract class
 void ReturnsChecker::visitBlk(Blk* t) {} //abstract class
 void ReturnsChecker::visitStmt(Stmt* t) {} //abstract class
 void ReturnsChecker::visitItem(Item* t) {} //abstract class
+void ReturnsChecker::visitStructuredIdent(StructuredIdent* t) {} //abstract class
+void ReturnsChecker::visitArrayIndex(ArrayIndex* t) {} //abstract class
 void ReturnsChecker::visitType(Type* t) {} //abstract class
 void ReturnsChecker::visitExpr(Expr* t) {} //abstract class
 void ReturnsChecker::visitAddOp(AddOp* t) {} //abstract class
@@ -52,23 +55,66 @@ void ReturnsChecker::visitFnDef(FnDef* fndef)
 {
     this->r_flag = false;
     fndef->blk_->accept(this);
-    Environment::FunInfoPtr f = this->env.get_function(fndef->ident_);
-    if ((!this->r_flag) && (!(check_is<Void *>(f->ret_type))))
-    {
-        std::string msg;
-        msg += "function : `";
-        msg += fndef->ident_;
-        msg += "` should returns [";
-        msg += type_pretty_print(f->ret_type);
-        msg += "].";
-        this->error_handler.error(fndef->type_->line_number, msg);
-    }
+//    //Environment::FunInfoPtr f = this->env.get_function(fndef->ident_);
+//    if ((!this->r_flag) && (!(check_is<Void *>(f->ret_type))))
+//    {
+//        std::string msg;
+//        msg += "function : `";
+//        msg += fndef->ident_;
+//        msg += "` should returns [";
+//        msg += type_pretty_print(f->ret_type);
+//        msg += "].";
+//        this->error_handler.error(fndef->type_->line_number, msg);
+//    }
+}
+
+void ReturnsChecker::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
+{
+    /* Code For ClsDefNoInher Goes Here */
+    /* Latte++ */
+
+    visitIdent(clsdefnoinher->ident_);
+    clsdefnoinher->listclsdef_->accept(this);
+
+}
+
+void ReturnsChecker::visitClsDefInher(ClsDefInher *clsdefinher)
+{
+    /* Code For ClsDefInher Goes Here */
+    /* Latte++ */
+
+    visitIdent(clsdefinher->ident_1);
+    visitIdent(clsdefinher->ident_2);
+    clsdefinher->listclsdef_->accept(this);
+
 }
 
 void ReturnsChecker::visitArgument(Argument* argument)
 {
     argument->type_->accept(this);
     visitIdent(argument->ident_);
+}
+
+void ReturnsChecker::visitMethodDef(MethodDef *methoddef)
+{
+    /* Code For MethodDef Goes Here */
+    /* Latte++ */
+
+    methoddef->type_->accept(this);
+    visitIdent(methoddef->ident_);
+    methoddef->listarg_->accept(this);
+    methoddef->blk_->accept(this);
+
+}
+
+void ReturnsChecker::visitFieldDef(FieldDef *fielddef)
+{
+    /* Code For FieldDef Goes Here */
+    /* Latte++ */
+
+    fielddef->type_->accept(this);
+    visitIdent(fielddef->ident_);
+
 }
 
 void ReturnsChecker::visitStmBlock(StmBlock* stmblock)
@@ -93,21 +139,49 @@ void ReturnsChecker::visitStmDecl(StmDecl* stmdecl)
 
 void ReturnsChecker::visitStmAss(StmAss* stmass)
 {
-    visitIdent(stmass->ident_);
+    stmass->liststructuredident_->accept(this);
     this->expression_optimization = 0;
     stmass->expr_->accept(this);
-    //TODO: not so important optimization
     this->expression_optimization = 0;
 }
 
-void ReturnsChecker::visitStmIncr(StmIncr* stmincr)
+void ReturnsChecker::visitStmAssArr(StmAssArr *stmassarr)
 {
-    visitIdent(stmincr->ident_);
+    /* Code For StmAssArr Goes Here */
+    /* Latte++ */
+
+    stmassarr->liststructuredident_->accept(this);
+    stmassarr->type_->accept(this);
+    stmassarr->expr_->accept(this);
+
 }
 
-void ReturnsChecker::visitStmDecr(StmDecr* stmdecr)
+void ReturnsChecker::visitStmAssObj(StmAssObj *stmassobj)
 {
-    visitIdent(stmdecr->ident_);
+    /* Code For StmAssObj Goes Here */
+    /* Latte++ */
+
+    stmassobj->liststructuredident_->accept(this);
+    stmassobj->type_->accept(this);
+
+}
+
+void ReturnsChecker::visitStmIncr(StmIncr *stmincr)
+{
+    /* Code For StmIncr Goes Here */
+    /* Latte++ */
+
+    stmincr->liststructuredident_->accept(this);
+
+}
+
+void ReturnsChecker::visitStmDecr(StmDecr *stmdecr)
+{
+    /* Code For StmDecr Goes Here */
+    /* Latte++ */
+
+    stmdecr->liststructuredident_->accept(this);
+
 }
 
 void ReturnsChecker::visitStmRet(StmRet* stmret)
@@ -182,6 +256,18 @@ void ReturnsChecker::visitStmWhile(StmWhile* stmwhile)
     this->expression_optimization = 0;
 }
 
+void ReturnsChecker::visitStmForeach(StmForeach *stmforeach)
+{
+    /* Code For StmForeach Goes Here */
+    /* Latte++ */
+
+    stmforeach->type_->accept(this);
+    visitIdent(stmforeach->ident_);
+    stmforeach->liststructuredident_->accept(this);
+    stmforeach->stmt_->accept(this);
+
+}
+
 void ReturnsChecker::visitStmSExp(StmSExp* stmsexp)
 {
     this->expression_optimization = 0;
@@ -206,6 +292,63 @@ void ReturnsChecker::visitStmInit(StmInit* stminit)
     }
 }
 
+void ReturnsChecker::visitStmInitArray(StmInitArray *stminitarray)
+{
+    /* Code For StmInitArray Goes Here */
+    /* Latte++ */
+
+    visitIdent(stminitarray->ident_);
+    stminitarray->type_->accept(this);
+    stminitarray->expr_->accept(this);
+
+}
+
+void ReturnsChecker::visitStmInitObj(StmInitObj *stminitobj)
+{
+    /* Code For StmInitObj Goes Here */
+    /* Latte++ */
+
+    visitIdent(stminitobj->ident_);
+    stminitobj->type_->accept(this);
+
+}
+
+void ReturnsChecker::visitSingleIdent(SingleIdent *singleident)
+{
+    /* Code For SingleIdent Goes Here */
+    /* Latte++ */
+
+    visitIdent(singleident->ident_);
+
+}
+
+void ReturnsChecker::visitTableVal(TableVal *tableval)
+{
+    /* Code For TableVal Goes Here */
+    /* Latte++ */
+
+    visitIdent(tableval->ident_);
+    tableval->listarrayindex_->accept(this);
+
+}
+
+void ReturnsChecker::visitExprIndex(ExprIndex *exprindex)
+{
+    /* Code For ExprIndex Goes Here */
+    /* Latte++ */
+
+    exprindex->expr_->accept(this);
+
+}
+
+void ReturnsChecker::visitClass(Class* _class)
+{
+    /* Latte++ */
+
+    visitIdent(_class->ident_);
+
+}
+
 void ReturnsChecker::visitInt(Int* integer)
 {
 }
@@ -222,17 +365,23 @@ void ReturnsChecker::visitVoid(Void* void_field)
 {
 }
 
-void ReturnsChecker::visitFun(Fun* fun)
+void ReturnsChecker::visitTType(TType *ttype)
 {
-    fun->type_->accept(this);
-    fun->listtype_->accept(this);
+    /* Code For TType Goes Here */
+    /* Latte++ */
+
+    ttype->type_->accept(this);
+
 }
 
-void ReturnsChecker::visitEVar(EVar* evar)
+void ReturnsChecker::visitEVar(EVar *evar)
 {
-    // Check if initialized by literal.
-    visitIdent(evar->ident_);
+    /* Code For EVar Goes Here */
+    /* Latte++ */
+
+    evar->liststructuredident_->accept(this);
     this->expression_optimization = 0;
+
 }
 
 void ReturnsChecker::visitELitInt(ELitInt* elitint)
@@ -254,11 +403,13 @@ void ReturnsChecker::visitELitFalse(ELitFalse* elitfalse)
     this->const_bool_value = false;
 }
 
-void ReturnsChecker::visitEApp(EApp* eapp)
+void ReturnsChecker::visitEApp(EApp *eapp)
 {
-    visitIdent(eapp->ident_);
+    /* Latte++ */
+
+    eapp->liststructuredident_->accept(this);
     eapp->listexpr_->accept(this);
-    // Check const return functions.
+
 }
 
 void ReturnsChecker::visitEString(EString* estring)
@@ -280,6 +431,16 @@ void ReturnsChecker::visitNot(Not* not_field)
     this->expression_optimization = 0;
     not_field->expr_->accept(this);
     this->expression_optimization = -(this->expression_optimization);
+}
+
+void ReturnsChecker::visitEDynamicCast(EDynamicCast *edynamiccast)
+{
+    /* Code For EDynamicCast Goes Here */
+    /* Latte++ */
+
+    visitIdent(edynamiccast->ident_);
+    edynamiccast->expr_->accept(this);
+
 }
 
 void ReturnsChecker::visitEMul(EMul* emul)
@@ -528,6 +689,15 @@ void ReturnsChecker::visitListArg(ListArg* listarg)
     }
 }
 
+void ReturnsChecker::visitListClsDef(ListClsDef* listclsdef)
+{
+    /* Latte++ */
+    for (ListClsDef::iterator i = listclsdef->begin() ; i != listclsdef->end() ; ++i)
+    {
+        (*i)->accept(this);
+    }
+}
+
 void ReturnsChecker::visitListStmt(ListStmt* liststmt)
 {
     for (ListStmt::iterator i = liststmt->begin() ; i != liststmt->end() ; ++i)
@@ -544,9 +714,19 @@ void ReturnsChecker::visitListItem(ListItem* listitem)
     }
 }
 
-void ReturnsChecker::visitListType(ListType* listtype)
+void ReturnsChecker::visitListArrayIndex(ListArrayIndex* listarrayindex)
 {
-    for (ListType::iterator i = listtype->begin() ; i != listtype->end() ; ++i)
+    /* Latte++ */
+    for (ListArrayIndex::iterator i = listarrayindex->begin() ; i != listarrayindex->end() ; ++i)
+    {
+        (*i)->accept(this);
+    }
+}
+
+void ReturnsChecker::visitListStructuredIdent(ListStructuredIdent* liststructuredident)
+{
+    /* Latte++ */
+    for (ListStructuredIdent::iterator i = liststructuredident->begin() ; i != liststructuredident->end() ; ++i)
     {
         (*i)->accept(this);
     }
@@ -554,6 +734,7 @@ void ReturnsChecker::visitListType(ListType* listtype)
 
 void ReturnsChecker::visitListExpr(ListExpr* listexpr)
 {
+    /* Latte++ */
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
         (*i)->accept(this);

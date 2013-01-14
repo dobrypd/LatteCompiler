@@ -31,7 +31,7 @@ enum arch_t {x86, x86_64};
 namespace frontend
 {
 
-enum etypes {INT, BOOL, STRING, VOID, FUN, UNDEFINED};
+enum etypes {INT, BOOL, STRING, VOID, TTYPE, CLASS, UNDEFINED};
 
 etypes type_to_enum(Type* t);
 std::string type_pretty_print(Type* t);
@@ -42,6 +42,8 @@ bool check_is(U a)
 {
     return !((dynamic_cast<T>(a)) == 0);
 }
+
+std::string ident_to_string(ListStructuredIdent* ident_list);
 
 }
 

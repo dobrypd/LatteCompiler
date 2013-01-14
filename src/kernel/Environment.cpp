@@ -138,35 +138,39 @@ void Environment::add_function(FnDef *function_definition,
     this->env_f[function_definition->ident_] = new_function;
 }
 
-bool Environment::can_add_variable(Ident & ident) const
+bool Environment::can_add_variable(std::string& ident) const
 {
     Environment::MapPtr env_tip = this->env_v.back();
     return (env_tip->find(ident)) == env_tip->end();
 }
 
-bool Environment::can_add_funciton(FnDef *function_definition) const
+bool Environment::can_add_function(std::string& ident) const
 {
-    return (this->env_f.find(function_definition->ident_)) == this->env_f.end();
+    return (this->env_f.find(ident)) == this->env_f.end();
 }
 
-Environment::VarInfoPtr Environment::get_variable(Ident& ident) const
+Environment::VarInfoPtr Environment::get_variable(ListStructuredIdent * ident) const
 {
-    for(std::vector<MapPtr>::const_reverse_iterator it = this->env_v.rbegin();
-            it != this->env_v.rend(); it++) {
-        MapType::iterator fit = (*it)->find(ident);
-        if (fit != ((*it)->end()))
-            return fit->second;
-    }
+//    for(std::vector<MapPtr>::const_reverse_iterator it = this->env_v.rbegin();
+//            it != this->env_v.rend(); it++) {
+//        //TODO: Latte++
+//        //MapType::iterator fit = (*it)->find(ident);
+//        if (fit != ((*it)->end()))
+//            return fit->second;
+//    }
+    //TODO: Latte++
     return VarInfoPtr();
 }
 
 
-Environment::FunInfoPtr Environment::get_function(Ident& ident) const
+Environment::FunInfoPtr Environment::get_function(ListStructuredIdent* ident) const
 {
-    std::map<std::string, FunInfoPtr>::const_iterator it = this->env_f.find(ident);
-    if (it == this->env_f.end())
-        return FunInfoPtr();
-    return it->second;
+    //std::map<std::string, FunInfoPtr>::const_iterator it = this->env_f.find(ident);
+    //if (it == this->env_f.end())
+    //    return FunInfoPtr();
+    //return it->second;
+    //TODO: Latte++
+    return FunInfoPtr();
 }
 
 } /* namespace frontend */
