@@ -39,7 +39,7 @@ StmNoInit.      Item ::= Ident ;
 
 StmInit.        Item ::= Ident "=" Expr ;
 
-StmInitArray.   Item ::= Ident "=" "new" Type "[" [ArrayIndex] "]" ;
+StmInitArray.   Item ::= Ident "=" "new" Type "[" Expr "]" ;
 
 StmInitObj.     Item ::= Ident "=" "new" Type ;
 
@@ -57,7 +57,7 @@ separator nonempty StructuredIdent "." ;
 
 StmAss.     Stmt ::= [StructuredIdent] "=" Expr  ";" ;
 
-StmAssArr.  Stmt ::= [StructuredIdent] "=" "new" Type "[" [ArrayIndex] "]" ;
+StmAssArr.  Stmt ::= [StructuredIdent] "=" "new" Type "[" Expr "]" ;
 
 StmAssObj.  Stmt ::= [StructuredIdent] "=" "new" Type ;
 
