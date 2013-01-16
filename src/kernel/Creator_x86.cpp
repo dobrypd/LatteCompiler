@@ -4,6 +4,7 @@
  *
  */
 
+#include "Instruction.h"
 #include "Creator_x86.h"
 
 
@@ -34,15 +35,14 @@ void Creator_x86::visitRelOp(RelOp* t) {} //abstract class
 
 void Creator_x86::visitProgram(Program *program)
 {
-    /* Code For Program Goes Here */
-
     program->listtopdef_->accept(this);
-
 }
 
 void Creator_x86::visitFnDef(FnDef *fndef)
 {
-    /* Code For FnDef Goes Here */
+    this->instruction_manager.new_block("main");
+    Block::instr_ptr_t m(new x86_Mov);
+    this->instruction_manager.add(m);
 
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);

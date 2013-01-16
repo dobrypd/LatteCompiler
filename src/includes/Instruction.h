@@ -14,12 +14,19 @@ class Instruction
 {
 public:
     Instruction();
+    virtual ~Instruction() {};
+
+    virtual const char* c_str() const = 0;
 };
 
 class x86_Mov : public Instruction
 {
+private:
+    static const char* cstr;
 public:
     x86_Mov();
+
+    virtual const char* c_str() const;
 };
 
 } /* namespace backend */

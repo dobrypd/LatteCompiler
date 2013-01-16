@@ -35,7 +35,7 @@ void ASCreator::save_in_file()
     std::ofstream file;
     file.open(this->assembly_file_name.c_str());
 
-    this->instruction_manager.to_stream(file);
+    this->instruction_manager.write_to_stream(file);
 
     file.close();
 }
@@ -43,6 +43,7 @@ void ASCreator::save_in_file()
 void ASCreator::generate(Visitable *ast_root)
 {
     ast_root->accept(&this->creator);
+
     this->peep_hole_optimization();
     this->save_in_file();
 }
