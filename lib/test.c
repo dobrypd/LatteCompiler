@@ -7,6 +7,7 @@ char* readString();
 int main()
 {
    printInt(readInt());
-   printString(readString());
+   char* read_str = readString();
+   printString(read_str);
    return 0;
 }

@@ -5,3 +5,5 @@ Test: test.c
 	gcc -m32 -Wall -Werror runtime.o test.o
 	gcc -c -m32 -S -o test.s test.c
 	gcc -c -m32 -S -o runtime.s runtime.c
+clean:
+	rm -rf *.s *.o
