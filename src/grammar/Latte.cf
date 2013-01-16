@@ -107,6 +107,8 @@ ELitTrue.  Expr6 ::= "true" ;
 
 ELitFalse. Expr6 ::= "false" ;
 
+ELitNull.  Expr6 ::= "null" ;
+
 EApp.      Expr6 ::= [StructuredIdent] "(" [Expr] ")" ;
 
 EString.   Expr6 ::= String ;

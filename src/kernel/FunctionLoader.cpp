@@ -355,6 +355,13 @@ void FunctionLoader::visitELitFalse(ELitFalse* elitfalse)
 {
 }
 
+void FunctionLoader::visitELitNull(ELitNull *elitnull)
+{
+  /* Code For ELitNull Goes Here */
+
+
+}
+
 void FunctionLoader::visitEApp(EApp *eapp)
 {
     /* Code For EApp Goes Here */

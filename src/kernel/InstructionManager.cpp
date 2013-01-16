@@ -4,6 +4,7 @@
  *
  */
 
+#include <ostream>
 #include "InstructionManager.h"
 
 namespace backend
@@ -11,8 +12,11 @@ namespace backend
 
 InstructionManager::InstructionManager()
 {
-    // TODO Auto-generated constructor stub
+}
 
+void InstructionManager::to_stream(std::ostream& stream)
+{
+    stream << "test";
 }
 
 } /* namespace backend */

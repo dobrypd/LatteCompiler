@@ -403,6 +403,13 @@ void ReturnsChecker::visitELitFalse(ELitFalse* elitfalse)
     this->const_bool_value = false;
 }
 
+void ReturnsChecker::visitELitNull(ELitNull *elitnull)
+{
+  /* Code For ELitNull Goes Here */
+
+}
+
+
 void ReturnsChecker::visitEApp(EApp *eapp)
 {
     /* Latte++ */

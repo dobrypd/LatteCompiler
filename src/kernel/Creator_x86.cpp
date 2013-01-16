@@ -4,28 +4,35 @@
  *
  */
 
-#include "Creator_x86.H"
+#include "Creator_x86.h"
 
 
 namespace backend
 {
 
-void Skeleton::visitProg(Prog* t) {} //abstract class
-void Skeleton::visitTopDef(TopDef* t) {} //abstract class
-void Skeleton::visitArg(Arg* t) {} //abstract class
-void Skeleton::visitClsDef(ClsDef* t) {} //abstract class
-void Skeleton::visitBlk(Blk* t) {} //abstract class
-void Skeleton::visitStmt(Stmt* t) {} //abstract class
-void Skeleton::visitItem(Item* t) {} //abstract class
-void Skeleton::visitStructuredIdent(StructuredIdent* t) {} //abstract class
-void Skeleton::visitArrayIndex(ArrayIndex* t) {} //abstract class
-void Skeleton::visitType(Type* t) {} //abstract class
-void Skeleton::visitExpr(Expr* t) {} //abstract class
-void Skeleton::visitAddOp(AddOp* t) {} //abstract class
-void Skeleton::visitMulOp(MulOp* t) {} //abstract class
-void Skeleton::visitRelOp(RelOp* t) {} //abstract class
+Creator_x86::Creator_x86(InstructionManager& instruction_manager) :
+        instruction_manager(instruction_manager)
+{
 
-void Skeleton::visitProgram(Program *program)
+}
+
+
+void Creator_x86::visitProg(Prog* t) {} //abstract class
+void Creator_x86::visitTopDef(TopDef* t) {} //abstract class
+void Creator_x86::visitArg(Arg* t) {} //abstract class
+void Creator_x86::visitClsDef(ClsDef* t) {} //abstract class
+void Creator_x86::visitBlk(Blk* t) {} //abstract class
+void Creator_x86::visitStmt(Stmt* t) {} //abstract class
+void Creator_x86::visitItem(Item* t) {} //abstract class
+void Creator_x86::visitStructuredIdent(StructuredIdent* t) {} //abstract class
+void Creator_x86::visitArrayIndex(ArrayIndex* t) {} //abstract class
+void Creator_x86::visitType(Type* t) {} //abstract class
+void Creator_x86::visitExpr(Expr* t) {} //abstract class
+void Creator_x86::visitAddOp(AddOp* t) {} //abstract class
+void Creator_x86::visitMulOp(MulOp* t) {} //abstract class
+void Creator_x86::visitRelOp(RelOp* t) {} //abstract class
+
+void Creator_x86::visitProgram(Program *program)
 {
     /* Code For Program Goes Here */
 
@@ -33,7 +40,7 @@ void Skeleton::visitProgram(Program *program)
 
 }
 
-void Skeleton::visitFnDef(FnDef *fndef)
+void Creator_x86::visitFnDef(FnDef *fndef)
 {
     /* Code For FnDef Goes Here */
 
@@ -44,7 +51,7 @@ void Skeleton::visitFnDef(FnDef *fndef)
 
 }
 
-void Skeleton::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
+void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 {
     /* Code For ClsDefNoInher Goes Here */
     /* Latte++ */
@@ -54,7 +61,7 @@ void Skeleton::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 
 }
 
-void Skeleton::visitClsDefInher(ClsDefInher *clsdefinher)
+void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
 {
     /* Code For ClsDefInher Goes Here */
     /* Latte++ */
@@ -65,7 +72,7 @@ void Skeleton::visitClsDefInher(ClsDefInher *clsdefinher)
 
 }
 
-void Skeleton::visitArgument(Argument *argument)
+void Creator_x86::visitArgument(Argument *argument)
 {
     /* Code For Argument Goes Here */
 
@@ -74,7 +81,7 @@ void Skeleton::visitArgument(Argument *argument)
 
 }
 
-void Skeleton::visitMethodDef(MethodDef *methoddef)
+void Creator_x86::visitMethodDef(MethodDef *methoddef)
 {
     /* Code For MethodDef Goes Here */
     /* Latte++ */
@@ -86,7 +93,7 @@ void Skeleton::visitMethodDef(MethodDef *methoddef)
 
 }
 
-void Skeleton::visitFieldDef(FieldDef *fielddef)
+void Creator_x86::visitFieldDef(FieldDef *fielddef)
 {
     /* Code For FieldDef Goes Here */
     /* Latte++ */
@@ -96,7 +103,7 @@ void Skeleton::visitFieldDef(FieldDef *fielddef)
 
 }
 
-void Skeleton::visitStmBlock(StmBlock *stmblock)
+void Creator_x86::visitStmBlock(StmBlock *stmblock)
 {
     /* Code For StmBlock Goes Here */
 
@@ -104,14 +111,14 @@ void Skeleton::visitStmBlock(StmBlock *stmblock)
 
 }
 
-void Skeleton::visitStmEmpty(StmEmpty *stmempty)
+void Creator_x86::visitStmEmpty(StmEmpty *stmempty)
 {
     /* Code For StmEmpty Goes Here */
 
 
 }
 
-void Skeleton::visitStmBStmt(StmBStmt *stmbstmt)
+void Creator_x86::visitStmBStmt(StmBStmt *stmbstmt)
 {
     /* Code For StmBStmt Goes Here */
 
@@ -119,7 +126,7 @@ void Skeleton::visitStmBStmt(StmBStmt *stmbstmt)
 
 }
 
-void Skeleton::visitStmDecl(StmDecl *stmdecl)
+void Creator_x86::visitStmDecl(StmDecl *stmdecl)
 {
     /* Code For StmDecl Goes Here */
 
@@ -128,7 +135,7 @@ void Skeleton::visitStmDecl(StmDecl *stmdecl)
 
 }
 
-void Skeleton::visitStmAss(StmAss *stmass)
+void Creator_x86::visitStmAss(StmAss *stmass)
 {
     /* Code For StmAss Goes Here */
     /* Latte++ */
@@ -138,7 +145,7 @@ void Skeleton::visitStmAss(StmAss *stmass)
 
 }
 
-void Skeleton::visitStmAssArr(StmAssArr *stmassarr)
+void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 {
     /* Code For StmAssArr Goes Here */
     /* Latte++ */
@@ -149,7 +156,7 @@ void Skeleton::visitStmAssArr(StmAssArr *stmassarr)
 
 }
 
-void Skeleton::visitStmAssObj(StmAssObj *stmassobj)
+void Creator_x86::visitStmAssObj(StmAssObj *stmassobj)
 {
     /* Code For StmAssObj Goes Here */
     /* Latte++ */
@@ -159,7 +166,7 @@ void Skeleton::visitStmAssObj(StmAssObj *stmassobj)
 
 }
 
-void Skeleton::visitStmIncr(StmIncr *stmincr)
+void Creator_x86::visitStmIncr(StmIncr *stmincr)
 {
     /* Code For StmIncr Goes Here */
     /* Latte++ */
@@ -168,7 +175,7 @@ void Skeleton::visitStmIncr(StmIncr *stmincr)
 
 }
 
-void Skeleton::visitStmDecr(StmDecr *stmdecr)
+void Creator_x86::visitStmDecr(StmDecr *stmdecr)
 {
     /* Code For StmDecr Goes Here */
     /* Latte++ */
@@ -177,7 +184,7 @@ void Skeleton::visitStmDecr(StmDecr *stmdecr)
 
 }
 
-void Skeleton::visitStmRet(StmRet *stmret)
+void Creator_x86::visitStmRet(StmRet *stmret)
 {
     /* Code For StmRet Goes Here */
 
@@ -185,14 +192,14 @@ void Skeleton::visitStmRet(StmRet *stmret)
 
 }
 
-void Skeleton::visitStmVRet(StmVRet *stmvret)
+void Creator_x86::visitStmVRet(StmVRet *stmvret)
 {
     /* Code For StmVRet Goes Here */
 
 
 }
 
-void Skeleton::visitStmCond(StmCond *stmcond)
+void Creator_x86::visitStmCond(StmCond *stmcond)
 {
     /* Code For StmCond Goes Here */
 
@@ -201,7 +208,7 @@ void Skeleton::visitStmCond(StmCond *stmcond)
 
 }
 
-void Skeleton::visitStmCondElse(StmCondElse *stmcondelse)
+void Creator_x86::visitStmCondElse(StmCondElse *stmcondelse)
 {
     /* Code For StmCondElse Goes Here */
 
@@ -211,7 +218,7 @@ void Skeleton::visitStmCondElse(StmCondElse *stmcondelse)
 
 }
 
-void Skeleton::visitStmWhile(StmWhile *stmwhile)
+void Creator_x86::visitStmWhile(StmWhile *stmwhile)
 {
     /* Code For StmWhile Goes Here */
 
@@ -220,7 +227,7 @@ void Skeleton::visitStmWhile(StmWhile *stmwhile)
 
 }
 
-void Skeleton::visitStmForeach(StmForeach *stmforeach)
+void Creator_x86::visitStmForeach(StmForeach *stmforeach)
 {
     /* Code For StmForeach Goes Here */
     /* Latte++ */
@@ -232,7 +239,7 @@ void Skeleton::visitStmForeach(StmForeach *stmforeach)
 
 }
 
-void Skeleton::visitStmSExp(StmSExp *stmsexp)
+void Creator_x86::visitStmSExp(StmSExp *stmsexp)
 {
     /* Code For StmSExp Goes Here */
 
@@ -240,7 +247,7 @@ void Skeleton::visitStmSExp(StmSExp *stmsexp)
 
 }
 
-void Skeleton::visitStmNoInit(StmNoInit *stmnoinit)
+void Creator_x86::visitStmNoInit(StmNoInit *stmnoinit)
 {
     /* Code For StmNoInit Goes Here */
 
@@ -248,7 +255,7 @@ void Skeleton::visitStmNoInit(StmNoInit *stmnoinit)
 
 }
 
-void Skeleton::visitStmInit(StmInit *stminit)
+void Creator_x86::visitStmInit(StmInit *stminit)
 {
     /* Code For StmInit Goes Here */
 
@@ -257,7 +264,7 @@ void Skeleton::visitStmInit(StmInit *stminit)
 
 }
 
-void Skeleton::visitStmInitArray(StmInitArray *stminitarray)
+void Creator_x86::visitStmInitArray(StmInitArray *stminitarray)
 {
     /* Code For StmInitArray Goes Here */
     /* Latte++ */
@@ -268,7 +275,7 @@ void Skeleton::visitStmInitArray(StmInitArray *stminitarray)
 
 }
 
-void Skeleton::visitStmInitObj(StmInitObj *stminitobj)
+void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)
 {
     /* Code For StmInitObj Goes Here */
     /* Latte++ */
@@ -278,7 +285,7 @@ void Skeleton::visitStmInitObj(StmInitObj *stminitobj)
 
 }
 
-void Skeleton::visitSingleIdent(SingleIdent *singleident)
+void Creator_x86::visitSingleIdent(SingleIdent *singleident)
 {
     /* Code For SingleIdent Goes Here */
     /* Latte++ */
@@ -287,7 +294,7 @@ void Skeleton::visitSingleIdent(SingleIdent *singleident)
 
 }
 
-void Skeleton::visitTableVal(TableVal *tableval)
+void Creator_x86::visitTableVal(TableVal *tableval)
 {
     /* Code For TableVal Goes Here */
     /* Latte++ */
@@ -297,7 +304,7 @@ void Skeleton::visitTableVal(TableVal *tableval)
 
 }
 
-void Skeleton::visitExprIndex(ExprIndex *exprindex)
+void Creator_x86::visitExprIndex(ExprIndex *exprindex)
 {
     /* Code For ExprIndex Goes Here */
     /* Latte++ */
@@ -306,7 +313,7 @@ void Skeleton::visitExprIndex(ExprIndex *exprindex)
 
 }
 
-void Skeleton::visitClass(Class *_class)
+void Creator_x86::visitClass(Class *_class)
 {
     /* Code For Class Goes Here */
     /* Latte++ */
@@ -315,35 +322,35 @@ void Skeleton::visitClass(Class *_class)
 
 }
 
-void Skeleton::visitInt(Int *_int)
+void Creator_x86::visitInt(Int *_int)
 {
     /* Code For Int Goes Here */
 
 
 }
 
-void Skeleton::visitStr(Str *str)
+void Creator_x86::visitStr(Str *str)
 {
     /* Code For Str Goes Here */
 
 
 }
 
-void Skeleton::visitBool(Bool *_bool)
+void Creator_x86::visitBool(Bool *_bool)
 {
     /* Code For Bool Goes Here */
 
 
 }
 
-void Skeleton::visitVoid(Void *_void)
+void Creator_x86::visitVoid(Void *_void)
 {
     /* Code For Void Goes Here */
 
 
 }
 
-void Skeleton::visitTType(TType *ttype)
+void Creator_x86::visitTType(TType *ttype)
 {
     /* Code For TType Goes Here */
     /* Latte++ */
@@ -352,7 +359,7 @@ void Skeleton::visitTType(TType *ttype)
 
 }
 
-void Skeleton::visitEVar(EVar *evar)
+void Creator_x86::visitEVar(EVar *evar)
 {
     /* Code For EVar Goes Here */
     /* Latte++ */
@@ -361,7 +368,7 @@ void Skeleton::visitEVar(EVar *evar)
 
 }
 
-void Skeleton::visitELitInt(ELitInt *elitint)
+void Creator_x86::visitELitInt(ELitInt *elitint)
 {
     /* Code For ELitInt Goes Here */
 
@@ -369,21 +376,28 @@ void Skeleton::visitELitInt(ELitInt *elitint)
 
 }
 
-void Skeleton::visitELitTrue(ELitTrue *elittrue)
+void Creator_x86::visitELitTrue(ELitTrue *elittrue)
 {
     /* Code For ELitTrue Goes Here */
 
 
 }
 
-void Skeleton::visitELitFalse(ELitFalse *elitfalse)
+void Creator_x86::visitELitFalse(ELitFalse *elitfalse)
 {
     /* Code For ELitFalse Goes Here */
 
 
 }
 
-void Skeleton::visitEApp(EApp *eapp)
+void Creator_x86::visitELitNull(ELitNull *elitnull)
+{
+  /* Code For ELitNull Goes Here */
+
+
+}
+
+void Creator_x86::visitEApp(EApp *eapp)
 {
     /* Code For EApp Goes Here */
     /* Latte++ */
@@ -393,7 +407,7 @@ void Skeleton::visitEApp(EApp *eapp)
 
 }
 
-void Skeleton::visitEString(EString *estring)
+void Creator_x86::visitEString(EString *estring)
 {
     /* Code For EString Goes Here */
 
@@ -401,7 +415,7 @@ void Skeleton::visitEString(EString *estring)
 
 }
 
-void Skeleton::visitNeg(Neg *neg)
+void Creator_x86::visitNeg(Neg *neg)
 {
     /* Code For Neg Goes Here */
 
@@ -409,15 +423,15 @@ void Skeleton::visitNeg(Neg *neg)
 
 }
 
-void Skeleton::visitNot(Not *_not)
+void Creator_x86::visitNot(Not *_not)
 {
     /* Code For Not Goes Here */
 
-    not->expr_->accept(this);
+    _not->expr_->accept(this);
 
 }
 
-void Skeleton::visitEDynamicCast(EDynamicCast *edynamiccast)
+void Creator_x86::visitEDynamicCast(EDynamicCast *edynamiccast)
 {
     /* Code For EDynamicCast Goes Here */
     /* Latte++ */
@@ -427,7 +441,7 @@ void Skeleton::visitEDynamicCast(EDynamicCast *edynamiccast)
 
 }
 
-void Skeleton::visitEMul(EMul *emul)
+void Creator_x86::visitEMul(EMul *emul)
 {
     /* Code For EMul Goes Here */
 
@@ -437,7 +451,7 @@ void Skeleton::visitEMul(EMul *emul)
 
 }
 
-void Skeleton::visitEAdd(EAdd *eadd)
+void Creator_x86::visitEAdd(EAdd *eadd)
 {
     /* Code For EAdd Goes Here */
 
@@ -447,7 +461,7 @@ void Skeleton::visitEAdd(EAdd *eadd)
 
 }
 
-void Skeleton::visitERel(ERel *erel)
+void Creator_x86::visitERel(ERel *erel)
 {
     /* Code For ERel Goes Here */
 
@@ -457,7 +471,7 @@ void Skeleton::visitERel(ERel *erel)
 
 }
 
-void Skeleton::visitEAnd(EAnd *eand)
+void Creator_x86::visitEAnd(EAnd *eand)
 {
     /* Code For EAnd Goes Here */
 
@@ -466,7 +480,7 @@ void Skeleton::visitEAnd(EAnd *eand)
 
 }
 
-void Skeleton::visitEOr(EOr *eor)
+void Creator_x86::visitEOr(EOr *eor)
 {
     /* Code For EOr Goes Here */
 
@@ -475,77 +489,77 @@ void Skeleton::visitEOr(EOr *eor)
 
 }
 
-void Skeleton::visitPlus(Plus *plus)
+void Creator_x86::visitPlus(Plus *plus)
 {
     /* Code For Plus Goes Here */
 
 
 }
 
-void Skeleton::visitMinus(Minus *minus)
+void Creator_x86::visitMinus(Minus *minus)
 {
     /* Code For Minus Goes Here */
 
 
 }
 
-void Skeleton::visitTimes(Times *times)
+void Creator_x86::visitTimes(Times *times)
 {
     /* Code For Times Goes Here */
 
 
 }
 
-void Skeleton::visitDiv(Div *div)
+void Creator_x86::visitDiv(Div *div)
 {
     /* Code For Div Goes Here */
 
 
 }
 
-void Skeleton::visitMod(Mod *mod)
+void Creator_x86::visitMod(Mod *mod)
 {
     /* Code For Mod Goes Here */
 
 
 }
 
-void Skeleton::visitLTH(LTH *lth)
+void Creator_x86::visitLTH(LTH *lth)
 {
     /* Code For LTH Goes Here */
 
 
 }
 
-void Skeleton::visitLE(LE *le)
+void Creator_x86::visitLE(LE *le)
 {
     /* Code For LE Goes Here */
 
 
 }
 
-void Skeleton::visitGTH(GTH *gth)
+void Creator_x86::visitGTH(GTH *gth)
 {
     /* Code For GTH Goes Here */
 
 
 }
 
-void Skeleton::visitGE(GE *ge)
+void Creator_x86::visitGE(GE *ge)
 {
     /* Code For GE Goes Here */
 
 
 }
 
-void Skeleton::visitEQU(EQU *equ)
+void Creator_x86::visitEQU(EQU *equ)
 {
     /* Code For EQU Goes Here */
 
 
 }
 
-void Skeleton::visitNE(NE *ne)
+void Creator_x86::visitNE(NE *ne)
 {
     /* Code For NE Goes Here */
 
@@ -553,7 +567,7 @@ void Skeleton::visitNE(NE *ne)
 }
 
 
-void Skeleton::visitListTopDef(ListTopDef* listtopdef)
+void Creator_x86::visitListTopDef(ListTopDef* listtopdef)
 {
     for (ListTopDef::iterator i = listtopdef->begin() ; i != listtopdef->end() ; ++i)
     {
@@ -561,7 +575,7 @@ void Skeleton::visitListTopDef(ListTopDef* listtopdef)
     }
 }
 
-void Skeleton::visitListArg(ListArg* listarg)
+void Creator_x86::visitListArg(ListArg* listarg)
 {
     for (ListArg::iterator i = listarg->begin() ; i != listarg->end() ; ++i)
     {
@@ -569,7 +583,7 @@ void Skeleton::visitListArg(ListArg* listarg)
     }
 }
 
-void Skeleton::visitListClsDef(ListClsDef* listclsdef)
+void Creator_x86::visitListClsDef(ListClsDef* listclsdef)
 {
     /* Latte++ */
     for (ListClsDef::iterator i = listclsdef->begin() ; i != listclsdef->end() ; ++i)
@@ -578,7 +592,7 @@ void Skeleton::visitListClsDef(ListClsDef* listclsdef)
     }
 }
 
-void Skeleton::visitListStmt(ListStmt* liststmt)
+void Creator_x86::visitListStmt(ListStmt* liststmt)
 {
     for (ListStmt::iterator i = liststmt->begin() ; i != liststmt->end() ; ++i)
     {
@@ -586,7 +600,7 @@ void Skeleton::visitListStmt(ListStmt* liststmt)
     }
 }
 
-void Skeleton::visitListItem(ListItem* listitem)
+void Creator_x86::visitListItem(ListItem* listitem)
 {
     for (ListItem::iterator i = listitem->begin() ; i != listitem->end() ; ++i)
     {
@@ -594,7 +608,7 @@ void Skeleton::visitListItem(ListItem* listitem)
     }
 }
 
-void Skeleton::visitListArrayIndex(ListArrayIndex* listarrayindex)
+void Creator_x86::visitListArrayIndex(ListArrayIndex* listarrayindex)
 {
     /* Latte++ */
     for (ListArrayIndex::iterator i = listarrayindex->begin() ; i != listarrayindex->end() ; ++i)
@@ -603,7 +617,7 @@ void Skeleton::visitListArrayIndex(ListArrayIndex* listarrayindex)
     }
 }
 
-void Skeleton::visitListStructuredIdent(ListStructuredIdent* liststructuredident)
+void Creator_x86::visitListStructuredIdent(ListStructuredIdent* liststructuredident)
 {
     /* Latte++ */
     for (ListStructuredIdent::iterator i = liststructuredident->begin() ; i != liststructuredident->end() ; ++i)
@@ -612,7 +626,7 @@ void Skeleton::visitListStructuredIdent(ListStructuredIdent* liststructuredident
     }
 }
 
-void Skeleton::visitListExpr(ListExpr* listexpr)
+void Creator_x86::visitListExpr(ListExpr* listexpr)
 {
     /* Latte++ */
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
@@ -622,27 +636,27 @@ void Skeleton::visitListExpr(ListExpr* listexpr)
 }
 
 
-void Skeleton::visitInteger(Integer x)
+void Creator_x86::visitInteger(Integer x)
 {
     /* Code for Integer Goes Here */
 }
 
-void Skeleton::visitChar(Char x)
+void Creator_x86::visitChar(Char x)
 {
     /* Code for Char Goes Here */
 }
 
-void Skeleton::visitDouble(Double x)
+void Creator_x86::visitDouble(Double x)
 {
     /* Code for Double Goes Here */
 }
 
-void Skeleton::visitString(String x)
+void Creator_x86::visitString(String x)
 {
     /* Code for String Goes Here */
 }
 
-void Skeleton::visitIdent(Ident x)
+void Creator_x86::visitIdent(Ident x)
 {
     /* Code for Ident Goes Here */
 }

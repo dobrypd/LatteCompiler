@@ -562,6 +562,13 @@ void ASTChecker::visitELitFalse(ELitFalse* elitfalse)
     this->last_type = &(this->literal_bool);
 }
 
+void ASTChecker::visitELitNull(ELitNull *elitnull)
+{
+  /* Code For ELitNull Goes Here */
+
+
+}
+
 void ASTChecker::visitEApp(EApp* eapp)
 {
     this->last_line_number = eapp->line_number;

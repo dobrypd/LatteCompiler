@@ -6,17 +6,23 @@
 
 #ifndef CREATOR_X86_H_
 #define CREATOR_X86_H_
-/* You might want to change the above name. */
 
 #include "Absyn.H"
+#include "InstructionManager.h"
 
 
 namespace backend
 {
 
-class Skeleton : public Visitor
+class Creator_x86 : public Visitor
 {
+private:
+    InstructionManager& instruction_manager;
+
 public:
+    Creator_x86(InstructionManager& instruction_manager);
+
+
     void visitProg(Prog* p);
     void visitTopDef(TopDef* p);
     void visitArg(Arg* p);
@@ -71,6 +77,7 @@ public:
     void visitELitInt(ELitInt* p);
     void visitELitTrue(ELitTrue* p);
     void visitELitFalse(ELitFalse* p);
+    void visitELitNull(ELitNull* p);
     void visitEApp(EApp* p);
     void visitEString(EString* p);
     void visitNeg(Neg* p);

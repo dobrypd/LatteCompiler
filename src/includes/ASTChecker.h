@@ -99,6 +99,7 @@ public:
     void visitELitInt(ELitInt* p);
     void visitELitTrue(ELitTrue* p);
     void visitELitFalse(ELitFalse* p);
+    void visitELitNull(ELitNull* p);
     void visitEApp(EApp* p);
     void visitEString(EString* p);
     void visitNeg(Neg* p);
