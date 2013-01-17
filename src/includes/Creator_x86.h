@@ -9,6 +9,7 @@
 
 #include "Absyn.H"
 #include "InstructionManager.h"
+#include "CompilerEnvironment.h"
 
 
 namespace backend
@@ -18,6 +19,14 @@ class Creator_x86 : public Visitor
 {
 private:
     InstructionManager& instruction_manager;
+    CompilerEnvironment env;
+
+    // Traverse variables
+    // Declarations:
+    Type* declaration_type;
+    // Expressions:
+
+    // End of traverse vars
 
 public:
     Creator_x86(InstructionManager& instruction_manager);

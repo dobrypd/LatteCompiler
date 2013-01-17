@@ -54,8 +54,11 @@ void CompilerEnvironment::add_variable(Type* type, std::string name)
     MapPtr tip = this->var_tip();
     VarInfoPtr new_variable(new CompilerEnvironment::var_info);
     new_variable->type = type;
-        (*tip)[name] = new_variable;
+    // TODO: OFFSET! if array + sizeof len if object + sizeof len
+    (*tip)[name] = new_variable;
 }
+
+
 
 CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(std::string & name)
 {

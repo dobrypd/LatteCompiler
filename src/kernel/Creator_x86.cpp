@@ -5,6 +5,8 @@
  */
 
 #include "Instruction.h"
+#include "CompilerEnvironment.h"
+#include "global.h"
 #include "Creator_x86.h"
 
 
@@ -41,26 +43,24 @@ void Creator_x86::visitProgram(Program *program)
 void Creator_x86::visitFnDef(FnDef *fndef)
 {
     this->instruction_manager.new_block(fndef->ident_);
+    this->env.prepare();
 
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);
     fndef->listarg_->accept(this);
     fndef->blk_->accept(this);
 
+    this->env.back();
 }
 
 void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 {
-    /* Code For ClsDefNoInher Goes Here */
-
     visitIdent(clsdefnoinher->ident_);
     clsdefnoinher->listclsdef_->accept(this);
 }
 
 void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
 {
-    /* Code For ClsDefInher Goes Here */
-    /* Latte++ */
 
     visitIdent(clsdefinher->ident_1);
     visitIdent(clsdefinher->ident_2);
@@ -89,12 +89,8 @@ void Creator_x86::visitMethodDef(MethodDef *methoddef)
 
 void Creator_x86::visitFieldDef(FieldDef *fielddef)
 {
-    /* Code For FieldDef Goes Here */
-    /* Latte++ */
-
     fielddef->type_->accept(this);
     visitIdent(fielddef->ident_);
-
 }
 
 void Creator_x86::visitStmBlock(StmBlock *stmblock)
@@ -108,12 +104,15 @@ void Creator_x86::visitStmEmpty(StmEmpty *stmempty)
 
 void Creator_x86::visitStmBStmt(StmBStmt *stmbstmt)
 {
+    this->env.prepare(); // TODO: check
     stmbstmt->blk_->accept(this);
+    this->env.back();
 }
 
 void Creator_x86::visitStmDecl(StmDecl *stmdecl)
 {
     stmdecl->type_->accept(this);
+    this->declaration_type = stmdecl->type_;
     stmdecl->listitem_->accept(this);
 }
 
@@ -219,30 +218,27 @@ void Creator_x86::visitStmSExp(StmSExp *stmsexp)
 
 void Creator_x86::visitStmNoInit(StmNoInit *stmnoinit)
 {
-    /* Code For StmNoInit Goes Here */
-
     visitIdent(stmnoinit->ident_);
-
+    this->env.add_variable(this->declaration_type, stmnoinit->ident_);
+    this->instruction_manager.alloc_default(this->declaration_type);
 }
 
 void Creator_x86::visitStmInit(StmInit *stminit)
 {
-    /* Code For StmInit Goes Here */
-
     visitIdent(stminit->ident_);
+    this->env.add_variable(this->declaration_type, stminit->ident_);
     stminit->expr_->accept(this);
-
+    // Default value should be on stack. Do not pop it.
 }
 
 void Creator_x86::visitStmInitArray(StmInitArray *stminitarray)
 {
-    /* Code For StmInitArray Goes Here */
-    /* Latte++ */
-
     visitIdent(stminitarray->ident_);
     stminitarray->type_->accept(this);
     stminitarray->expr_->accept(this);
 
+    this->instruction_manager.alloc_array(
+            CompilerEnvironment::type_sizeof(stminitarray->type_));
 }
 
 void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)

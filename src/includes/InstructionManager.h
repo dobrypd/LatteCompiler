@@ -65,6 +65,16 @@ public:
 
     void new_block(std::string name);
     void add(Block::instr_ptr_t instruction);
+
+    // Standard operations:
+    void alloc_var(Type* type);
+    void alloc_default(Type* type);
+    void alloc_array(size_t size); // Length on top of the stack.
+
+    // Stack operations;
+    void pop_from_the_stack();
+
+
 };
 
 

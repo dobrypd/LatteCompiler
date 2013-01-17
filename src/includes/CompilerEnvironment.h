@@ -21,6 +21,7 @@ public:
     typedef struct {
         Type* type;
         int position;
+        bool scalar;
         bool on_stack;
         bool temp;
     } var_info;
