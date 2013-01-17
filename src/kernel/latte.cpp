@@ -233,7 +233,7 @@ void compile_file(Visitable* ast_root, const char* input_file_name,
 {
     // Create assembly file.
     std::string assembly_file_name = create_out_name(input_file_name, "s");
-    backend::ASCreator as_generator(assembly_file_name, env);
+    backend::ASCreator as_generator(input_file_name, assembly_file_name, env);
     as_generator.generate(ast_root);
 
 

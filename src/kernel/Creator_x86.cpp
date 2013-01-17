@@ -40,9 +40,7 @@ void Creator_x86::visitProgram(Program *program)
 
 void Creator_x86::visitFnDef(FnDef *fndef)
 {
-    this->instruction_manager.new_block("main");
-    Block::instr_ptr_t m(new x86_Mov);
-    this->instruction_manager.add(m);
+    this->instruction_manager.new_block(fndef->ident_);
 
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);
@@ -54,11 +52,9 @@ void Creator_x86::visitFnDef(FnDef *fndef)
 void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 {
     /* Code For ClsDefNoInher Goes Here */
-    /* Latte++ */
 
     visitIdent(clsdefnoinher->ident_);
     clsdefnoinher->listclsdef_->accept(this);
-
 }
 
 void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
@@ -83,8 +79,6 @@ void Creator_x86::visitArgument(Argument *argument)
 
 void Creator_x86::visitMethodDef(MethodDef *methoddef)
 {
-    /* Code For MethodDef Goes Here */
-    /* Latte++ */
 
     methoddef->type_->accept(this);
     visitIdent(methoddef->ident_);
@@ -105,55 +99,35 @@ void Creator_x86::visitFieldDef(FieldDef *fielddef)
 
 void Creator_x86::visitStmBlock(StmBlock *stmblock)
 {
-    /* Code For StmBlock Goes Here */
-
     stmblock->liststmt_->accept(this);
-
 }
 
 void Creator_x86::visitStmEmpty(StmEmpty *stmempty)
 {
-    /* Code For StmEmpty Goes Here */
-
-
 }
 
 void Creator_x86::visitStmBStmt(StmBStmt *stmbstmt)
 {
-    /* Code For StmBStmt Goes Here */
-
     stmbstmt->blk_->accept(this);
-
 }
 
 void Creator_x86::visitStmDecl(StmDecl *stmdecl)
 {
-    /* Code For StmDecl Goes Here */
-
     stmdecl->type_->accept(this);
     stmdecl->listitem_->accept(this);
-
 }
 
 void Creator_x86::visitStmAss(StmAss *stmass)
 {
-    /* Code For StmAss Goes Here */
-    /* Latte++ */
-
     stmass->liststructuredident_->accept(this);
     stmass->expr_->accept(this);
-
 }
 
 void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 {
-    /* Code For StmAssArr Goes Here */
-    /* Latte++ */
-
     stmassarr->liststructuredident_->accept(this);
     stmassarr->type_->accept(this);
     stmassarr->expr_->accept(this);
-
 }
 
 void Creator_x86::visitStmAssObj(StmAssObj *stmassobj)
@@ -168,11 +142,7 @@ void Creator_x86::visitStmAssObj(StmAssObj *stmassobj)
 
 void Creator_x86::visitStmIncr(StmIncr *stmincr)
 {
-    /* Code For StmIncr Goes Here */
-    /* Latte++ */
-
     stmincr->liststructuredident_->accept(this);
-
 }
 
 void Creator_x86::visitStmDecr(StmDecr *stmdecr)
@@ -338,15 +308,11 @@ void Creator_x86::visitStr(Str *str)
 
 void Creator_x86::visitBool(Bool *_bool)
 {
-    /* Code For Bool Goes Here */
-
 
 }
 
 void Creator_x86::visitVoid(Void *_void)
 {
-    /* Code For Void Goes Here */
-
 
 }
 
@@ -370,41 +336,30 @@ void Creator_x86::visitEVar(EVar *evar)
 
 void Creator_x86::visitELitInt(ELitInt *elitint)
 {
-    /* Code For ELitInt Goes Here */
-
     visitInteger(elitint->integer_);
-
+    //this->instruction_manager.add(push)
 }
 
 void Creator_x86::visitELitTrue(ELitTrue *elittrue)
 {
-    /* Code For ELitTrue Goes Here */
-
-
 }
 
 void Creator_x86::visitELitFalse(ELitFalse *elitfalse)
 {
-    /* Code For ELitFalse Goes Here */
-
-
 }
 
 void Creator_x86::visitELitNull(ELitNull *elitnull)
 {
-  /* Code For ELitNull Goes Here */
-
-
 }
 
 void Creator_x86::visitEApp(EApp *eapp)
 {
-    /* Code For EApp Goes Here */
-    /* Latte++ */
 
     eapp->liststructuredident_->accept(this);
     eapp->listexpr_->accept(this);
 
+    //Block::instr_ptr_t call(new x86_Call(get_from_vtable(eapp->liststructuredident_)));
+    //this->instruction_manager.add(call);
 }
 
 void Creator_x86::visitEString(EString *estring)

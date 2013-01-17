@@ -23,12 +23,14 @@ public:
     typedef std::list<instr_ptr_t> instructions_list_t;
     typedef std::list<instr_ptr_t>::iterator list_it_t;
 
+    static const char* ident_prefix;
 private:
     instructions_list_t i_list;
-
     std::string block_name;
 
     Block();
+
+    static long current_ident;
 public:
 
     Block(std::string name);
@@ -39,6 +41,8 @@ public:
     std::string& get_name();
 
     void add(instr_ptr_t instruction);
+
+    static std::string new_ident();
 };
 
 class InstructionManager

@@ -5,6 +5,7 @@
  */
 
 #include <ostream>
+#include <sstream>
 #include "InstructionManager.h"
 
 namespace backend
@@ -12,6 +13,8 @@ namespace backend
 
 InstructionManager::InstructionManager()
 {
+    block_ptr_t block_0(new Block(Block::new_ident()));
+    this->blocks.push_back(block_0);
 }
 
 void InstructionManager::write_to_stream(std::ostream& stream)
@@ -22,9 +25,8 @@ void InstructionManager::write_to_stream(std::ostream& stream)
         for (Block::list_it_t i_it = (*it)->begin(); i_it != (*it)->end();
                 i_it++)
         {
-            stream << "  " << (*i_it)->c_str() << std::endl;
+            stream << "\t" << (*i_it)->c_str() << std::endl;
         }
-        stream << std::endl;
     }
 }
 
@@ -48,6 +50,9 @@ InstructionManager::list_it_t InstructionManager::end()
 {
     return this->blocks.end();
 }
+
+long Block::current_ident = 0;
+const char* Block::ident_prefix = "_L";
 
 Block::Block()
 {
@@ -83,6 +88,15 @@ std::string & Block::get_name()
 void Block::add(instr_ptr_t instruction)
 {
     this->i_list.push_back(instruction);
+}
+
+std::string Block::new_ident()
+{
+    Block::current_ident++;
+    std::stringstream ss;
+    ss << Block::current_ident;
+    std::string r_str(Block::ident_prefix);
+    return r_str + ss.str();
 }
 
 } /* namespace backend */

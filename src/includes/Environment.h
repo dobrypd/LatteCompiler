@@ -9,7 +9,6 @@
 
 #include <string>
 #include <vector>
-#include <deque>
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include "Absyn.H"

@@ -14,3 +14,4 @@ latc
 latc_x86
 latc_x86_64
 *.s
+a.out
