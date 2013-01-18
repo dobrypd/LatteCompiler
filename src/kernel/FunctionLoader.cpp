@@ -39,6 +39,12 @@ void FunctionLoader::check(Visitable* v)
 //        this->error_handler.error(1, msg);
 //        return;
 //    }
+    if (debug)
+    {
+        // Log what was added and checked.
+        std::cout << "Function loader finished with environment:" << std::endl;
+        // TODO:
+    }
 }
 
 void FunctionLoader::visitProg(Prog* t) {} //abstract class

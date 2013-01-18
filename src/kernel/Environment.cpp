@@ -16,6 +16,27 @@
 namespace frontend
 {
 
+
+Environment::FunInfoPtr Environment::create_fun(Type* ret_type, ListArg* args)
+{
+    Environment::FunInfoPtr new_function(new Environment::fun_info);
+    new_function->ret_type = ret_type;
+
+    for(ListArg::iterator it = args->begin(); it != args->end();it++){
+        Environment::VarInfoPtr next_argument(new Environment::var_info);
+        Argument *argument = dynamic_cast<Argument*>(*it);
+        if(argument == 0)
+            if (debug)
+                std::cerr << "Cannot cast Arg to Argument. Did you changed grammar?";
+            throw "Did you changed grammar?!";
+
+        next_argument->type = argument->type_;
+        new_function->arguments.push_back(next_argument);
+    }
+
+    return new_function;
+}
+
 Environment::Environment()
 {
     Environment::MapPtr empty(new Environment::MapType());
@@ -105,26 +126,11 @@ void Environment::add_variable(Type *t, std::string & ident)
 void Environment::add_function(FnDef *function_definition,
         bool is_extern = false)
 {
-    Environment::FunInfoPtr new_function(new Environment::fun_info);
-    new_function->ret_type = function_definition->type_;
+
+    Environment::FunInfoPtr new_function =
+            this->create_fun(function_definition->type_,
+                    function_definition->listarg_);
     new_function->is_extern = is_extern;
-    if(debug && (function_definition->listarg_->size() > 0))
-        std::cout << " found arguments: ";
-
-    for(ListArg::iterator it = function_definition->listarg_->begin();it != function_definition->listarg_->end();it++){
-        if(debug)
-            std::cout << (dynamic_cast<Argument*>(*it))->ident_ << ", ";
-
-        Environment::VarInfoPtr next_argument(new Environment::var_info);
-        Argument *argument = dynamic_cast<Argument*>(*it);
-        if(argument == 0)
-            throw "Did you changed grammar?!";
-
-        next_argument->type = argument->type_;
-        new_function->arguments.push_back(next_argument);
-    }
-    if(debug)
-        std::cout << std::endl;
 
     this->env_f[function_definition->ident_] = new_function;
 }
@@ -137,18 +143,35 @@ bool Environment::can_add_variable(std::string& ident) const
 
 void Environment::add_class(std::string ident)
 {
+    Environment::ClsInfoPtr new_class(new Environment::lat_class);
+    this->env_cls[ident] = new_class;
 }
 
 void Environment::add_class(std::string ident, std::string extends_ident)
 {
+    Environment::ClsInfoPtr new_class(new Environment::lat_class);
+    Environment::ClsInfoPtr parent = this->get_class(extends_ident);
+    // Should be checked if extends exists by this can_add_class(id, id_parent).
+    new_class->lat_cls_parent = parent;
+    this->env_cls[ident] = new_class;
 }
 
-void Environment::add_method_to_cls(std::string & class_name, FnDef *funciton_definition)
+void Environment::add_method_to_cls(std::string & class_name,
+        MethodDef *method_definition)
 {
+    Environment::ClsInfoPtr this_class = this->get_class(class_name);
+    this_class->methods.push_back(std::make_pair(method_definition->ident_,
+            this->create_fun(method_definition->type_,
+                    method_definition->listarg_)));
 }
 
-void Environment::add_field_to_cls(std::string & class_name, Type *type, std::string & ident)
+void Environment::add_field_to_cls(std::string & class_name,
+        Type *type, std::string & ident)
 {
+    Environment::ClsInfoPtr this_class = this->get_class(class_name);
+    Environment::VarInfoPtr new_variable(new Environment::var_info);
+    new_variable->type = type;
+    this_class->fields.push_back(std::make_pair(ident, new_variable));
 }
 
 bool Environment::can_add_function(std::string & ident) const
@@ -156,29 +179,26 @@ bool Environment::can_add_function(std::string & ident) const
     return (this->env_f.find(ident)) == this->env_f.end();
 }
 
-Environment::VarInfoPtr Environment::get_variable(ListStructuredIdent *ident) const
-{
-    return VarInfoPtr();
-}
-
-Environment::FunInfoPtr Environment::get_function(ListStructuredIdent *ident) const
-{
-    return FunInfoPtr();
-}
-
 bool Environment::can_add_class(std::string & ident) const
 {
+    return (this->env_cls.find(ident)) == this->env_cls.end();
 }
 
-VarInfoPtr Environment::get_variable(std::string & ident) const
+bool Environment::can_add_class(std::string& ident, std::string& parent_ident) const
+{
+    return ((this->env_cls.find(parent_ident)) != this->env_cls.end())
+            && ((this->env_cls.find(ident)) == this->env_cls.end());
+}
+
+Environment::VarInfoPtr Environment::get_variable(std::string & ident) const
 {
 }
 
-FunInfoPtr Environment::get_function(std::string & ident) const
+Environment::FunInfoPtr Environment::get_function(std::string & ident) const
 {
 }
 
-ClsInfoPtr Environment::get_class(std::string & ident) const
+Environment::ClsInfoPtr Environment::get_class(std::string & ident) const
 {
 }
 

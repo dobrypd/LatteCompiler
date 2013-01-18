@@ -50,7 +50,7 @@ public:
         boost::shared_ptr<Environment::lat_class> lat_cls_parent;
     };
 
-    typedef boost::shared_ptr<lat_class> ClsInfoPtr;
+    typedef boost::shared_ptr<Environment::lat_class> ClsInfoPtr;
 
 private:
 
@@ -84,6 +84,8 @@ private:
      * end globals.
      */
 
+    FunInfoPtr create_fun(Type* ret_type, ListArg* args);
+
 public:
     Environment();
     ~Environment();
@@ -95,13 +97,15 @@ public:
     void add_function(FnDef* function_definition, bool is_extern);
     void add_class(std::string ident);
     void add_class(std::string ident, std::string extends_ident);
-    void add_method_to_cls(std::string& class_name, FnDef* funciton_definition);
+    void add_method_to_cls(std::string& class_name,
+            MethodDef* method_definition);
     void add_field_to_cls(std::string& class_name, Type* type,
             std::string& ident);
 
     bool can_add_variable(std::string& ident) const;
     bool can_add_function(std::string& ident) const;
     bool can_add_class(std::string& ident) const;
+    bool can_add_class(std::string& ident, std::string& parent_ident) const;
 
     VarInfoPtr get_variable(std::string& ident) const;
     FunInfoPtr get_function(std::string& ident) const;
