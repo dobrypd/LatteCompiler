@@ -18,7 +18,6 @@ namespace backend
 class CompilerEnvironment
 {
 public:
-    enum simpletype_t {SCALAR, ARRAY, OBJECT};
     typedef struct {
         Type* type;
         int position;

@@ -192,14 +192,24 @@ bool Environment::can_add_class(std::string& ident, std::string& parent_ident) c
 
 Environment::VarInfoPtr Environment::get_variable(std::string & ident) const
 {
+    for(std::vector<Environment::MapPtr>::const_reverse_iterator it =
+            this->env_v.rbegin(); it != this->env_v.rend();it++){
+        Environment::MapType::iterator fit = (*it)->find(ident);
+        if(fit != ((*it)->end())) {
+            return fit->second;
+        }
+    }
+    return Environment::VarInfoPtr();
 }
 
 Environment::FunInfoPtr Environment::get_function(std::string & ident) const
 {
+    return this->env_f[ident];
 }
 
 Environment::ClsInfoPtr Environment::get_class(std::string & ident) const
 {
+    return this->env_cls[ident];
 }
 
 } /* namespace frontend */
