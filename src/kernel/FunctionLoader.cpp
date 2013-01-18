@@ -290,6 +290,13 @@ void FunctionLoader::visitTableVal(TableVal *tableval)
 
 }
 
+void FunctionLoader::visitSelfIdent(SelfIdent *selfident)
+{
+  /* Code For SelfIdent Goes Here */
+
+
+}
+
 void FunctionLoader::visitExprIndex(ExprIndex *exprindex)
 {
     /* Code For ExprIndex Goes Here */

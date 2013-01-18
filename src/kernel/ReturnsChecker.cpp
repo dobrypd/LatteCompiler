@@ -332,6 +332,13 @@ void ReturnsChecker::visitTableVal(TableVal *tableval)
 
 }
 
+void ReturnsChecker::visitSelfIdent(SelfIdent *selfident)
+{
+  /* Code For SelfIdent Goes Here */
+
+
+}
+
 void ReturnsChecker::visitExprIndex(ExprIndex *exprindex)
 {
     /* Code For ExprIndex Goes Here */

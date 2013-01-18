@@ -20,8 +20,6 @@ Environment::Environment()
 {
     Environment::MapPtr empty(new Environment::MapType());
     this->env_v.push_back(empty);
-    if(debug)
-        std::cout << "Initializing new environment at address: " << this << std::endl;
 
     this->global_int_type = new Int;
     this->global_str_type = new Str;
@@ -84,27 +82,20 @@ void Environment::emerge()
 
 void Environment::prepare()
 {
-    if(debug)
-        std::cout << "Preparing environment to new " << this->env_v.size() + 1 << "'th block." << std::endl;
-
     this->submerge();
 }
 void Environment::back()
 {
-    if(debug)
-        std::cout << "Back from block " << this->env_v.size() << "." << std::endl;
-
     if(this->env_v.size() > 0){
         this->emerge();
     }else{
+        if (debug) std::cerr << "Emerging below bottom is not possible.";
         throw 0;
     }
 }
 
-void Environment::add_variable(Type *t, Ident & ident)
+void Environment::add_variable(Type *t, std::string & ident)
 {
-    if (debug)
-        std::cout << "Adding new variable: " << ident << " line: " << t->line_number << std::endl;
     MapPtr tip = this->env_v_tip();
     VarInfoPtr new_variable(new Environment::var_info);
     new_variable->type = t;
@@ -144,33 +135,51 @@ bool Environment::can_add_variable(std::string& ident) const
     return (env_tip->find(ident)) == env_tip->end();
 }
 
-bool Environment::can_add_function(std::string& ident) const
+void Environment::add_class(std::string ident)
+{
+}
+
+void Environment::add_class(std::string ident, std::string extends_ident)
+{
+}
+
+void Environment::add_method_to_cls(std::string & class_name, FnDef *funciton_definition)
+{
+}
+
+void Environment::add_field_to_cls(std::string & class_name, Type *type, std::string & ident)
+{
+}
+
+bool Environment::can_add_function(std::string & ident) const
 {
     return (this->env_f.find(ident)) == this->env_f.end();
 }
 
-Environment::VarInfoPtr Environment::get_variable(ListStructuredIdent * ident) const
+Environment::VarInfoPtr Environment::get_variable(ListStructuredIdent *ident) const
 {
-//    for(std::vector<MapPtr>::const_reverse_iterator it = this->env_v.rbegin();
-//            it != this->env_v.rend(); it++) {
-//        //TODO: Latte++
-//        //MapType::iterator fit = (*it)->find(ident);
-//        if (fit != ((*it)->end()))
-//            return fit->second;
-//    }
-    //TODO: Latte++
     return VarInfoPtr();
 }
 
-
-Environment::FunInfoPtr Environment::get_function(ListStructuredIdent* ident) const
+Environment::FunInfoPtr Environment::get_function(ListStructuredIdent *ident) const
 {
-    //std::map<std::string, FunInfoPtr>::const_iterator it = this->env_f.find(ident);
-    //if (it == this->env_f.end())
-    //    return FunInfoPtr();
-    //return it->second;
-    //TODO: Latte++
     return FunInfoPtr();
+}
+
+bool Environment::can_add_class(std::string & ident) const
+{
+}
+
+VarInfoPtr Environment::get_variable(std::string & ident) const
+{
+}
+
+FunInfoPtr Environment::get_function(std::string & ident) const
+{
+}
+
+ClsInfoPtr Environment::get_class(std::string & ident) const
+{
 }
 
 } /* namespace frontend */

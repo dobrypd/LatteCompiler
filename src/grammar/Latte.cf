@@ -49,6 +49,8 @@ SingleIdent.    StructuredIdent ::= Ident ;
 
 TableVal.       StructuredIdent ::= Ident "[" [ArrayIndex] "]" ;
 
+SelfIdent.      StructuredIdent ::= "self" ;
+
 ExprIndex.  ArrayIndex ::= Expr ;
 
 separator nonempty ArrayIndex "][" ;

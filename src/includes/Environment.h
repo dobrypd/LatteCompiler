@@ -19,15 +19,17 @@ namespace frontend
 class Environment
 {
 public:
-    typedef struct {
+    struct var_info
+    {
         Type* type;
-    } var_info;
+    };
 
     typedef boost::shared_ptr<var_info> VarInfoPtr;
     typedef std::map<std::string, VarInfoPtr> MapType;
     typedef boost::shared_ptr<MapType> MapPtr;
 
-    typedef struct {
+    typedef struct
+    {
         bool is_extern;
         Type* ret_type;
         std::vector<VarInfoPtr> arguments;
@@ -35,12 +37,29 @@ public:
 
     typedef boost::shared_ptr<fun_info> FunInfoPtr;
 
+    // Classes
+    struct lat_class
+    {
+        // Vector because position is important.
+        typedef std::vector<std::pair<std::string, FunInfoPtr> > methods_t;
+        typedef std::vector<std::pair<std::string, VarInfoPtr> > fields_t;
+
+        methods_t methods;
+        fields_t fields;
+
+        boost::shared_ptr<Environment::lat_class> lat_cls_parent;
+    };
+
+    typedef boost::shared_ptr<lat_class> ClsInfoPtr;
+
 private:
 
     // Environment for variables, vector of map -> ident, ident_struct
     std::vector<MapPtr> env_v;
     // Environment for functions.
     std::map<std::string, FunInfoPtr> env_f;
+    // Environment for classes.
+    std::map<std::string, ClsInfoPtr> env_cls;
 
     MapPtr env_v_tip();
 
@@ -72,14 +91,21 @@ public:
     void prepare();
     void back();
 
-    void add_variable(Type* t, Ident& ident);
+    void add_variable(Type* t, std::string& ident);
     void add_function(FnDef* function_definition, bool is_extern);
+    void add_class(std::string ident);
+    void add_class(std::string ident, std::string extends_ident);
+    void add_method_to_cls(std::string& class_name, FnDef* funciton_definition);
+    void add_field_to_cls(std::string& class_name, Type* type,
+            std::string& ident);
 
     bool can_add_variable(std::string& ident) const;
     bool can_add_function(std::string& ident) const;
+    bool can_add_class(std::string& ident) const;
 
-    VarInfoPtr get_variable(ListStructuredIdent* ident) const;
-    FunInfoPtr get_function(ListStructuredIdent* ident) const;
+    VarInfoPtr get_variable(std::string& ident) const;
+    FunInfoPtr get_function(std::string& ident) const;
+    ClsInfoPtr get_class(std::string& ident) const;
 };
 
 } /* namespace frontend */

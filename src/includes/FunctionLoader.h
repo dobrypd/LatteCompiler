@@ -55,6 +55,7 @@ public:
     void visitStmInitObj(StmInitObj* p);
     void visitSingleIdent(SingleIdent* p);
     void visitTableVal(TableVal* p);
+    void visitSelfIdent(SelfIdent* p);
     void visitExprIndex(ExprIndex* p);
     void visitStmAss(StmAss* p);
     void visitStmAssArr(StmAssArr* p);

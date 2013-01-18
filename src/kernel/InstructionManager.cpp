@@ -6,6 +6,7 @@
 
 #include <ostream>
 #include <sstream>
+#include "Absyn.H"
 #include "InstructionManager.h"
 
 namespace backend

@@ -18,12 +18,11 @@ namespace backend
 class CompilerEnvironment
 {
 public:
+    enum simpletype_t {SCALAR, ARRAY, OBJECT};
     typedef struct {
         Type* type;
         int position;
-        bool scalar;
-        bool on_stack;
-        bool temp;
+        bool on_stack; // Is value on stack (direct address or scalar)
     } var_info;
 
     typedef boost::shared_ptr<var_info> VarInfoPtr;
@@ -38,7 +37,6 @@ private:
     MapPtr var_tip();
     int stack_size_tip();
 
-
 public:
     CompilerEnvironment();
 
@@ -50,6 +48,7 @@ public:
 
     void add_variable(Type* type, std::string name);
     VarInfoPtr get_variable(std::string& name);
+    VarInfoPtr get_variable(ListStructuredIdent* ident);
 
     static size_t type_sizeof(Type* type);
 };

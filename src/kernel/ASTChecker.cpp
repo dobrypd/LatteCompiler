@@ -485,6 +485,13 @@ void ASTChecker::visitTableVal(TableVal *tableval)
 
 }
 
+void ASTChecker::visitSelfIdent(SelfIdent *selfident)
+{
+  /* Code For SelfIdent Goes Here */
+
+
+}
+
 void ASTChecker::visitExprIndex(ExprIndex *exprindex)
 {
     /* Latte++ */

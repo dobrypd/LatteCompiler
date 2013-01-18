@@ -27,7 +27,6 @@ ASCreator::ASCreator(std::string original_file_name,
 
 void ASCreator::peep_hole_optimization()
 {
-    // TODO:
     if (debug) std::cout << "Peep hole optimization.";
 }
 

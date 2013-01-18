@@ -11,6 +11,7 @@
 #include <ostream>
 #include <list>
 #include <boost/shared_ptr.hpp>
+#include "Absyn.H"
 #include "Instruction.h"
 
 namespace backend
@@ -55,6 +56,10 @@ public:
 private:
     blocks_list_t blocks;
 
+    void alloc_scalar_var();
+    void alloc_object_var();
+    void alloc_array_var();
+
 public:
     InstructionManager();
 
@@ -66,13 +71,23 @@ public:
     void new_block(std::string name);
     void add(Block::instr_ptr_t instruction);
 
-    // Standard operations:
+    // Allocating:
     void alloc_var(Type* type);
     void alloc_default(Type* type);
-    void alloc_array(size_t size); // Length on top of the stack.
+    void alloc_array(size_t size);
 
     // Stack operations;
     void pop_from_the_stack();
+    void pop_deeper_on_stack(int offset);
+
+    // Getting adresses:
+    void get_addr_to_EDI(ListStructuredIdent* ident)
+
+    // Assign
+    void assign_scalar_from_top(int var_pos);
+
+    // Moving:
+    void pop_to_addr_from_EDI();
 
 
 };

@@ -188,14 +188,12 @@ int check_file(FILE* input, const char* file_name,
 
     frontend::ErrorHandler file_error_handler(file_name);
 
-    /*
-     * Removed in this version.
-     *
-     *
 
     // Load functions.
     frontend::FunctionLoader function_loader(file_error_handler, env);
     function_loader.check(ast_root);
+
+    /*
 
     if (!file_error_handler.has_errors()){
         // Type check (without returns).

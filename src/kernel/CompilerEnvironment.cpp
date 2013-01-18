@@ -60,6 +60,8 @@ void CompilerEnvironment::add_variable(Type* type, std::string name)
 
 
 
+
+
 CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(std::string & name)
 {
     for(std::vector<CompilerEnvironment::MapPtr>::const_reverse_iterator it =
@@ -69,6 +71,19 @@ CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(std::string & 
             return fit->second;
         }
     }
+    return VarInfoPtr();
+}
+
+CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(ListStructuredIdent* ident)
+{
+    // TODO:
+//    for(std::vector<CompilerEnvironment::MapPtr>::const_reverse_iterator it =
+//            this->variables.rbegin(); it != this->variables.rend();it++){
+//        CompilerEnvironment::MapType::iterator fit = (*it)->find(name);
+//        if(fit != ((*it)->end())) {
+//            return fit->second;
+//        }
+//    }
     return VarInfoPtr();
 }
 
