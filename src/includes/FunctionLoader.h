@@ -21,7 +21,7 @@ private:
     Environment& env;
 
     bool loaded_classes_no_ext_and_fun;
-    std::string default_cls_name;
+    static std::string default_cls_name;
     std::string& last_cls_name;
 
 public:

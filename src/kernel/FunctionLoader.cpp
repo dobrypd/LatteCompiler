@@ -11,11 +11,13 @@
 namespace frontend
 {
 
+std::string FunctionLoader::default_cls_name("def_cls_name");
+
 FunctionLoader::FunctionLoader(ErrorHandler& error_handler,
         Environment& env)
     : error_handler(error_handler), env(env),
       loaded_classes_no_ext_and_fun(false),
-      last_cls_name()
+      last_cls_name(FunctionLoader::default_cls_name)
 {
 }
 
@@ -178,7 +180,7 @@ void FunctionLoader::visitMethodDef(MethodDef *methoddef)
             comunicate += methoddef->ident_;
             comunicate += "` already declared in class `";
             comunicate += this->last_cls_name;
-            comunicate += "`."
+            comunicate += "`.";
             this->error_handler.error(methoddef->type_->line_number, comunicate);
             return;
         }
@@ -198,7 +200,7 @@ void FunctionLoader::visitFieldDef(FieldDef *fielddef)
             comunicate += fielddef->ident_;
             comunicate += "` already declared in class `";
             comunicate += this->last_cls_name;
-            comunicate += "`."
+            comunicate += "`.";
             this->error_handler.error(fielddef->type_->line_number, comunicate);
             return;
         }
