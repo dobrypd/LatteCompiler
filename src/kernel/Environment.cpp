@@ -45,6 +45,7 @@ Environment::Environment()
     this->global_int_type = new Int;
     this->global_str_type = new Str;
     this->global_void_type = new Void;
+    this->global_cls_type = new Class("");
     this->arg_int.reset(new Environment::var_info);
     this->arg_int->type = this->global_int_type;
     this->arg_str.reset(new Environment::var_info);
@@ -83,6 +84,7 @@ Environment::~Environment()
     delete this->global_int_type;
     delete this->global_str_type;
     delete this->global_void_type;
+    delete this->global_cls_type;
 }
 
 Environment::MapPtr Environment::env_v_tip()
@@ -198,12 +200,22 @@ Environment::VarInfoPtr Environment::get_variable(std::string & ident) const
 
 Environment::FunInfoPtr Environment::get_function(std::string & ident) const
 {
-    return this->env_f[ident];
+    std::map<std::string, FunInfoPtr>::const_iterator fit = this->env_f.find(ident);
+    if(fit != (this->env_f.end())){
+        return fit->second;
+    }
+
+    return Environment::FunInfoPtr();
 }
 
 Environment::ClsInfoPtr Environment::get_class(std::string & ident) const
 {
-    return this->env_cls[ident];
+    std::map<std::string, ClsInfoPtr>::const_iterator fit = this->env_cls.find(ident);
+    if(fit != (this->env_cls.end())){
+        return fit->second;
+    }
+
+    return Environment::ClsInfoPtr();
 }
 
 std::vector<Environment::MapPtr>::iterator Environment::get_env_v_it_begin()
@@ -231,9 +243,68 @@ std::map<std::string, Environment::ClsInfoPtr>::iterator Environment::get_env_cl
     return this->env_cls.begin();
 }
 
+Environment::VarInfoPtr Environment::get_field_type(std::string & ident, std::string & cls_name)
+{
+    ClsInfoPtr cls = this->get_class(cls_name);
+    Type* type = NULL;
+    while ((type == NULL) or (cls->lat_cls_parent != NULL)) {
+        for(Environment::lat_class::fields_t::iterator it = cls->fields.begin();
+                it != cls->fields.end(); it++) {
+            if (it->first == ident) {
+                return it->second;
+            }
+        }
+        cls = cls->lat_cls_parent;
+    }
+    return Environment::VarInfoPtr();
+}
+
+Environment::FunInfoPtr Environment::get_method_type(std::string & ident, std::string & cls_name)
+{
+    ClsInfoPtr cls = this->get_class(cls_name);
+    Type* type = NULL;
+    while ((type == NULL) or (cls->lat_cls_parent != NULL)) {
+        for(Environment::lat_class::methods_t::iterator it = cls->methods.begin();
+                it != cls->methods.end(); it++) {
+            if (it->first == ident) {
+                return it->second;
+            }
+        }
+        cls = cls->lat_cls_parent;
+    }
+    return Environment::FunInfoPtr();
+}
+
 std::map<std::string, Environment::ClsInfoPtr>::iterator Environment::get_env_cls_end()
 {
     return this->env_cls.begin();
 }
+
+
+Type* Environment::get_var_type(ListStructuredIdent* l_ident,
+        std::string* cls_name = NULL)
+{
+    Type* last_type = NULL;
+    ListStructuredIdent::iterator it;
+    if (check_is<SelfIdent* >(l_ident)) {
+        this->global_cls_type->ident_ = *cls_name;
+        last_type = this->global_cls_type;
+        it = l_ident->begin() + 1;
+    } else {
+        it = l_ident->begin();
+    }
+
+    for (;it != l_ident->end(); ++it)
+    {
+        StructuredIdent* str_ident = (*it);
+        if (check_is<Class*>(str_ident)) {
+
+        } else if (check_is<TType*>(str_ident))
+            last_type = dynamic_cast<TType*>(str_ident)->type_;
+    }
+
+    return last_type;
+}
+
 
 } /* namespace frontend */

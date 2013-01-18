@@ -72,6 +72,7 @@ private:
     Void* global_void_type;
     Int* global_int_type;
     Str* global_str_type;
+    Class* global_cls_type;
     Environment::FunInfoPtr print_int_f;
     Environment::FunInfoPtr print_string_f;
     Environment::FunInfoPtr error_f;
@@ -110,6 +111,10 @@ public:
     VarInfoPtr get_variable(std::string& ident) const;
     FunInfoPtr get_function(std::string& ident) const;
     ClsInfoPtr get_class(std::string& ident) const;
+
+    Type* get_var_type(ListStructuredIdent* l_ident, std::string* cls_name);
+    VarInfoPtr get_field_type(std::string& ident, std::string& cls_name);
+    FunInfoPtr get_method_type(std::string& ident, std::string& cls_name);
 
     // Direct access to the environment:
     std::vector<MapPtr>::iterator get_env_v_it_begin();

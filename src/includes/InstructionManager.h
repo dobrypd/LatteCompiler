@@ -81,7 +81,7 @@ public:
     void pop_deeper_on_stack(int offset);
 
     // Getting adresses:
-    void get_addr_to_EDI(ListStructuredIdent* ident)
+    void get_addr_to_EDI(ListStructuredIdent* ident);
 
     // Assign
     void assign_scalar_from_top(int var_pos);

@@ -20,6 +20,10 @@ private:
     ErrorHandler& error_handler;
     Environment& env;
 
+    bool loaded_classes_no_ext_and_fun;
+    std::string default_cls_name;
+    std::string& last_cls_name;
+
 public:
     FunctionLoader(ErrorHandler& error_handler, Environment& env);
     void check(Visitable* v);
