@@ -58,10 +58,6 @@ void CompilerEnvironment::add_variable(Type* type, std::string name)
     (*tip)[name] = new_variable;
 }
 
-
-
-
-
 CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(std::string & name)
 {
     for(std::vector<CompilerEnvironment::MapPtr>::const_reverse_iterator it =
@@ -71,7 +67,7 @@ CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(std::string & 
             return fit->second;
         }
     }
-    return VarInfoPtr();
+    return CompilerEnvironment::VarInfoPtr();
 }
 
 CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(ListStructuredIdent* ident)
@@ -84,7 +80,7 @@ CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(ListStructured
 //            return fit->second;
 //        }
 //    }
-    return VarInfoPtr();
+    return CompilerEnvironment::VarInfoPtr();
 }
 
 size_t CompilerEnvironment::type_sizeof(Type* type)

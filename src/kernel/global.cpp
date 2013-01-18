@@ -8,57 +8,25 @@
 #include "Absyn.H"
 #include "Environment.h"
 
-namespace frontend
-{
-
-etypes type_to_enum(Type *t)
-{
-    if(dynamic_cast<Int*>(t) != 0)
-        return INT;
-
-    else
-    if(dynamic_cast<Str*>(t) != 0)
-        return STRING;
-
-    else
-    if(dynamic_cast<Bool*>(t) != 0)
-        return BOOL;
-
-    else
-    if(dynamic_cast<Void*>(t) != 0)
-        return VOID;
-
-    else
-    if(dynamic_cast<TType*>(t) != 0)
-        return TTYPE; // TODO: should be TTYPE of STH!
-    if (dynamic_cast<Class*>(t))
-        return CLASS; // TODO: should be named CLASS
-
-    else
-        return UNDEFINED;
-
-}
 std::string type_pretty_print(Type *t)
 {
-    switch (type_to_enum(t)){
-        case INT:
-            return "int";
-        case BOOL:
-            return "boolean";
-        case STRING:
-            return "string";
-        case VOID:
-            return "void";
-        case TTYPE:
-            // TODO: it's ugly, try to accept this node and has array of TYPE
-            return "array";
-        case CLASS:
-            // TODO: as TTYPE
-            return "class";
-        case UNDEFINED:
-            return "undefined";
-        default:
-            return "undeclared";
+    if (check_is<Int*>(t)) {
+        return "int";
+    } else if (check_is<Str*>(t)) {
+        return "string";
+    } else if (check_is<Bool*>(t)) {
+        return "boolean";
+    } else if (check_is<Void*>(t)) {
+        return "void";
+    } else if (check_is<TType*>(t)) {
+        return "array of "
+                + type_pretty_print(dynamic_cast<TType*>(t)->type_);
+    } else if (check_is<Class*>(t)) {
+        return "class " + (dynamic_cast<Class*>(t))->ident_;
+    } else {
+        if (debug) std::cerr << "Did you changed the grammar? "
+                "Could not find type";
+        return "undefined";
     }
 }
 
@@ -66,9 +34,30 @@ bool operator==(Type & t1, Type & t2)
 {
     Type *p1 = &t1;
     Type *p2 = &t2;
-    etypes et1 = type_to_enum(p1);
-    etypes et2 = type_to_enum(p2);
-    return et1 == et2;
+
+    if (check_is<Int*>(p1))
+        return check_is<Int*>(p2);
+    if (check_is<Str*>(p1))
+        return check_is<Str*>(p2);
+    if (check_is<Bool*>(p1))
+        return check_is<Bool*>(p2);
+    if (check_is<Void*>(p1))
+        return check_is<Void*>(p2);
+    if (check_is<TType*>(p1)) {
+        if (check_is<TType*>(p2)) {
+            return (*(dynamic_cast<TType*>(p1)->type_)
+                == *(dynamic_cast<TType*>(p2)->type_));
+        }
+        return false;
+    }
+    if (check_is<Class*>(p1)) {
+        if (check_is<Class*>(p2)) {
+            return ((dynamic_cast<Class*>(p1)->ident_)
+                == (dynamic_cast<Class*>(p2)->ident_));
+        }
+        return false;
+    }
+    return false;
 }
 
 
@@ -91,5 +80,3 @@ std::string ident_to_string(ListStructuredIdent* ident_list)
     }
     return identifier;
 }
-
-} /* frontend */

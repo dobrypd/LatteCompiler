@@ -25,10 +25,11 @@ Environment::FunInfoPtr Environment::create_fun(Type* ret_type, ListArg* args)
     for(ListArg::iterator it = args->begin(); it != args->end();it++){
         Environment::VarInfoPtr next_argument(new Environment::var_info);
         Argument *argument = dynamic_cast<Argument*>(*it);
-        if(argument == 0)
+        if(argument == 0) {
             if (debug)
                 std::cerr << "Cannot cast Arg to Argument. Did you changed grammar?";
             throw "Did you changed grammar?!";
+        }
 
         next_argument->type = argument->type_;
         new_function->arguments.push_back(next_argument);
@@ -277,7 +278,7 @@ Environment::FunInfoPtr Environment::get_method_type(std::string & ident, std::s
 
 std::map<std::string, Environment::ClsInfoPtr>::iterator Environment::get_env_cls_end()
 {
-    return this->env_cls.begin();
+    return this->env_cls.end();
 }
 
 

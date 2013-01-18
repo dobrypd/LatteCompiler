@@ -4,6 +4,7 @@
  *
  */
 
+#include "Environment.h"
 #include "Instruction.h"
 #include "CompilerEnvironment.h"
 #include "global.h"
@@ -13,8 +14,10 @@
 namespace backend
 {
 
-Creator_x86::Creator_x86(InstructionManager& instruction_manager) :
-        instruction_manager(instruction_manager)
+Creator_x86::Creator_x86(InstructionManager& instruction_manager,
+        frontend::Environment& frontend_environment) :
+        instruction_manager(instruction_manager),
+        fr_env(frontend_environment)
 {
 
 }
@@ -120,32 +123,32 @@ void Creator_x86::visitStmAss(StmAss *stmass)
 {
     stmass->liststructuredident_->accept(this);
 
-    CompilerEnvironment::VarInfoPtr var_ptr =
-            this->env.get_variable(stmass->liststructuredident_);
-    int stack_offset = this->env.full_stack_size - var_ptr->position;
+//    CompilerEnvironment::VarInfoPtr var_ptr =
+//            this->env.get_variable(stmass->liststructuredident_);
+//    int stack_offset = this->env.stack_all_offset() - var_ptr->position;
 
     stmass->expr_->accept(this);
 
-    if (var_ptr->on_stack) {
-        this->instruction_manager.pop_deeper_on_stack(stack_offset);
-    } else {
-        this->instruction_manager.get_addr_to_EDI(stmass->liststructuredident_);
-        // Save value from top of the stack to address in EDX
-        this->instruction_manager.pop_to_addr_from_EDI();
-    }
+//    if (var_ptr->on_stack) {
+//        this->instruction_manager.pop_deeper_on_stack(stack_offset);
+//    } else {
+//        this->instruction_manager.get_addr_to_EDI(stmass->liststructuredident_);
+//        // Save value from top of the stack to address in EDX
+//        this->instruction_manager.pop_to_addr_from_EDI();
+//    }
 }
 
 void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 {
     stmassarr->liststructuredident_->accept(this);
 
-    CompilerEnvironment::VarInfoPtr var_ptr =
-            this->env.get_variable(stmassarr->liststructuredident_);
-    int stack_offset = this->env.full_stack_size - var_ptr->position;
+//    CompilerEnvironment::VarInfoPtr var_ptr =
+//            this->env.get_variable(stmassarr->liststructuredident_);
+//    int stack_offset = this->env.stack_all_offset() - var_ptr->position;
 
-    this->instruction_manager.get_addr_to_EDI(stmassarr->liststructuredident_);
-    // Save value from top of the stack to address in EDX
-    this->instruction_manager.pop_to_addr_from_EDI();
+//    this->instruction_manager.get_addr_to_EDI(stmassarr->liststructuredident_);
+//    // Save value from top of the stack to address in EDX
+//    this->instruction_manager.pop_to_addr_from_EDI();
 
     stmassarr->type_->accept(this);
     stmassarr->expr_->accept(this);

@@ -37,6 +37,18 @@ void InstructionManager::new_block(std::string name)
     this->blocks.push_back(new_blc);
 }
 
+void InstructionManager::alloc_scalar_var()
+{
+}
+
+void InstructionManager::alloc_object_var()
+{
+}
+
+void InstructionManager::alloc_array_var()
+{
+}
+
 void InstructionManager::add(Block::instr_ptr_t instruction)
 {
     this->blocks.back()->add(instruction);
@@ -53,33 +65,25 @@ InstructionManager::list_it_t InstructionManager::end()
 }
 
 long Block::current_ident = 0;
-const char* Block::ident_prefix = "_L";
-
+const char *Block::ident_prefix = "_L";
 Block::Block()
 {
 }
 
-
-
-Block::Block(std::string name) : block_name(name)
+Block::Block(std::string name)
+:block_name(name)
 {
 }
-
-
 
 Block::list_it_t Block::begin()
 {
     return this->i_list.begin();
 }
 
-
-
 Block::list_it_t Block::end()
 {
     return this->i_list.end();
 }
-
-
 
 std::string & Block::get_name()
 {
@@ -98,6 +102,38 @@ std::string Block::new_ident()
     ss << Block::current_ident;
     std::string r_str(Block::ident_prefix);
     return r_str + ss.str();
+}
+
+void InstructionManager::alloc_var(Type *type)
+{
+}
+
+void InstructionManager::alloc_default(Type *type)
+{
+}
+
+void InstructionManager::alloc_array(size_t size)
+{
+}
+
+void InstructionManager::pop_from_the_stack()
+{
+}
+
+void InstructionManager::pop_deeper_on_stack(int offset)
+{
+}
+
+void InstructionManager::get_addr_to_EDI(ListStructuredIdent *ident)
+{
+}
+
+void InstructionManager::assign_scalar_from_top(int var_pos)
+{
+}
+
+void InstructionManager::pop_to_addr_from_EDI()
+{
 }
 
 } /* namespace backend */

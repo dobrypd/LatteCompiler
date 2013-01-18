@@ -213,25 +213,25 @@ void ASTChecker::visitStmAss(StmAss* stmass)
 {
     this->last_line_number = stmass->line_number;
     stmass->liststructuredident_->accept(this);
-    Environment::VarInfoPtr var_info = this->env.get_variable(stmass->liststructuredident_);
-
-    this->last_type = 0;
-    stmass->expr_->accept(this);
-
-    if (!var_info) {
-        std::string msg = "variable `";
-        msg += ident_to_string(stmass->liststructuredident_);
-        msg += "` used before declared.";
-        this->error_handler.error(stmass->line_number, msg);
-    }
-    else
-    {
-        //Ident expevalident = Ident("type evaluation of expression");
-        // TODO: second ident name
-        this->check_type(stmass->liststructuredident_, var_info->type,
-                stmass->liststructuredident_, this->last_type,
-                stmass->line_number);
-    }
+//    Environment::VarInfoPtr var_info = this->env.get_variable(stmass->liststructuredident_);
+//
+//    this->last_type = 0;
+//    stmass->expr_->accept(this);
+//
+//    if (!var_info) {
+//        std::string msg = "variable `";
+//        msg += ident_to_string(stmass->liststructuredident_);
+//        msg += "` used before declared.";
+//        this->error_handler.error(stmass->line_number, msg);
+//    }
+//    else
+//    {
+//        //Ident expevalident = Ident("type evaluation of expression");
+//        // TODO: second ident name
+//        this->check_type(stmass->liststructuredident_, var_info->type,
+//                stmass->liststructuredident_, this->last_type,
+//                stmass->line_number);
+//    }
 }
 
 void ASTChecker::visitStmAssArr(StmAssArr *stmassarr)
@@ -255,51 +255,51 @@ void ASTChecker::visitStmAssObj(StmAssObj *stmassobj)
 
 void ASTChecker::visitStmIncr(StmIncr* stmincr)
 {
-    this->last_line_number = stmincr->line_number;
-    stmincr->liststructuredident_->accept(this);
-    Environment::VarInfoPtr var_info =
-            this->env.get_variable(stmincr->liststructuredident_);
-    if (!var_info) {
-        std::string msg = "variable `";
-        msg += ident_to_string(stmincr->liststructuredident_);
-        msg += "` used before declared.";
-        this->error_handler.error(stmincr->line_number, msg);
-        return;
-    }
-    if (!check_is<Int*>(var_info->type))
-    {
-        std::string msg = "variable `";
-        msg += ident_to_string(stmincr->liststructuredident_);
-        msg += "` with type [";
-        msg += type_pretty_print(var_info->type);
-        msg += "] cannot be used with ++ operator.";
-        this->error_handler.error(stmincr->line_number, msg);
-    }
+//    this->last_line_number = stmincr->line_number;
+//    stmincr->liststructuredident_->accept(this);
+//    Environment::VarInfoPtr var_info =
+//            this->env.get_variable(stmincr->liststructuredident_);
+//    if (!var_info) {
+//        std::string msg = "variable `";
+//        msg += ident_to_string(stmincr->liststructuredident_);
+//        msg += "` used before declared.";
+//        this->error_handler.error(stmincr->line_number, msg);
+//        return;
+//    }
+//    if (!check_is<Int*>(var_info->type))
+//    {
+//        std::string msg = "variable `";
+//        msg += ident_to_string(stmincr->liststructuredident_);
+//        msg += "` with type [";
+//        msg += type_pretty_print(var_info->type);
+//        msg += "] cannot be used with ++ operator.";
+//        this->error_handler.error(stmincr->line_number, msg);
+//    }
 }
 
 void ASTChecker::visitStmDecr(StmDecr* stmdecr)
 {
-    this->last_line_number = stmdecr->line_number;
-    stmdecr->liststructuredident_->accept(this);
-    Environment::VarInfoPtr var_info =
-            this->env.get_variable(stmdecr->liststructuredident_);
-    if (!var_info) {
-        std::string msg = "variable `";
-        msg += ident_to_string(stmdecr->liststructuredident_);
-        msg += "` used before declared.";
-        this->error_handler.error(stmdecr->line_number, msg);
-        return;
-    }
-    if (!check_is<Int*>(var_info->type))
-    {
-        std::string msg = "variable `";
-        //msg += stmdecr->ident_;
-        msg += ident_to_string(stmdecr->liststructuredident_);
-        msg += "` with type [";
-        msg += type_pretty_print(var_info->type);
-        msg += "] cannot be used with -- operator.";
-        this->error_handler.error(stmdecr->line_number, msg);
-    }
+//    this->last_line_number = stmdecr->line_number;
+//    stmdecr->liststructuredident_->accept(this);
+//    Environment::VarInfoPtr var_info =
+//            this->env.get_variable(stmdecr->liststructuredident_);
+//    if (!var_info) {
+//        std::string msg = "variable `";
+//        msg += ident_to_string(stmdecr->liststructuredident_);
+//        msg += "` used before declared.";
+//        this->error_handler.error(stmdecr->line_number, msg);
+//        return;
+//    }
+//    if (!check_is<Int*>(var_info->type))
+//    {
+//        std::string msg = "variable `";
+//        //msg += stmdecr->ident_;
+//        msg += ident_to_string(stmdecr->liststructuredident_);
+//        msg += "` with type [";
+//        msg += type_pretty_print(var_info->type);
+//        msg += "] cannot be used with -- operator.";
+//        this->error_handler.error(stmdecr->line_number, msg);
+//    }
 }
 
 void ASTChecker::visitStmRet(StmRet* stmret)
@@ -534,20 +534,20 @@ void ASTChecker::visitTType(TType *ttype)
 
 void ASTChecker::visitEVar(EVar* evar)
 {
-    this->last_line_number = evar->line_number;
-    evar->liststructuredident_->accept(this);
-    Environment::VarInfoPtr var_info =
-            this->env.get_variable(evar->liststructuredident_);
-    if (!var_info) {
-        std::string msg = "variable `";
-        msg += ident_to_string(evar->liststructuredident_);
-        msg += "` used before declaration.";
-        this->error_handler.error(evar->line_number, msg);
-    }
-    else
-    {
-        this->last_type = var_info->type;
-    }
+//    this->last_line_number = evar->line_number;
+//    evar->liststructuredident_->accept(this);
+//    Environment::VarInfoPtr var_info =
+//            this->env.get_variable(evar->liststructuredident_);
+//    if (!var_info) {
+//        std::string msg = "variable `";
+//        msg += ident_to_string(evar->liststructuredident_);
+//        msg += "` used before declaration.";
+//        this->error_handler.error(evar->line_number, msg);
+//    }
+//    else
+//    {
+//        this->last_type = var_info->type;
+//    }
 }
 
 void ASTChecker::visitELitInt(ELitInt* elitint)
@@ -578,40 +578,40 @@ void ASTChecker::visitELitNull(ELitNull *elitnull)
 
 void ASTChecker::visitEApp(EApp* eapp)
 {
-    this->last_line_number = eapp->line_number;
-    eapp->liststructuredident_->accept(this);
-    Environment::FunInfoPtr fun_ptr =
-            this->env.get_function(eapp->liststructuredident_);
-    // Check if function exists.
-    if (!fun_ptr)
-    {
-        std::string msg = "function `";
-        msg += ident_to_string(eapp->liststructuredident_);
-        msg += "` does not exist.";
-        this->error_handler.error(eapp->line_number, msg);
-        return;
-    }
+//    this->last_line_number = eapp->line_number;
+//    eapp->liststructuredident_->accept(this);
+//    Environment::FunInfoPtr fun_ptr =
+//            this->env.get_function(eapp->liststructuredident_);
+//    // Check if function exists.
+//    if (!fun_ptr)
+//    {
+//        std::string msg = "function `";
+//        msg += ident_to_string(eapp->liststructuredident_);
+//        msg += "` does not exist.";
+//        this->error_handler.error(eapp->line_number, msg);
+//        return;
+//    }
+//
+//    // Check arguments.
+//    this->last_arguments_iterator = fun_ptr->arguments.begin();
+//    this->last_arguments_end = fun_ptr->arguments.end();
+//    eapp->listexpr_->accept(this);
+//    if ((this->last_arguments_iterator != this->last_arguments_end) || this->error_flag)
+//    {
+//        std::string msg = "function `";
+//        msg += ident_to_string(eapp->liststructuredident_);
+//        msg += "` need ";
+//        std::ostringstream ss;
+//        ss << fun_ptr->arguments.size();
+//        msg += ss.str();
+//        msg += " arguments: ";
+//        msg += this->args_pretty_print(fun_ptr->arguments.begin(), fun_ptr->arguments.end());
+//        this->error_handler.error(eapp->line_number, msg);
+//        this->error_flag = false;
+//    }
+//    // Args checked.
 
-    // Check arguments.
-    this->last_arguments_iterator = fun_ptr->arguments.begin();
-    this->last_arguments_end = fun_ptr->arguments.end();
-    eapp->listexpr_->accept(this);
-    if ((this->last_arguments_iterator != this->last_arguments_end) || this->error_flag)
-    {
-        std::string msg = "function `";
-        msg += ident_to_string(eapp->liststructuredident_);
-        msg += "` need ";
-        std::ostringstream ss;
-        ss << fun_ptr->arguments.size();
-        msg += ss.str();
-        msg += " arguments: ";
-        msg += this->args_pretty_print(fun_ptr->arguments.begin(), fun_ptr->arguments.end());
-        this->error_handler.error(eapp->line_number, msg);
-        this->error_flag = false;
-    }
-    // Args checked.
-
-    this->last_type = fun_ptr->ret_type;
+//    this->last_type = fun_ptr->ret_type;
 }
 
 void ASTChecker::visitEString(EString* estring)

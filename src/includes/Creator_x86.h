@@ -8,6 +8,7 @@
 #define CREATOR_X86_H_
 
 #include "Absyn.H"
+#include "Environment.h"
 #include "InstructionManager.h"
 #include "CompilerEnvironment.h"
 
@@ -20,6 +21,7 @@ class Creator_x86 : public Visitor
 private:
     InstructionManager& instruction_manager;
     CompilerEnvironment env;
+    frontend::Environment& fr_env;
 
     // Traverse variables
     // Declarations:
@@ -29,7 +31,8 @@ private:
     // End of traverse vars
 
 public:
-    Creator_x86(InstructionManager& instruction_manager);
+    Creator_x86(InstructionManager& instruction_manager,
+            frontend::Environment& fr_env);
 
 
     void visitProg(Prog* p);

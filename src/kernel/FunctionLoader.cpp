@@ -57,7 +57,7 @@ void FunctionLoader::check(Visitable* v)
                 m_it++) {
             for (Environment::MapType::iterator it = (*m_it)->begin();
                     it != (*m_it)->end(); it++) {
-                std::cout << type_pretty_print(it->second->type) << " "
+                std::cout << "\t" << type_pretty_print(it->second->type) << " "
                         << it->first << std::endl;
             }
 
@@ -66,11 +66,11 @@ void FunctionLoader::check(Visitable* v)
         for (std::map<std::string, Environment::FunInfoPtr>::iterator it =
                 this->env.get_env_f_begin(); it != this->env.get_env_f_end();
                 it++) {
-            std::cout << it->first << "(";
+            std::cout << "\t" << it->first << "(";
             for(std::vector<Environment::VarInfoPtr>::iterator it_arg =
                     it->second->arguments.begin();
                     it_arg != it->second->arguments.end(); it_arg++){
-                std::cout << type_pretty_print((*it_arg)->type);
+                std::cout << type_pretty_print((*it_arg)->type) << ",";
             }
 
             std::cout << ")" << std::endl;
@@ -79,18 +79,31 @@ void FunctionLoader::check(Visitable* v)
         for (std::map<std::string, Environment::ClsInfoPtr>::iterator it =
                 this->env.get_env_cls_begin(); it != this->env.get_env_cls_end();
                 it++) {
-            std::cout << it->first << "{" << std::endl;
-            std::cout << "\tFields:" << std::endl;
+            std::cout << "\t" << it->first << " {" << std::endl;
+            std::cout << "\t\tFields:" << std::endl;
             for(std::vector<std::pair<std::string, Environment::VarInfoPtr> >::iterator it_fields =
                     it->second->fields.begin();
                     it_fields != it->second->fields.end(); it_fields++){
-                std::cout << "\t";
+                std::cout << "\t\t\t";
                 std::cout << type_pretty_print((*it_fields).second->type);
                 std::cout << " " << (*it_fields).first;
                 std::cout << std::endl;
             }
-
-            std::cout << "}" << std::endl;
+            std::cout << "\t\tMethods:" << std::endl;
+            for(std::vector<std::pair<std::string, Environment::FunInfoPtr> >::iterator it_method =
+                    it->second->methods.begin();
+                    it_method != it->second->methods.end(); it_method++){
+                std::cout << "\t\t\t";
+                std::cout << type_pretty_print((*it_method).second->ret_type);
+                std::cout << " " << (*it_method).first << "(";
+                for(std::vector<Environment::VarInfoPtr>::iterator it_arg =
+                        (*it_method).second->arguments.begin();
+                        it_arg != (*it_method).second->arguments.end(); it_arg++){
+                    std::cout << type_pretty_print((*it_arg)->type) << ",";
+                }
+                std::cout << ")" << std::endl;
+            }
+            std::cout << "\t}" << std::endl;
         }
     }
 }

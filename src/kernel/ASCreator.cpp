@@ -18,7 +18,7 @@ namespace backend
 ASCreator::ASCreator(std::string original_file_name,
         std::string output_file_name,
         frontend::Environment& env)
-    : creator(Creator_x86(this->instruction_manager)),
+    : creator(Creator_x86(this->instruction_manager, env)),
       assembly_file_name(output_file_name),
       original_file_name(original_file_name),
       env(env)
@@ -27,7 +27,7 @@ ASCreator::ASCreator(std::string original_file_name,
 
 void ASCreator::peep_hole_optimization()
 {
-    if (debug) std::cout << "Peep hole optimization.";
+    if (debug) std::cout << "Peep hole optimization." << std::endl;
 }
 
 void ASCreator::save_in_file()
