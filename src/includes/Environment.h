@@ -110,6 +110,14 @@ public:
     VarInfoPtr get_variable(std::string& ident) const;
     FunInfoPtr get_function(std::string& ident) const;
     ClsInfoPtr get_class(std::string& ident) const;
+
+    // Direct access to the environment:
+    std::vector<MapPtr>::iterator get_env_v_it_begin();
+    std::vector<MapPtr>::iterator get_env_v_it_end();
+    std::map<std::string, FunInfoPtr>::iterator get_env_f_begin();
+    std::map<std::string, FunInfoPtr>::iterator get_env_f_end();
+    std::map<std::string, ClsInfoPtr>::iterator get_env_cls_begin();
+    std::map<std::string, ClsInfoPtr>::iterator get_env_cls_end();
 };
 
 } /* namespace frontend */

@@ -21,29 +21,71 @@ FunctionLoader::FunctionLoader(ErrorHandler& error_handler,
 void FunctionLoader::check(Visitable* v)
 {
     v->accept(this);
+
     /*
      * check if has main
      */
-    //Ident main_idnt("main");
-    //Environment::FunInfoPtr fun_ptr = this->env.get_function(main_idnt);
-    // TODO: Latte++
-
+    std::string main_idnt("main");
+    Environment::FunInfoPtr fun_ptr = this->env.get_function(main_idnt);
     // Check if function exists.
-//    if ((!fun_ptr)
-//            || (!fun_ptr->arguments.empty())
-//            || (!check_is<Int*>(fun_ptr->ret_type)))
-//    {
-//        std::string msg = "function `";
-//        msg += main_idnt;
-//        msg += "` with 0 arguments and int return type does not exist.";
-//        this->error_handler.error(1, msg);
-//        return;
-//    }
+    if ((!fun_ptr)
+            || (!fun_ptr->arguments.empty())
+            || (!check_is<Int*>(fun_ptr->ret_type)))
+    {
+        std::string msg = "function `";
+        msg += main_idnt;
+        msg += "` with 0 arguments and int return type does not exist.";
+        this->error_handler.error(1, msg);
+        return;
+    }
+
     if (debug)
     {
         // Log what was added and checked.
         std::cout << "Function loader finished with environment:" << std::endl;
-        // TODO:
+        std::cout << std::endl;
+        std::cout << "Variables: (shouldn't be any):" << std::endl;
+        for (std::vector<Environment::MapPtr>::iterator m_it =
+                this->env.get_env_v_it_begin();
+                m_it != this->env.get_env_v_it_end();
+                m_it++) {
+            for (Environment::MapType::iterator it = (*m_it)->begin();
+                    it != (*m_it)->end(); it++) {
+                std::cout << type_pretty_print(it->second->type) << " "
+                        << it->first << std::endl;
+            }
+
+        }
+        std::cout << "Functions:" << std::endl;
+        for (std::map<std::string, Environment::FunInfoPtr>::iterator it =
+                this->env.get_env_f_begin(); it != this->env.get_env_f_end();
+                it++) {
+            std::cout << it->first << "(";
+            for(std::vector<Environment::VarInfoPtr>::iterator it_arg =
+                    it->second->arguments.begin();
+                    it_arg != it->second->arguments.end(); it_arg++){
+                std::cout << type_pretty_print((*it_arg)->type);
+            }
+
+            std::cout << ")" << std::endl;
+        }
+        std::cout << "Classes:" << std::endl;
+        for (std::map<std::string, Environment::ClsInfoPtr>::iterator it =
+                this->env.get_env_cls_begin(); it != this->env.get_env_cls_end();
+                it++) {
+            std::cout << it->first << "{" << std::endl;
+            std::cout << "\tFields:" << std::endl;
+            for(std::vector<std::pair<std::string, Environment::VarInfoPtr> >::iterator it_fields =
+                    it->second->fields.begin();
+                    it_fields != it->second->fields.end(); it_fields++){
+                std::cout << "\t";
+                std::cout << type_pretty_print((*it_fields).second->type);
+                std::cout << " " << (*it_fields).first;
+                std::cout << std::endl;
+            }
+
+            std::cout << "}" << std::endl;
+        }
     }
 }
 

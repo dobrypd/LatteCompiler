@@ -151,22 +151,17 @@ void Environment::add_class(std::string ident, std::string extends_ident)
 {
     Environment::ClsInfoPtr new_class(new Environment::lat_class);
     Environment::ClsInfoPtr parent = this->get_class(extends_ident);
-    // Should be checked if extends exists by this can_add_class(id, id_parent).
     new_class->lat_cls_parent = parent;
     this->env_cls[ident] = new_class;
 }
 
-void Environment::add_method_to_cls(std::string & class_name,
-        MethodDef *method_definition)
+void Environment::add_method_to_cls(std::string & class_name, MethodDef *method_definition)
 {
     Environment::ClsInfoPtr this_class = this->get_class(class_name);
-    this_class->methods.push_back(std::make_pair(method_definition->ident_,
-            this->create_fun(method_definition->type_,
-                    method_definition->listarg_)));
+    this_class->methods.push_back(std::make_pair(method_definition->ident_, this->create_fun(method_definition->type_, method_definition->listarg_)));
 }
 
-void Environment::add_field_to_cls(std::string & class_name,
-        Type *type, std::string & ident)
+void Environment::add_field_to_cls(std::string & class_name, Type *type, std::string & ident)
 {
     Environment::ClsInfoPtr this_class = this->get_class(class_name);
     Environment::VarInfoPtr new_variable(new Environment::var_info);
@@ -184,21 +179,20 @@ bool Environment::can_add_class(std::string & ident) const
     return (this->env_cls.find(ident)) == this->env_cls.end();
 }
 
-bool Environment::can_add_class(std::string& ident, std::string& parent_ident) const
+bool Environment::can_add_class(std::string & ident, std::string & parent_ident) const
 {
-    return ((this->env_cls.find(parent_ident)) != this->env_cls.end())
-            && ((this->env_cls.find(ident)) == this->env_cls.end());
+    return ((this->env_cls.find(parent_ident)) != this->env_cls.end()) && ((this->env_cls.find(ident)) == this->env_cls.end());
 }
 
 Environment::VarInfoPtr Environment::get_variable(std::string & ident) const
 {
-    for(std::vector<Environment::MapPtr>::const_reverse_iterator it =
-            this->env_v.rbegin(); it != this->env_v.rend();it++){
+    for(std::vector<Environment::MapPtr>::const_reverse_iterator it = this->env_v.rbegin();it != this->env_v.rend();it++){
         Environment::MapType::iterator fit = (*it)->find(ident);
-        if(fit != ((*it)->end())) {
+        if(fit != ((*it)->end())){
             return fit->second;
         }
     }
+
     return Environment::VarInfoPtr();
 }
 
@@ -210,6 +204,36 @@ Environment::FunInfoPtr Environment::get_function(std::string & ident) const
 Environment::ClsInfoPtr Environment::get_class(std::string & ident) const
 {
     return this->env_cls[ident];
+}
+
+std::vector<Environment::MapPtr>::iterator Environment::get_env_v_it_begin()
+{
+    return this->env_v.begin();
+}
+
+std::vector<Environment::MapPtr>::iterator Environment::get_env_v_it_end()
+{
+    return this->env_v.end();
+}
+
+std::map<std::string, Environment::FunInfoPtr>::iterator Environment::get_env_f_begin()
+{
+    return this->env_f.begin();
+}
+
+std::map<std::string, Environment::FunInfoPtr>::iterator Environment::get_env_f_end()
+{
+    return this->env_f.end();
+}
+
+std::map<std::string, Environment::ClsInfoPtr>::iterator Environment::get_env_cls_begin()
+{
+    return this->env_cls.begin();
+}
+
+std::map<std::string, Environment::ClsInfoPtr>::iterator Environment::get_env_cls_end()
+{
+    return this->env_cls.begin();
 }
 
 } /* namespace frontend */
