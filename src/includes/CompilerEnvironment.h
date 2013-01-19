@@ -15,39 +15,39 @@
 namespace backend
 {
 
+/*
+ * This environment is dynamically cahnging while passing code.
+ */
 class CompilerEnvironment
 {
 public:
     typedef struct {
         Type* type;
         int position;
-        bool on_stack; // Is value on stack (direct address or scalar)
+        bool on_stack;
     } var_info;
-
     typedef boost::shared_ptr<var_info> VarInfoPtr;
-    typedef std::map<std::string, VarInfoPtr> MapType;
+    typedef std::map<std::string,VarInfoPtr> MapType;
     typedef boost::shared_ptr<MapType> MapPtr;
-
 private:
-    std::vector<MapPtr> variables;
-    std::vector<int> stack_size;
-    int full_stack_size;
-
-    MapPtr var_tip();
-    int stack_size_tip();
+    MapPtr variables;
+    int varaibles_on_stack; // offset
+    std::vector<int> variables_sizes;
+    int return_addr;
 
 public:
     CompilerEnvironment();
 
-    void prepare();
-    void back();
-
-    int stack_current_offset();
-    int stack_all_offset();
+    int stack_size();
 
     void add_variable(Type* type, std::string name);
+    void add_obj(std::string obj_name, frontend::Environment::ClsInfoPtr cls);
+    void add_array(Type* type, std::string name);
+
     VarInfoPtr get_variable(std::string& name);
-    VarInfoPtr get_variable(ListStructuredIdent* ident);
+
+    int get_return_addr() const;
+    void set_return_addr();
 
     static size_t type_sizeof(Type* type);
 };

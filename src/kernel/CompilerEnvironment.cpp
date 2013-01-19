@@ -54,38 +54,39 @@ void CompilerEnvironment::add_variable(Type* type, std::string name)
     MapPtr tip = this->var_tip();
     VarInfoPtr new_variable(new CompilerEnvironment::var_info);
     new_variable->type = type;
-    // TODO: OFFSET! if array + sizeof len if object + sizeof len
-    (*tip)[name] = new_variable;
+        (*tip)[name] = new_variable;
 }
 
 CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(std::string & name)
 {
-    for(std::vector<CompilerEnvironment::MapPtr>::const_reverse_iterator it =
-            this->variables.rbegin(); it != this->variables.rend();it++){
+    for(std::vector<CompilerEnvironment::MapPtr>::const_reverse_iterator it = this->variables.rbegin();it != this->variables.rend();it++){
         CompilerEnvironment::MapType::iterator fit = (*it)->find(name);
-        if(fit != ((*it)->end())) {
+        if(fit != ((*it)->end())){
             return fit->second;
         }
     }
+
     return CompilerEnvironment::VarInfoPtr();
 }
 
-CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(ListStructuredIdent* ident)
+CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(ListStructuredIdent *ident)
 {
-    // TODO:
-//    for(std::vector<CompilerEnvironment::MapPtr>::const_reverse_iterator it =
-//            this->variables.rbegin(); it != this->variables.rend();it++){
-//        CompilerEnvironment::MapType::iterator fit = (*it)->find(name);
-//        if(fit != ((*it)->end())) {
-//            return fit->second;
-//        }
-//    }
     return CompilerEnvironment::VarInfoPtr();
 }
 
-size_t CompilerEnvironment::type_sizeof(Type* type)
+int CompilerEnvironment::getReturnAddr() const
 {
-    return 4; // TODO:
+    return return_addr;
+}
+
+void CompilerEnvironment::set_return_addr()
+{
+    return_addr = ++this->full_stack_size;
+}
+
+size_t CompilerEnvironment::type_sizeof(Type *type)
+{
+    return 4;
 }
 
 } /* namespace backend */

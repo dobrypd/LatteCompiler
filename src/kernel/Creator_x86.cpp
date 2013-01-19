@@ -14,6 +14,15 @@
 namespace backend
 {
 
+
+const char* Creator_x86::self_name = "self";
+
+std::string Creator_x86::method_ident(std::string& class_name,
+            std::string& method_name)
+{
+    return "_" + class_name + "@@" + method_name;
+}
+
 Creator_x86::Creator_x86(InstructionManager& instruction_manager,
         frontend::Environment& frontend_environment) :
         instruction_manager(instruction_manager),
@@ -58,36 +67,42 @@ void Creator_x86::visitFnDef(FnDef *fndef)
 
 void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 {
+    this->last_class_name = clsdefnoinher->ident_;
     visitIdent(clsdefnoinher->ident_);
     clsdefnoinher->listclsdef_->accept(this);
+
+    // TODO: Create vtable
 }
 
 void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
 {
-
+    this->last_class_name = clsdefinher->ident_1;
     visitIdent(clsdefinher->ident_1);
     visitIdent(clsdefinher->ident_2);
     clsdefinher->listclsdef_->accept(this);
+
+    // TODO: Create vtable
 
 }
 
 void Creator_x86::visitArgument(Argument *argument)
 {
-    /* Code For Argument Goes Here */
-
+    // Watch out! Adding variable which already is on stack.
+    this->env.add_variable(argument->type_, argument->ident_);
     argument->type_->accept(this);
     visitIdent(argument->ident_);
-
 }
 
 void Creator_x86::visitMethodDef(MethodDef *methoddef)
 {
-
+    this->instruction_manager.new_block(Creator_x86::method_ident(
+            this->last_class_name, methoddef->ident_));
     methoddef->type_->accept(this);
     visitIdent(methoddef->ident_);
     methoddef->listarg_->accept(this);
+    // Add self!
+    this->env.add_variable(this->last_class_type, "self");
     methoddef->blk_->accept(this);
-
 }
 
 void Creator_x86::visitFieldDef(FieldDef *fielddef)

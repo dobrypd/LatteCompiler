@@ -26,9 +26,16 @@ private:
     // Traverse variables
     // Declarations:
     Type* declaration_type;
+    Type* last_class_type;
+    std::string last_class_name;
     // Expressions:
 
     // End of traverse vars
+
+    static const char* self_name;
+
+    static std::string method_ident(std::string& class_name,
+            std::string& method_name);
 
 public:
     Creator_x86(InstructionManager& instruction_manager,
