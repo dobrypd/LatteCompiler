@@ -60,8 +60,11 @@ private:
     void alloc_object_var();
     void alloc_array_var();
 
-public:
+    frontend::Environment& fr_env;  // To know information about objects.
+
     InstructionManager();
+public:
+    InstructionManager(frontend::Environment& fr_env);
 
     list_it_t begin();
     list_it_t end();
@@ -71,20 +74,34 @@ public:
     void new_block(std::string name);
     void add(Block::instr_ptr_t instruction);
 
+    // Funciton:
+    void function_prologue();
+    void function_epilogue();
+
+    // Op on reg:
+    void top_to_EAX();
+
     // Allocating:
     void alloc_var(Type* type);
     void alloc_default(Type* type);
-    void alloc_array(size_t size);
+    void alloc_array(Type* type); // with size  of array on top of the stack, save ptr on EAX
+    void alloc_object(Type* type); // calculate object size by fr_env, save ptr on EAX
 
     // Stack operations;
-    void pop_from_the_stack();
-    void pop_deeper_on_stack(int offset);
-
-    // Getting adresses:
-    void get_addr_to_EDI(ListStructuredIdent* ident);
+    void add_to_ESP(int value); // value in bajts (not bits)!
 
     // Assign
-    void assign_scalar_from_top(int var_pos);
+    void pop_top_to_var(int offset);
+    void pop_top_to_addr(int offset);
+    void pop_sec_top_to_addr_on_top
+
+    // Incrementation
+    void increment_var_on_stack(int offset, int inc_by);
+    void increment_var_in_addr(int offset, int inc_by);
+    void increment_var_addr_on_top(int inc_by);
+
+
+
 
     // Moving:
     void pop_to_addr_from_EDI();

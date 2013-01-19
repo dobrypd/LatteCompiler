@@ -27,9 +27,11 @@ private:
     // Declarations:
     Type* declaration_type;
     std::string last_class_name;
+    // Localc
+    int current_var_offset;
     // Statements:
-    bool current_var_on_stack = false;
-    bool current_var_is_addr = false;
+    bool current_var_on_stack;
+    bool current_var_is_addr;
     // Expressions:
 
 

@@ -23,7 +23,7 @@ class CompilerEnvironment
 public:
     typedef struct {
         Type* type;
-        int position;
+        int position; // Difference between current function EBP.
         bool on_stack;
     } var_info;
     typedef boost::shared_ptr<var_info> VarInfoPtr;
@@ -32,15 +32,16 @@ public:
 private:
     std::vector<MapPtr> variables;
     int varaibles_on_stack; // offset
-    std::vector<int> variables_sizes;
+    std::vector<int> current_stack_size; // for every block
     std::vector<int> variables_on_current_block;
-    int return_addr;
+
+    MapPtr var_tip();
 
 public:
     CompilerEnvironment();
 
     void prepare();
-    void back();
+    int back(); // returns no of variables to remove from stack
 
     int stack_size();
 
@@ -50,8 +51,8 @@ public:
 
     VarInfoPtr get_variable(std::string& name);
 
-    int get_return_addr() const;
-    void set_return_addr();
+    void new_fun();
+    void prev_fun();
 
     static size_t type_sizeof(Type* type);
 };

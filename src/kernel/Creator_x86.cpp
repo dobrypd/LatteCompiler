@@ -55,16 +55,14 @@ void Creator_x86::visitProgram(Program *program)
 void Creator_x86::visitFnDef(FnDef *fndef)
 {
     this->instruction_manager.new_block(fndef->ident_);
+    this->instruction_manager.function_prologue();
     this->env.prepare();
-
+    this->env.new_fun();
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);
-
-    this->env.set_return_addr();
-    // Then add arguments.
     fndef->listarg_->accept(this);
     fndef->blk_->accept(this);
-    this->env.back();
+    this->env.back(); // ESP will be changed by EBP
 }
 
 void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
@@ -99,8 +97,9 @@ void Creator_x86::visitMethodDef(MethodDef *methoddef)
 {
     this->instruction_manager.new_block(Creator_x86::method_ident(
             this->last_class_name, methoddef->ident_));
+    this->instruction_manager.function_prologue();
     this->env.prepare();
-    this->env.set_return_addr();
+    this->env.new_fun();
     this->env.add_obj(Creator_x86::self_name,
             this->fr_env.get_class(this->last_class_name));
     // Then add arguments.
@@ -109,7 +108,7 @@ void Creator_x86::visitMethodDef(MethodDef *methoddef)
     methoddef->listarg_->accept(this);
 
     methoddef->blk_->accept(this);
-    this->env.back();
+    this->env.back(); // ESP will be changed by EBP
 }
 
 void Creator_x86::visitFieldDef(FieldDef *fielddef)
@@ -131,7 +130,9 @@ void Creator_x86::visitStmBStmt(StmBStmt *stmbstmt)
 {
     this->env.prepare();
     stmbstmt->blk_->accept(this);
-    this->env.back();
+    int ESP_diff = this->env.back();
+    this->instruction_manager.add_to_ESP(ESP_diff);
+    // ESP will be changed by EBP
 }
 
 void Creator_x86::visitStmDecl(StmDecl *stmdecl)
@@ -143,19 +144,22 @@ void Creator_x86::visitStmDecl(StmDecl *stmdecl)
 
 void Creator_x86::visitStmAss(StmAss *stmass)
 {
-    this->current_var_on_stack = false;
+    this->current_var_on_stack = true;
     this->current_var_is_addr = false;
+    this->current_var_offset = 0;
     stmass->liststructuredident_->accept(this);
 
     stmass->expr_->accept(this);
 
+    // TODO: boolean!
+
     if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
         // POP - write direct to stack
-        this->instruction_manager.pop_top_to_var();
+        this->instruction_manager.pop_top_to_var(this->current_var_offset);
     } else if (this->current_var_is_addr) {
         // POP - write to stack (variable)
-        this->instruction_manager.pop_top_to_addr();
-    }
+        this->instruction_manager.pop_top_to_addr(this->current_var_offset);
+    } else {
         // POP - addres in memmory where write next POP
         this->instruction_manager.pop_sec_top_to_addr_on_top();
     }
@@ -163,24 +167,24 @@ void Creator_x86::visitStmAss(StmAss *stmass)
 
 void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 {
-    // MALLOC
-    this->current_var_on_stack = false;
+
+    this->current_var_on_stack = true;
     this->current_var_is_addr = false;
+    this->current_var_offset = 0;
     stmassarr->liststructuredident_->accept(this);
 
     stmassarr->type_->accept(this);
     stmassarr->expr_->accept(this);
 
-    // With value from top of the stack
-    this->instruction_manager.call_calloc(stmassarr->type_);
+    this->instruction_manager.alloc_array(stmassarr->type_); // with len on stack
 
     if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
         // POP - write direct to stack
-        this->instruction_manager.pop_top_to_var();
+        this->instruction_manager.pop_top_to_var(this->current_var_offset);
     } else if (this->current_var_is_addr) {
         // POP - write to stack (variable)
-        this->instruction_manager.pop_top_to_addr();
-    }
+        this->instruction_manager.pop_top_to_addr(this->current_var_offset);
+    } else {
         // POP - addres in memmory where write next POP
         this->instruction_manager.pop_sec_top_to_addr_on_top();
     }
@@ -188,89 +192,112 @@ void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 
 void Creator_x86::visitStmAssObj(StmAssObj *stmassobj)
 {
-    /* Code For StmAssObj Goes Here */
-    /* Latte++ */
+    this->current_var_on_stack = true;
+    this->current_var_is_addr = false;
+    this->current_var_offset = 0;
 
     stmassobj->liststructuredident_->accept(this);
     stmassobj->type_->accept(this);
 
+    this->instruction_manager.alloc_object(stmassobj->type_);
+
+    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
+        // POP - write direct to stack
+        this->instruction_manager.pop_top_to_var(this->current_var_offset);
+    } else if (this->current_var_is_addr) {
+        // POP - write to stack (variable)
+        this->instruction_manager.pop_top_to_addr(this->current_var_offset);
+    } else {
+        // POP - addres in memmory where write next POP
+        this->instruction_manager.pop_sec_top_to_addr_on_top();
+    }
 }
 
 void Creator_x86::visitStmIncr(StmIncr *stmincr)
 {
+    this->current_var_is_addr = false;
+    this->current_var_on_stack = true;
+    this->current_var_offset = 0;
+
     stmincr->liststructuredident_->accept(this);
+
+    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
+        this->instruction_manager.increment_var_on_stack(this->current_var_offset, 1);
+    } else if (this->current_var_is_addr) {
+        this->instruction_manager.increment_var_in_addr(this->current_var_offset, 1);
+    } else {
+        this->instruction_manager.increment_var_addr_on_top(1);
+    }
 }
 
 void Creator_x86::visitStmDecr(StmDecr *stmdecr)
 {
-    /* Code For StmDecr Goes Here */
-    /* Latte++ */
+    this->current_var_is_addr = false;
+    this->current_var_on_stack = false;
+    this->current_var_offset = 0;
 
     stmdecr->liststructuredident_->accept(this);
 
+    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
+        this->instruction_manager.increment_var_on_stack(this->current_var_offset, -1);
+    } else if (this->current_var_is_addr) {
+        this->instruction_manager.increment_var_in_addr(this->current_var_offset, -1);
+    } else {
+        this->instruction_manager.increment_var_addr_on_top(-1);
+    }
 }
 
 void Creator_x86::visitStmRet(StmRet *stmret)
 {
-    /* Code For StmRet Goes Here */
-
     stmret->expr_->accept(this);
 
+    // TODO: boolean
+
+    this->instruction_manager.top_to_EAX();
+    this->instruction_manager.function_epilogue();
 }
 
 void Creator_x86::visitStmVRet(StmVRet *stmvret)
 {
-    /* Code For StmVRet Goes Here */
-
-
+    this->instruction_manager.function_epilogue();
 }
 
 void Creator_x86::visitStmCond(StmCond *stmcond)
 {
-    /* Code For StmCond Goes Here */
-
+    // TODO:
     stmcond->expr_->accept(this);
     stmcond->stmt_->accept(this);
-
 }
 
 void Creator_x86::visitStmCondElse(StmCondElse *stmcondelse)
 {
-    /* Code For StmCondElse Goes Here */
-
+    // TODO:
     stmcondelse->expr_->accept(this);
     stmcondelse->stmt_1->accept(this);
     stmcondelse->stmt_2->accept(this);
-
 }
 
 void Creator_x86::visitStmWhile(StmWhile *stmwhile)
 {
-    /* Code For StmWhile Goes Here */
-
+    // TODO:
     stmwhile->expr_->accept(this);
     stmwhile->stmt_->accept(this);
-
 }
 
 void Creator_x86::visitStmForeach(StmForeach *stmforeach)
 {
-    /* Code For StmForeach Goes Here */
-    /* Latte++ */
-
+    // TODO:
     stmforeach->type_->accept(this);
     visitIdent(stmforeach->ident_);
     stmforeach->liststructuredident_->accept(this);
     stmforeach->stmt_->accept(this);
-
 }
 
 void Creator_x86::visitStmSExp(StmSExp *stmsexp)
 {
-    /* Code For StmSExp Goes Here */
-
     stmsexp->expr_->accept(this);
-
+    // TODO: boolean
+    this->instruction_manager.add_to_ESP(1);
 }
 
 void Creator_x86::visitStmNoInit(StmNoInit *stmnoinit)
@@ -285,62 +312,60 @@ void Creator_x86::visitStmInit(StmInit *stminit)
     visitIdent(stminit->ident_);
     this->env.add_variable(this->declaration_type, stminit->ident_);
     stminit->expr_->accept(this);
-    // Default value should be on stack. Do not pop it.
+    // TODO: boolean
 }
 
 void Creator_x86::visitStmInitArray(StmInitArray *stminitarray)
 {
     visitIdent(stminitarray->ident_);
     stminitarray->type_->accept(this);
+    this->env.add_array(stminitarray->type_, stminitarray->ident_);
     stminitarray->expr_->accept(this);
-
-    this->instruction_manager.alloc_array(
-            CompilerEnvironment::type_sizeof(stminitarray->type_));
+    this->instruction_manager.alloc_array(stminitarray->type_); // with len on stack
 }
 
 void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)
 {
-    /* Code For StmInitObj Goes Here */
-    /* Latte++ */
-
     visitIdent(stminitobj->ident_);
     stminitobj->type_->accept(this);
-
+    frontend::Environment::ClsInfoPtr cls =
+            this->fr_env.get_class((dynamic_cast<Class*>(stminitobj->type_)->ident_));
+    this->env.add_obj(stminitobj->ident_, cls);
 }
 
 void Creator_x86::visitSingleIdent(SingleIdent *singleident)
 {
-    /* Code For SingleIdent Goes Here */
-    /* Latte++ */
-
     visitIdent(singleident->ident_);
 
+    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
+        this->current_var_offset = this->env.get_variable(singleident->ident_)->position;
+    } else if (this->current_var_is_addr) {
+        // Array of objects:
+        // TODO:
+    } else {
+        // Object
+        // TODO:
+    }
 }
 
 void Creator_x86::visitTableVal(TableVal *tableval)
 {
-    /* Code For TableVal Goes Here */
-    /* Latte++ */
-
     visitIdent(tableval->ident_);
     tableval->listarrayindex_->accept(this);
-
 }
 
 void Creator_x86::visitSelfIdent(SelfIdent *selfident)
 {
-  /* Code For SelfIdent Goes Here */
-
-
+    /* self should be always first if not - do nothing with rest values */
+    std::string self = Creator_x86::self_name;
+    this->current_var_offset = this->env.get_variable(self)->position;
+    this->current_var_is_addr = true;
+    this->current_var_on_stack = true;
 }
 
 void Creator_x86::visitExprIndex(ExprIndex *exprindex)
 {
-    /* Code For ExprIndex Goes Here */
-    /* Latte++ */
-
     exprindex->expr_->accept(this);
-
 }
 
 void Creator_x86::visitClass(Class *_class)

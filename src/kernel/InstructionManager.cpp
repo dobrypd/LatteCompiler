@@ -18,6 +18,12 @@ InstructionManager::InstructionManager()
     this->blocks.push_back(block_0);
 }
 
+InstructionManager::InstructionManager(frontend::Environment& fr_env) : fr_env(fr_env)
+{
+    block_ptr_t block_0(new Block(Block::new_ident()));
+    this->blocks.push_back(block_0);
+}
+
 void InstructionManager::write_to_stream(std::ostream& stream)
 {
     for (list_it_t it = this->blocks.begin(); it != this->blocks.end(); it++)
@@ -130,6 +136,19 @@ void InstructionManager::get_addr_to_EDI(ListStructuredIdent *ident)
 
 void InstructionManager::assign_scalar_from_top(int var_pos)
 {
+}
+
+void InstructionManager::function_prologue()
+{
+}
+
+void InstructionManager::function_epilogue()
+{
+}
+
+void InstructionManager::add_to_ESP(int value)
+{
+    // ADD VALUE TO ESP
 }
 
 void InstructionManager::pop_to_addr_from_EDI()
