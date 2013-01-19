@@ -92,7 +92,6 @@ public:
 
     // Assign
     void pop_top_to_var(int offset);
-    void pop_top_to_addr(int offset);
     void pop_sec_top_to_addr_on_top();
 
     // Incrementation

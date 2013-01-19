@@ -169,6 +169,10 @@ void Environment::add_field_to_cls(std::string & class_name, Type *type, std::st
     Environment::ClsInfoPtr this_class = this->get_class(class_name);
     Environment::VarInfoPtr new_variable(new Environment::var_info);
     new_variable->type = type;
+    if (this_class->fields.empty())
+        new_variable->field_pos = 0;
+    else
+        new_variable->field_pos = 1 + this_class->fields.back().second->field_pos;
     this_class->fields.push_back(std::make_pair(ident, new_variable));
 }
 

@@ -134,6 +134,8 @@ void InstructionManager::alloc_array(Type *type)
 
 void InstructionManager::alloc_object(Type *type)
 {
+    // Call constructor of this type
+    //this->fr_env.get_class()
 }
 
 void InstructionManager::pop_top_to_var(int offset)

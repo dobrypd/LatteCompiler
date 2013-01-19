@@ -68,6 +68,7 @@ void CompilerEnvironment::prev_fun()
 
 int CompilerEnvironment::stack_size()
 {
+    return this->varaibles_on_stack;
 }
 
 void CompilerEnvironment::add_obj(std::string obj_name, frontend::Environment::ClsInfoPtr cls)

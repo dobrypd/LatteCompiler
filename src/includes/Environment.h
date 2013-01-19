@@ -22,6 +22,7 @@ public:
     struct var_info
     {
         Type* type;
+        int field_pos; // If field in class otherwise undefined.
     };
 
     typedef boost::shared_ptr<var_info> VarInfoPtr;
