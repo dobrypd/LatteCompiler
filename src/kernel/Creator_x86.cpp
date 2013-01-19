@@ -176,9 +176,6 @@ void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
     if (this->current_var_on_stack) {
         // POP - write direct to stack
         this->instruction_manager.pop_top_to_var(this->current_var_offset);
-    } else if (this->current_var_is_addr) {
-        // POP - write to stack (variable)
-        this->instruction_manager.pop_top_to_addr(this->current_var_offset);
     } else {
         // POP - addres in memmory where write next POP
         this->instruction_manager.pop_sec_top_to_addr_on_top();
@@ -188,7 +185,6 @@ void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 void Creator_x86::visitStmAssObj(StmAssObj* stmassobj)
 {
     this->current_var_on_stack = true;
-    this->current_var_is_addr = false;
     this->current_var_offset = 0;
 
     stmassobj->liststructuredident_->accept(this);
@@ -196,12 +192,9 @@ void Creator_x86::visitStmAssObj(StmAssObj* stmassobj)
 
     this->instruction_manager.alloc_object(stmassobj->type_);
 
-    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
+    if (this->current_var_on_stack) {
         // POP - write direct to stack
         this->instruction_manager.pop_top_to_var(this->current_var_offset);
-    } else if (this->current_var_is_addr) {
-        // POP - write to stack (variable)
-        this->instruction_manager.pop_top_to_addr(this->current_var_offset);
     } else {
         // POP - addres in memmory where write next POP
         this->instruction_manager.pop_sec_top_to_addr_on_top();
@@ -210,16 +203,13 @@ void Creator_x86::visitStmAssObj(StmAssObj* stmassobj)
 
 void Creator_x86::visitStmIncr(StmIncr *stmincr)
 {
-    this->current_var_is_addr = false;
     this->current_var_on_stack = true;
     this->current_var_offset = 0;
 
     stmincr->liststructuredident_->accept(this);
 
-    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
+    if (this->current_var_on_stack) {
         this->instruction_manager.increment_var_on_stack(this->current_var_offset, 1);
-    } else if (this->current_var_is_addr) {
-        this->instruction_manager.increment_var_in_addr(this->current_var_offset, 1);
     } else {
         this->instruction_manager.increment_var_addr_on_top(1);
     }
@@ -227,16 +217,13 @@ void Creator_x86::visitStmIncr(StmIncr *stmincr)
 
 void Creator_x86::visitStmDecr(StmDecr *stmdecr)
 {
-    this->current_var_is_addr = false;
     this->current_var_on_stack = false;
     this->current_var_offset = 0;
 
     stmdecr->liststructuredident_->accept(this);
 
-    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
+    if (this->current_var_on_stack) {
         this->instruction_manager.increment_var_on_stack(this->current_var_offset, -1);
-    } else if (this->current_var_is_addr) {
-        this->instruction_manager.increment_var_in_addr(this->current_var_offset, -1);
     } else {
         this->instruction_manager.increment_var_addr_on_top(-1);
     }
@@ -316,7 +303,8 @@ void Creator_x86::visitStmInitArray(StmInitArray *stminitarray)
     stminitarray->type_->accept(this);
     this->env.add_array(stminitarray->type_, stminitarray->ident_);
     stminitarray->expr_->accept(this);
-    this->instruction_manager.alloc_array(stminitarray->type_); // with len on stack
+    this->instruction_manager.alloc_array(stminitarray->type_);
+    // with len on stack
 }
 
 void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)
@@ -324,48 +312,36 @@ void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)
     visitIdent(stminitobj->ident_);
     stminitobj->type_->accept(this);
     frontend::Environment::ClsInfoPtr cls =
-            this->fr_env.get_class((dynamic_cast<Class*>(stminitobj->type_)->ident_));
+            this->fr_env.get_class(
+                    (dynamic_cast<Class*>(stminitobj->type_)->ident_));
     this->env.add_obj(stminitobj->ident_, cls);
+    this->instruction_manager.alloc_object(stminitobj->type_);
 }
 
 void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 {
     visitIdent(singleident->ident_);
 
-    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
-        // Must be first!
+    if (this->current_var_offset == 0) {
         CompilerEnvironment::VarInfoPtr v =
                 this->env.get_variable(singleident->ident_);
         this->current_var_offset = v->position;
         this->current_var_on_stack = true;
-        if ((check_is<Class*>(v->type)) or (check_is<Str*>(v->type)) or (check_is<TType*>(v->type)))
-            this->current_var_is_addr = true;
         this->current_var_type = v->type;
-    } else if (this->current_var_is_addr) {
-        if (check_is<Class*>(this->current_var_type)) {
-            // count offset
-            ;
-        } else if (check_is<TType*>(this->current_var_type)) {
-            // ident should be length!
-            this->current_var_is_length = true;
-            this->current_var_type = this->fr_env.global_int_type;
-        } else {
-            if (debug) std::cerr << "Wrong ident list!" << std::endl;
-        }
     } else {
         if (check_is<Class*>(this->current_var_type)) {
-            frontend::Environment::VarInfoPtr field_info =
-                this->fr_env.get_field_type(singleident->ident_,
-                        (dynamic_cast<Class*>(this->current_var_type))
-                        ->ident_);
-            this->instruction_manager.add_to_var_on_top_of_stack();
+            if (this->current_var_on_stack) {
+                this->instruction_manager.mov_var_to_stack(this->current_var_offset);
+            }
+            int field_pos = this->fr_env.get_field_position(singleident->ident_,
+                    (dynamic_cast<Class*>(this->current_var_type))->ident_);
+            this->instruction_manager.add_deref_to_stack_top(field_pos * 4);
         } else if (check_is<TType*>(this->current_var_type)){
             this->current_var_is_length = true;
             this->current_var_type = this->fr_env.global_int_type;
         } else {
             if (debug) std::cerr << "Wrong ident list!" << std::endl;
         }
-
     }
 }
 
@@ -381,7 +357,6 @@ void Creator_x86::visitSelfIdent(SelfIdent *selfident)
     /* self should be always first if not - do nothing with rest values */
     std::string self = Creator_x86::self_name;
     this->current_var_offset = this->env.get_variable(self)->position;
-    this->current_var_is_addr = true;
     this->current_var_on_stack = true;
 }
 
@@ -436,7 +411,7 @@ void Creator_x86::visitEVar(EVar *evar)
 {
     /* Code For EVar Goes Here */
     /* Latte++ */
-
+    this->current_var_is_length = false;
     evar->liststructuredident_->accept(this);
 
 }

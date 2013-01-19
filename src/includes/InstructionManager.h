@@ -88,7 +88,9 @@ public:
     void alloc_object(Type* type); // calculate object size by fr_env, save ptr on EAX
 
     // Stack operations;
-    void add_to_ESP(int value); // value in bajts (not bits)!
+    void mov_var_to_stack(int var_offset);
+    void add_to_ESP(int value);  // value in baits (not bits)!
+    void add_deref_to_stack_top(size_t offset_size);  // add value offset to top of the stack and then dereference it
 
     // Assign
     void pop_top_to_var(int offset);
@@ -96,7 +98,6 @@ public:
 
     // Incrementation
     void increment_var_on_stack(int offset, int inc_by);
-    void increment_var_in_addr(int offset, int inc_by);
     void increment_var_addr_on_top(int inc_by);
 
 

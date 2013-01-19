@@ -22,7 +22,7 @@ public:
     struct var_info
     {
         Type* type;
-        int field_pos; // If field in class otherwise undefined.
+        int field_pos; // If field in class otherwise undefined. (in variables not real size)
     };
 
     typedef boost::shared_ptr<var_info> VarInfoPtr;
@@ -124,6 +124,9 @@ public:
     std::map<std::string, FunInfoPtr>::iterator get_env_f_end();
     std::map<std::string, ClsInfoPtr>::iterator get_env_cls_begin();
     std::map<std::string, ClsInfoPtr>::iterator get_env_cls_end();
+
+    int get_field_position(std::string& field_name, std::string& class_name);
+    int get_class_size(std::string class_name);
 };
 
 } /* namespace frontend */

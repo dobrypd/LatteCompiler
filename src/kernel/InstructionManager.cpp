@@ -142,19 +142,11 @@ void InstructionManager::pop_top_to_var(int offset)
 {
 }
 
-void InstructionManager::pop_top_to_addr(int offset)
-{
-}
-
 void InstructionManager::pop_sec_top_to_addr_on_top()
 {
 }
 
 void InstructionManager::increment_var_on_stack(int offset, int inc_by)
-{
-}
-
-void InstructionManager::increment_var_in_addr(int offset, int inc_by)
 {
 }
 
