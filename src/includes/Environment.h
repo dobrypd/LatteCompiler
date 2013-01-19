@@ -114,7 +114,8 @@ public:
     ClsInfoPtr get_class(std::string& ident) const;
 
     Type* get_var_type(ListStructuredIdent* l_ident, std::string* cls_name);
-    VarInfoPtr get_field_type(std::string& ident, std::string& cls_name);
+    VarInfoPtr get_field(std::string& ident, std::string& cls_name); // Only in this class
+    VarInfoPtr find_field(std::string& ident, std::string& cls_name); // On all class in mro.
     FunInfoPtr get_method_type(std::string& ident, std::string& cls_name);
 
     // Direct access to the environment:

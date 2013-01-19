@@ -28,10 +28,8 @@ private:
     Type* declaration_type;
     std::string last_class_name;
     // Localc
-    int current_var_offset;
     // Statements:
     bool current_var_on_stack;
-    bool current_var_is_length;
     Type* current_var_type;
     // Expressions:
 

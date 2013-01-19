@@ -322,27 +322,22 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 {
     visitIdent(singleident->ident_);
 
-    if (this->current_var_offset == 0) {
+    if (this->current_var_on_stack) {
         CompilerEnvironment::VarInfoPtr v =
                 this->env.get_variable(singleident->ident_);
-        this->current_var_offset = v->position;
-        this->current_var_on_stack = true;
+        this->instruction_manager.add_to_ESI_val_address(v->position);
         this->current_var_type = v->type;
-
-        this->instruction_manager.add_to_stack_val_address(v->position);
+        this->current_var_on_stack = false;
     } else {
+        this->instruction_manager.dereference_ESI();
         if (check_is<Class*>(this->current_var_type)) {
-            if (this->current_var_on_stack) {
-                this->instruction_manager.push_var(this->current_var_offset);
-            } else {
-                this->instruction_manager.dereference_stack_top();
-            }
             int field_pos = this->fr_env.get_field_position(singleident->ident_,
                     (dynamic_cast<Class*>(this->current_var_type))->ident_);
-            this->instruction_manager.add_to_stack_top(field_pos * 4);
+            frontend::Environment::VarInfoPtr field_info =
+                    this->fr_env.find_field(singleident->ident_,
+                    (dynamic_cast<Class*>(this->current_var_type))->ident_);
+            this->instruction_manager.add_to_ESI(field_pos * 4);
         } else if (check_is<TType*>(this->current_var_type)){
-            this->instruction_manager.dereference_stack_top();
-            this->current_var_is_length = true;
             this->current_var_type = this->fr_env.global_int_type;
         } else {
             if (debug) std::cerr << "Wrong ident list!" << std::endl;
@@ -356,14 +351,20 @@ void Creator_x86::visitTableVal(TableVal *tableval)
     visitIdent(tableval->ident_);
     // In current version only one dimension arrays
     tableval->listarrayindex_->accept(this);
+    // because in first value of array is length
+    this->instruction_manager.increment_ESI(1);
+    this->instruction_manager.pop_add_to_ESI();
 }
 
 void Creator_x86::visitSelfIdent(SelfIdent *selfident)
 {
     /* self should be always first if not - do nothing with rest values */
     std::string self = Creator_x86::self_name;
-    this->current_var_offset = this->env.get_variable(self)->position;
-    this->current_var_on_stack = true;
+    CompilerEnvironment::VarInfoPtr v =
+        this->env.get_variable(self);
+    this->instruction_manager.add_to_ESI_val_address(v->position);
+    this->current_var_type = v->type;
+    this->current_var_on_stack = false;
 }
 
 void Creator_x86::visitExprIndex(ExprIndex *exprindex)
