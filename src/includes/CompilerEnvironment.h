@@ -11,6 +11,7 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include "Absyn.H"
+#include "Environment.h"
 
 namespace backend
 {

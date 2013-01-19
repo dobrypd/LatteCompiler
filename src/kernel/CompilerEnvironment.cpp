@@ -25,7 +25,6 @@ void CompilerEnvironment::prepare()
     CompilerEnvironment::MapPtr empty(new CompilerEnvironment::MapType());
     this->variables.push_back(empty);
     this->current_stack_size.push_back(0);
-    // SET EBP
 }
 
 int CompilerEnvironment::back()
@@ -34,26 +33,15 @@ int CompilerEnvironment::back()
     int remove_variables = this->current_stack_size.back();
     this->current_stack_size.pop_back();
     this->varaibles_on_stack -= remove_variables;
-    return remove_variables; // ESP should be changed.
+    return remove_variables;
 }
 
-int CompilerEnvironment::stack_current_offset()
+void CompilerEnvironment::add_variable(Type *type, std::string name)
 {
-    return this->stack_size_tip();
-}
-
-int CompilerEnvironment::stack_all_offset()
-{
-    return this->full_stack_size;
-}
-
-void CompilerEnvironment::add_variable(Type* type, std::string name)
-{
-    //add +1 to `current` stack
     MapPtr tip = this->var_tip();
     VarInfoPtr new_variable(new CompilerEnvironment::var_info);
     new_variable->type = type;
-        (*tip)[name] = new_variable;
+    (*tip)[name] = new_variable;
 }
 
 CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(std::string & name)
@@ -68,21 +56,26 @@ CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(std::string & 
     return CompilerEnvironment::VarInfoPtr();
 }
 
-CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(ListStructuredIdent *ident)
-{
-    return CompilerEnvironment::VarInfoPtr();
-}
-
 void CompilerEnvironment::new_fun()
 {
-    // EBP changed!
     this->varaibles_on_stack = 0;
 }
 
 void CompilerEnvironment::prev_fun()
 {
-    // TODO: check it!
     this->varaibles_on_stack = this->current_stack_size.back();
+}
+
+int CompilerEnvironment::stack_size()
+{
+}
+
+void CompilerEnvironment::add_obj(std::string obj_name, frontend::Environment::ClsInfoPtr cls)
+{
+}
+
+void CompilerEnvironment::add_array(Type *type, std::string name)
+{
 }
 
 size_t CompilerEnvironment::type_sizeof(Type *type)

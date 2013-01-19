@@ -12,6 +12,7 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 #include "Absyn.H"
+#include "Environment.h"
 #include "Instruction.h"
 
 namespace backend
@@ -62,7 +63,6 @@ private:
 
     frontend::Environment& fr_env;  // To know information about objects.
 
-    InstructionManager();
 public:
     InstructionManager(frontend::Environment& fr_env);
 
@@ -93,7 +93,7 @@ public:
     // Assign
     void pop_top_to_var(int offset);
     void pop_top_to_addr(int offset);
-    void pop_sec_top_to_addr_on_top
+    void pop_sec_top_to_addr_on_top();
 
     // Incrementation
     void increment_var_on_stack(int offset, int inc_by);
@@ -101,7 +101,15 @@ public:
     void increment_var_addr_on_top(int inc_by);
 
 
+    // Arithmetic operations:
+    void add_on_stack();
+    void sub_on_stack();
+    void mul_on_stack();
+    void div_on_stack();
+    void mod_on_stack();
 
+    // Statics
+    void add_const_string(std::string& str); // and push on stack
 
     // Moving:
     void pop_to_addr_from_EDI();

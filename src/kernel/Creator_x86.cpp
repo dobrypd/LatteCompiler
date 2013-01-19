@@ -449,81 +449,55 @@ void Creator_x86::visitEApp(EApp *eapp)
 
 void Creator_x86::visitEString(EString *estring)
 {
-    /* Code For EString Goes Here */
-
     visitString(estring->string_);
-
+    this->instruction_manager.add_const_string(estring->string_);
 }
 
 void Creator_x86::visitNeg(Neg *neg)
 {
-    /* Code For Neg Goes Here */
-
     neg->expr_->accept(this);
-
 }
 
 void Creator_x86::visitNot(Not *_not)
 {
-    /* Code For Not Goes Here */
-
     _not->expr_->accept(this);
-
 }
 
 void Creator_x86::visitEDynamicCast(EDynamicCast *edynamiccast)
 {
-    /* Code For EDynamicCast Goes Here */
-    /* Latte++ */
-
     visitIdent(edynamiccast->ident_);
     edynamiccast->expr_->accept(this);
-
 }
 
 void Creator_x86::visitEMul(EMul *emul)
 {
-    /* Code For EMul Goes Here */
-
     emul->expr_1->accept(this);
     emul->mulop_->accept(this);
     emul->expr_2->accept(this);
-
 }
 
 void Creator_x86::visitEAdd(EAdd *eadd)
 {
-    /* Code For EAdd Goes Here */
-
     eadd->expr_1->accept(this);
-    eadd->addop_->accept(this);
     eadd->expr_2->accept(this);
-
+    eadd->addop_->accept(this);
 }
 
 void Creator_x86::visitERel(ERel *erel)
 {
-    /* Code For ERel Goes Here */
-
     erel->expr_1->accept(this);
-    erel->relop_->accept(this);
     erel->expr_2->accept(this);
-
+    erel->relop_->accept(this);
 }
 
 void Creator_x86::visitEAnd(EAnd *eand)
 {
-    /* Code For EAnd Goes Here */
-
     eand->expr_1->accept(this);
     eand->expr_2->accept(this);
-
 }
 
 void Creator_x86::visitEOr(EOr *eor)
 {
-    /* Code For EOr Goes Here */
-
     eor->expr_1->accept(this);
     eor->expr_2->accept(this);
 
@@ -531,79 +505,51 @@ void Creator_x86::visitEOr(EOr *eor)
 
 void Creator_x86::visitPlus(Plus *plus)
 {
-    /* Code For Plus Goes Here */
-
-
+    this->instruction_manager.add_on_stack();
 }
 
 void Creator_x86::visitMinus(Minus *minus)
 {
-    /* Code For Minus Goes Here */
-
-
+    this->instruction_manager.sub_on_stack();
 }
 
 void Creator_x86::visitTimes(Times *times)
 {
-    /* Code For Times Goes Here */
-
-
+    this->instruction_manager.mul_on_stack();
 }
 
 void Creator_x86::visitDiv(Div *div)
 {
-    /* Code For Div Goes Here */
-
-
+    this->instruction_manager.div_on_stack();
 }
 
 void Creator_x86::visitMod(Mod *mod)
 {
-    /* Code For Mod Goes Here */
-
-
+    this->instruction_manager.mod_on_stack();
 }
 
 void Creator_x86::visitLTH(LTH *lth)
 {
-    /* Code For LTH Goes Here */
-
-
 }
 
 void Creator_x86::visitLE(LE *le)
 {
-    /* Code For LE Goes Here */
-
-
 }
 
 void Creator_x86::visitGTH(GTH *gth)
 {
-    /* Code For GTH Goes Here */
-
-
 }
 
 void Creator_x86::visitGE(GE *ge)
 {
-    /* Code For GE Goes Here */
-
-
 }
 
 void Creator_x86::visitEQU(EQU *equ)
 {
-    /* Code For EQU Goes Here */
-
-
 }
 
 void Creator_x86::visitNE(NE *ne)
 {
-    /* Code For NE Goes Here */
-
-
 }
 
 
@@ -625,7 +571,6 @@ void Creator_x86::visitListArg(ListArg* listarg)
 
 void Creator_x86::visitListClsDef(ListClsDef* listclsdef)
 {
-    /* Latte++ */
     for (ListClsDef::iterator i = listclsdef->begin() ; i != listclsdef->end() ; ++i)
     {
         (*i)->accept(this);
@@ -650,7 +595,6 @@ void Creator_x86::visitListItem(ListItem* listitem)
 
 void Creator_x86::visitListArrayIndex(ListArrayIndex* listarrayindex)
 {
-    /* Latte++ */
     for (ListArrayIndex::iterator i = listarrayindex->begin() ; i != listarrayindex->end() ; ++i)
     {
         (*i)->accept(this);
@@ -659,7 +603,6 @@ void Creator_x86::visitListArrayIndex(ListArrayIndex* listarrayindex)
 
 void Creator_x86::visitListStructuredIdent(ListStructuredIdent* liststructuredident)
 {
-    /* Latte++ */
     for (ListStructuredIdent::iterator i = liststructuredident->begin() ; i != liststructuredident->end() ; ++i)
     {
         (*i)->accept(this);
@@ -668,7 +611,6 @@ void Creator_x86::visitListStructuredIdent(ListStructuredIdent* liststructuredid
 
 void Creator_x86::visitListExpr(ListExpr* listexpr)
 {
-    /* Latte++ */
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
         (*i)->accept(this);
@@ -678,27 +620,22 @@ void Creator_x86::visitListExpr(ListExpr* listexpr)
 
 void Creator_x86::visitInteger(Integer x)
 {
-    /* Code for Integer Goes Here */
 }
 
 void Creator_x86::visitChar(Char x)
 {
-    /* Code for Char Goes Here */
 }
 
 void Creator_x86::visitDouble(Double x)
 {
-    /* Code for Double Goes Here */
 }
 
 void Creator_x86::visitString(String x)
 {
-    /* Code for String Goes Here */
 }
 
 void Creator_x86::visitIdent(Ident x)
 {
-    /* Code for Ident Goes Here */
 }
 
 

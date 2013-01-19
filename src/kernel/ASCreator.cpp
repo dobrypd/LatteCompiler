@@ -18,7 +18,8 @@ namespace backend
 ASCreator::ASCreator(std::string original_file_name,
         std::string output_file_name,
         frontend::Environment& env)
-    : creator(Creator_x86(this->instruction_manager, env)),
+    : instruction_manager(new InstructionManager(env)),
+      creator(Creator_x86(*this->instruction_manager, env)),
       assembly_file_name(output_file_name),
       original_file_name(original_file_name),
       env(env)
@@ -36,7 +37,7 @@ void ASCreator::save_in_file()
     file.open(this->assembly_file_name.c_str());
 
     this->write_file_prologue(file);
-    this->instruction_manager.write_to_stream(file);
+    this->instruction_manager->write_to_stream(file);
     this->write_file_epilogue(file);
 
     file.close();
@@ -50,6 +51,11 @@ void ASCreator::write_file_prologue(std::ostream& stream)
 void ASCreator::write_file_epilogue(std::ostream& stream)
 {
 
+}
+
+ASCreator::~ASCreator()
+{
+    delete this->instruction_manager;
 }
 
 void ASCreator::generate(Visitable *ast_root)

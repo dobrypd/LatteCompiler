@@ -12,12 +12,6 @@
 namespace backend
 {
 
-InstructionManager::InstructionManager()
-{
-    block_ptr_t block_0(new Block(Block::new_ident()));
-    this->blocks.push_back(block_0);
-}
-
 InstructionManager::InstructionManager(frontend::Environment& fr_env) : fr_env(fr_env)
 {
     block_ptr_t block_0(new Block(Block::new_ident()));
@@ -118,26 +112,6 @@ void InstructionManager::alloc_default(Type *type)
 {
 }
 
-void InstructionManager::alloc_array(size_t size)
-{
-}
-
-void InstructionManager::pop_from_the_stack()
-{
-}
-
-void InstructionManager::pop_deeper_on_stack(int offset)
-{
-}
-
-void InstructionManager::get_addr_to_EDI(ListStructuredIdent *ident)
-{
-}
-
-void InstructionManager::assign_scalar_from_top(int var_pos)
-{
-}
-
 void InstructionManager::function_prologue()
 {
 }
@@ -148,7 +122,66 @@ void InstructionManager::function_epilogue()
 
 void InstructionManager::add_to_ESP(int value)
 {
-    // ADD VALUE TO ESP
+}
+
+void InstructionManager::top_to_EAX()
+{
+}
+
+void InstructionManager::alloc_array(Type *type)
+{
+}
+
+void InstructionManager::alloc_object(Type *type)
+{
+}
+
+void InstructionManager::pop_top_to_var(int offset)
+{
+}
+
+void InstructionManager::pop_top_to_addr(int offset)
+{
+}
+
+void InstructionManager::pop_sec_top_to_addr_on_top()
+{
+}
+
+void InstructionManager::increment_var_on_stack(int offset, int inc_by)
+{
+}
+
+void InstructionManager::increment_var_in_addr(int offset, int inc_by)
+{
+}
+
+void InstructionManager::increment_var_addr_on_top(int inc_by)
+{
+}
+
+void InstructionManager::add_on_stack()
+{
+}
+
+void InstructionManager::sub_on_stack()
+{
+}
+
+void InstructionManager::mul_on_stack()
+{
+}
+
+void InstructionManager::div_on_stack()
+{
+}
+
+void InstructionManager::mod_on_stack()
+{
+}
+
+void InstructionManager::add_const_string(std::string & str)
+{
 }
 
 void InstructionManager::pop_to_addr_from_EDI()
