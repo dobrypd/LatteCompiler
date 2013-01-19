@@ -26,9 +26,12 @@ private:
     // Traverse variables
     // Declarations:
     Type* declaration_type;
-    Type* last_class_type;
     std::string last_class_name;
+    // Statements:
+    bool current_var_on_stack = false;
+    bool current_var_is_addr = false;
     // Expressions:
+
 
     // End of traverse vars
 

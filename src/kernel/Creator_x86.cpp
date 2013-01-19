@@ -59,9 +59,11 @@ void Creator_x86::visitFnDef(FnDef *fndef)
 
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);
+
+    this->env.set_return_addr();
+    // Then add arguments.
     fndef->listarg_->accept(this);
     fndef->blk_->accept(this);
-
     this->env.back();
 }
 
@@ -87,8 +89,8 @@ void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
 
 void Creator_x86::visitArgument(Argument *argument)
 {
-    // Watch out! Adding variable which already is on stack.
     this->env.add_variable(argument->type_, argument->ident_);
+
     argument->type_->accept(this);
     visitIdent(argument->ident_);
 }
@@ -97,12 +99,17 @@ void Creator_x86::visitMethodDef(MethodDef *methoddef)
 {
     this->instruction_manager.new_block(Creator_x86::method_ident(
             this->last_class_name, methoddef->ident_));
+    this->env.prepare();
+    this->env.set_return_addr();
+    this->env.add_obj(Creator_x86::self_name,
+            this->fr_env.get_class(this->last_class_name));
+    // Then add arguments.
     methoddef->type_->accept(this);
     visitIdent(methoddef->ident_);
     methoddef->listarg_->accept(this);
-    // Add self!
-    this->env.add_variable(this->last_class_type, "self");
+
     methoddef->blk_->accept(this);
+    this->env.back();
 }
 
 void Creator_x86::visitFieldDef(FieldDef *fielddef)
@@ -136,37 +143,47 @@ void Creator_x86::visitStmDecl(StmDecl *stmdecl)
 
 void Creator_x86::visitStmAss(StmAss *stmass)
 {
+    this->current_var_on_stack = false;
+    this->current_var_is_addr = false;
     stmass->liststructuredident_->accept(this);
-
-//    CompilerEnvironment::VarInfoPtr var_ptr =
-//            this->env.get_variable(stmass->liststructuredident_);
-//    int stack_offset = this->env.stack_all_offset() - var_ptr->position;
 
     stmass->expr_->accept(this);
 
-//    if (var_ptr->on_stack) {
-//        this->instruction_manager.pop_deeper_on_stack(stack_offset);
-//    } else {
-//        this->instruction_manager.get_addr_to_EDI(stmass->liststructuredident_);
-//        // Save value from top of the stack to address in EDX
-//        this->instruction_manager.pop_to_addr_from_EDI();
-//    }
+    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
+        // POP - write direct to stack
+        this->instruction_manager.pop_top_to_var();
+    } else if (this->current_var_is_addr) {
+        // POP - write to stack (variable)
+        this->instruction_manager.pop_top_to_addr();
+    }
+        // POP - addres in memmory where write next POP
+        this->instruction_manager.pop_sec_top_to_addr_on_top();
+    }
 }
 
 void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 {
+    // MALLOC
+    this->current_var_on_stack = false;
+    this->current_var_is_addr = false;
     stmassarr->liststructuredident_->accept(this);
-
-//    CompilerEnvironment::VarInfoPtr var_ptr =
-//            this->env.get_variable(stmassarr->liststructuredident_);
-//    int stack_offset = this->env.stack_all_offset() - var_ptr->position;
-
-//    this->instruction_manager.get_addr_to_EDI(stmassarr->liststructuredident_);
-//    // Save value from top of the stack to address in EDX
-//    this->instruction_manager.pop_to_addr_from_EDI();
 
     stmassarr->type_->accept(this);
     stmassarr->expr_->accept(this);
+
+    // With value from top of the stack
+    this->instruction_manager.call_calloc(stmassarr->type_);
+
+    if ((this->current_var_on_stack) and !(this->current_var_is_addr)) {
+        // POP - write direct to stack
+        this->instruction_manager.pop_top_to_var();
+    } else if (this->current_var_is_addr) {
+        // POP - write to stack (variable)
+        this->instruction_manager.pop_top_to_addr();
+    }
+        // POP - addres in memmory where write next POP
+        this->instruction_manager.pop_sec_top_to_addr_on_top();
+    }
 }
 
 void Creator_x86::visitStmAssObj(StmAssObj *stmassobj)

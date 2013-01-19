@@ -30,13 +30,17 @@ public:
     typedef std::map<std::string,VarInfoPtr> MapType;
     typedef boost::shared_ptr<MapType> MapPtr;
 private:
-    MapPtr variables;
+    std::vector<MapPtr> variables;
     int varaibles_on_stack; // offset
     std::vector<int> variables_sizes;
+    std::vector<int> variables_on_current_block;
     int return_addr;
 
 public:
     CompilerEnvironment();
+
+    void prepare();
+    void back();
 
     int stack_size();
 
