@@ -328,20 +328,26 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
         this->current_var_offset = v->position;
         this->current_var_on_stack = true;
         this->current_var_type = v->type;
+
+        this->instruction_manager.add_to_stack_val_address(v->position);
     } else {
         if (check_is<Class*>(this->current_var_type)) {
             if (this->current_var_on_stack) {
-                this->instruction_manager.mov_var_to_stack(this->current_var_offset);
+                this->instruction_manager.push_var(this->current_var_offset);
+            } else {
+                this->instruction_manager.dereference_stack_top();
             }
             int field_pos = this->fr_env.get_field_position(singleident->ident_,
                     (dynamic_cast<Class*>(this->current_var_type))->ident_);
-            this->instruction_manager.add_deref_to_stack_top(field_pos * 4);
+            this->instruction_manager.add_to_stack_top(field_pos * 4);
         } else if (check_is<TType*>(this->current_var_type)){
+            this->instruction_manager.dereference_stack_top();
             this->current_var_is_length = true;
             this->current_var_type = this->fr_env.global_int_type;
         } else {
             if (debug) std::cerr << "Wrong ident list!" << std::endl;
         }
+        this->current_var_on_stack = false;
     }
 }
 
