@@ -412,10 +412,9 @@ void Creator_x86::visitEVar(EVar *evar)
     evar->liststructuredident_->accept(this);
     this->instruction_manager.dereference_ESI_to_stack();
     if (check_is<Bool*>(this->last_type)) {
-        // POP TO EAX
-        // TODO:
-        JVM << "    ifne L" << this->last_true_label << endl;
-        JVM << "    goto L" << this->last_false_label << endl;
+        this->instruction_manager.cmp_stack();
+        this->instruction_manager.jump_if(InstructionManager::NE, this->last_true_label);
+        this->instruction_manager.jump(this->last_false_label);
         this->e_was_rel = true;
     } else {
         this->e_was_rel = false;

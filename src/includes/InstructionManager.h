@@ -74,6 +74,11 @@ public:
     // Jumps / calls
     void jump(int id);
 
+    enum cmp_val_t {LTH, LE, GTH, GE, EQU, NE};
+    void jump_if(cmp_val_t type, int label_id);
+    void jump_if_0(int label_id);
+    void cmp_stack();
+
     // Funciton:
     void function_prologue();
     void function_epilogue();

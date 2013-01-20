@@ -280,35 +280,48 @@ Environment::FunInfoPtr Environment::get_method_type(std::string & ident, std::s
     return Environment::FunInfoPtr();
 }
 
-std::map<std::string, Environment::ClsInfoPtr>::iterator Environment::get_env_cls_end()
+Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string & cls_name)
+{
+}
+
+Environment::VarInfoPtr Environment::find_field(std::string & ident, std::string & cls_name)
+{
+}
+
+std::map<std::string,Environment::ClsInfoPtr>::iterator Environment::get_env_cls_end()
 {
     return this->env_cls.end();
 }
 
-
-Type* Environment::get_var_type(ListStructuredIdent* l_ident,
-        std::string* cls_name = NULL)
+Type *Environment::get_var_type(ListStructuredIdent *l_ident, std::string *cls_name = NULL)
 {
     Type* last_type = NULL;
     ListStructuredIdent::iterator it;
-    if (check_is<SelfIdent* >(l_ident)) {
+    if(check_is<SelfIdent*>(l_ident)){
         this->global_cls_type->ident_ = *cls_name;
         last_type = this->global_cls_type;
         it = l_ident->begin() + 1;
-    } else {
+    }else{
         it = l_ident->begin();
     }
+    for(;it != l_ident->end();++it){
+        StructuredIdent *str_ident = (*it);
+        if(check_is<Class*>(str_ident)){
+        }else
+            if(check_is<TType*>(str_ident))
+                last_type = dynamic_cast<TType*>(str_ident)->type_;
 
-    for (;it != l_ident->end(); ++it)
-    {
-        StructuredIdent* str_ident = (*it);
-        if (check_is<Class*>(str_ident)) {
 
-        } else if (check_is<TType*>(str_ident))
-            last_type = dynamic_cast<TType*>(str_ident)->type_;
     }
-
     return last_type;
+}
+
+int Environment::get_field_position(std::string & field_name, std::string & class_name)
+{
+}
+
+int Environment::get_class_size(std::string class_name)
+{
 }
 
 
