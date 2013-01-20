@@ -27,6 +27,7 @@ void Creator_x86::bool_expr_to_stack(int label_t, int label_f)
 }
 
 const char* Creator_x86::self_name = "self";
+const char* Creator_x86::named_temp_on_stack_prefix = "#_TEMP__ON__STACK_#";
 
 std::string Creator_x86::method_ident(std::string& class_name,
             std::string& method_name)
@@ -273,10 +274,33 @@ void Creator_x86::visitStmWhile(StmWhile *stmwhile)
 void Creator_x86::visitStmForeach(StmForeach *stmforeach)
 {
     // TODO:
+    int start = this->next_label++;
     stmforeach->type_->accept(this);
     visitIdent(stmforeach->ident_);
+
+    this->env.prepare();
+
+    this->instruction_manager.push_ECX();
+    // old ECX on stack
+    this->env.add_variable(this->fr_env.global_int_type,
+            Creator_x86::named_temp_on_stack_prefix);
+
+    this->env.add_variable(stmforeach->type_, stmforeach->ident_);
     stmforeach->liststructuredident_->accept(this);
+
+    this->instruction_manager.dereference_from_ESI_to_ECX_minus_1();
+
+    this->instruction_manager.new_block(start);
+    this->instruction_manager.add_to_ECX(1);
+    this->instruction_manager.dereference_ESI_to_stack();
+
+    this->instruction_manager.new_block(start);
     stmforeach->stmt_->accept(this);
+    this->instruction_manager.loop(start);
+
+    this->instruction_manager.pop_ECX();
+    this->env.back();
+
 }
 
 void Creator_x86::visitStmSExp(StmSExp *stmsexp)
@@ -358,9 +382,11 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 void Creator_x86::visitTableVal(TableVal *tableval)
 {
     visitIdent(tableval->ident_);
+    // XXX: TODO: SAVE ESI !
     // In current version only one dimension arrays
     tableval->listarrayindex_->accept(this);
     // because in first value of array is length
+    // XXX: TODO: LOAD ESI !
     this->instruction_manager.increment_ESI(1);
     this->instruction_manager.pop_add_to_ESI();
 }

@@ -83,6 +83,7 @@ public:
     void jump_if_0(int label_id);
     void jump_if_not0(int label_id);
     void cmp_stack();
+    void loop(int label_id);
 
     // Funciton:
     void function_prologue();
@@ -90,6 +91,9 @@ public:
 
     // Op on reg:
     void top_to_EAX();
+    void dereference_from_ESI_to_ECX_minus_1();
+    void push_ECX();
+    void pop_ECX();
 
     // Allocating:
     void alloc_var(Type* type);
@@ -101,8 +105,10 @@ public:
     void add_to_ESP(int value);  // value in baits (not bits)!
     void pop_add_to_ESI();
     void dereference_ESI_to_stack();
+    void dereference_stack_top_to_ECX();
     void push_literal(int value);
     void pop_to_addr_from_ESI();
+    void push_ESI();
 
     // Assign
     void pop_top_to_var(int offset);
@@ -113,6 +119,7 @@ public:
     void increment_var_addr_on_top(int inc_by);
     void increment_ESI(int inc_by);
     void increment_in_ESI(int inc_by); // inc in address in ESI
+    void increment_ECX(int inc_by);
 
 
     // Arithmetic operations:
