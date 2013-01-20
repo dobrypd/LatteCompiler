@@ -15,6 +15,17 @@ namespace backend
 {
 
 
+void Creator_x86::bool_expr_to_stack(int label_t, int label_f)
+{
+    int label_end = this->next_label++;
+    this->instruction_manager.new_block(label_t);
+    this->instruction_manager.push_literal(1);
+    this->instruction_manager.jump(label_end);
+    this->instruction_manager.new_block(label_f);
+    this->instruction_manager.push_literal(0);
+    this->instruction_manager.new_block(label_end);
+}
+
 const char* Creator_x86::self_name = "self";
 
 std::string Creator_x86::method_ident(std::string& class_name,
@@ -26,7 +37,8 @@ std::string Creator_x86::method_ident(std::string& class_name,
 Creator_x86::Creator_x86(InstructionManager& instruction_manager,
         frontend::Environment& frontend_environment) :
         instruction_manager(instruction_manager),
-        fr_env(frontend_environment)
+        fr_env(frontend_environment),
+        next_label(0)
 {
 
 }
@@ -49,12 +61,13 @@ void Creator_x86::visitRelOp(RelOp* t) {} //abstract class
 
 void Creator_x86::visitProgram(Program *program)
 {
+    this->e_was_rel = false;
     program->listtopdef_->accept(this);
 }
 
 void Creator_x86::visitFnDef(FnDef *fndef)
 {
-    this->instruction_manager.new_block(fndef->ident_);
+    this->instruction_manager.new_function_block(fndef->ident_);
     this->instruction_manager.function_prologue();
     this->env.prepare();
     this->env.new_fun();
@@ -62,6 +75,8 @@ void Creator_x86::visitFnDef(FnDef *fndef)
     visitIdent(fndef->ident_);
     fndef->listarg_->accept(this);
     fndef->blk_->accept(this);
+    if (check_is<Void*>(fndef->type_))
+        this->instruction_manager.function_epilogue(); // TODO: want it?
     this->env.back(); // ESP will be changed by EBP
 }
 
@@ -95,7 +110,7 @@ void Creator_x86::visitArgument(Argument *argument)
 
 void Creator_x86::visitMethodDef(MethodDef *methoddef)
 {
-    this->instruction_manager.new_block(Creator_x86::method_ident(
+    this->instruction_manager.new_function_block(Creator_x86::method_ident(
             this->last_class_name, methoddef->ident_));
     this->instruction_manager.function_prologue();
     this->env.prepare();
@@ -106,8 +121,9 @@ void Creator_x86::visitMethodDef(MethodDef *methoddef)
     methoddef->type_->accept(this);
     visitIdent(methoddef->ident_);
     methoddef->listarg_->accept(this);
-
     methoddef->blk_->accept(this);
+    if (check_is<Void*>(methoddef->type_))
+            this->instruction_manager.function_epilogue(); // TODO: want it?
     this->env.back(); // ESP will be changed by EBP
 }
 
@@ -145,96 +161,63 @@ void Creator_x86::visitStmDecl(StmDecl *stmdecl)
 void Creator_x86::visitStmAss(StmAss *stmass)
 {
     this->current_var_on_stack = true;
-    this->current_var_offset = 0;
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+
     stmass->liststructuredident_->accept(this);
 
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     stmass->expr_->accept(this);
-
-    // TODO: boolean!
-
-    if (this->current_var_on_stack) {
-        // POP - write direct to stack
-        this->instruction_manager.pop_top_to_var(this->current_var_offset);
-    } else {
-        // POP - addres in memmory where write next POP
-        this->instruction_manager.pop_sec_top_to_addr_on_top();
-    }
+    if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
+    this->instruction_manager.pop_to_addr_from_ESI();
 }
 
 void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 {
-
     this->current_var_on_stack = true;
-    this->current_var_offset = 0;
     stmassarr->liststructuredident_->accept(this);
 
     stmassarr->type_->accept(this);
     stmassarr->expr_->accept(this);
 
     this->instruction_manager.alloc_array(stmassarr->type_); // with len on stack
-
-    if (this->current_var_on_stack) {
-        // POP - write direct to stack
-        this->instruction_manager.pop_top_to_var(this->current_var_offset);
-    } else {
-        // POP - addres in memmory where write next POP
-        this->instruction_manager.pop_sec_top_to_addr_on_top();
-    }
+    this->instruction_manager.pop_to_addr_from_ESI();
 }
 
 void Creator_x86::visitStmAssObj(StmAssObj* stmassobj)
 {
     this->current_var_on_stack = true;
-    this->current_var_offset = 0;
 
     stmassobj->liststructuredident_->accept(this);
     stmassobj->type_->accept(this);
 
     this->instruction_manager.alloc_object(stmassobj->type_);
-
-    if (this->current_var_on_stack) {
-        // POP - write direct to stack
-        this->instruction_manager.pop_top_to_var(this->current_var_offset);
-    } else {
-        // POP - addres in memmory where write next POP
-        this->instruction_manager.pop_sec_top_to_addr_on_top();
-    }
+    this->instruction_manager.pop_to_addr_from_ESI();
 }
 
 void Creator_x86::visitStmIncr(StmIncr *stmincr)
 {
     this->current_var_on_stack = true;
-    this->current_var_offset = 0;
-
     stmincr->liststructuredident_->accept(this);
-
-    if (this->current_var_on_stack) {
-        this->instruction_manager.increment_var_on_stack(this->current_var_offset, 1);
-    } else {
-        this->instruction_manager.increment_var_addr_on_top(1);
-    }
+    this->instruction_manager.increment_in_ESI(1);
 }
 
 void Creator_x86::visitStmDecr(StmDecr *stmdecr)
 {
-    this->current_var_on_stack = false;
-    this->current_var_offset = 0;
-
+    this->current_var_on_stack = true;
     stmdecr->liststructuredident_->accept(this);
-
-    if (this->current_var_on_stack) {
-        this->instruction_manager.increment_var_on_stack(this->current_var_offset, -1);
-    } else {
-        this->instruction_manager.increment_var_addr_on_top(-1);
-    }
+    this->instruction_manager.increment_in_ESI(-1);
 }
 
 void Creator_x86::visitStmRet(StmRet *stmret)
 {
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     stmret->expr_->accept(this);
-
-    // TODO: boolean
-
+    if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
     this->instruction_manager.top_to_EAX();
     this->instruction_manager.function_epilogue();
 }
@@ -246,24 +229,45 @@ void Creator_x86::visitStmVRet(StmVRet *stmvret)
 
 void Creator_x86::visitStmCond(StmCond *stmcond)
 {
-    // TODO:
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     stmcond->expr_->accept(this);
+    this->instruction_manager.new_block(label_t);
     stmcond->stmt_->accept(this);
+    this->instruction_manager.new_block(label_f);
 }
 
 void Creator_x86::visitStmCondElse(StmCondElse *stmcondelse)
 {
-    // TODO:
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    int label_end = this->next_label++;
+    this->last_false_label = label_f;
+    this->last_true_label = label_t;
     stmcondelse->expr_->accept(this);
+    this->instruction_manager.new_block(label_t);
     stmcondelse->stmt_1->accept(this);
+    this->instruction_manager.jump(label_end);
+    this->instruction_manager.new_block(label_f);
     stmcondelse->stmt_2->accept(this);
+    this->instruction_manager.new_block(label_end);
 }
 
 void Creator_x86::visitStmWhile(StmWhile *stmwhile)
 {
-    // TODO:
+    int before_lbl = this->next_label++;
+    int after_lbl = this->next_label++;
+    int block_start = this->next_label++;
+    this->instruction_manager.new_block(before_lbl);
+    this->last_false_label = after_lbl;
+    this->last_true_label = block_start;
     stmwhile->expr_->accept(this);
+    this->instruction_manager.new_block(block_start);
     stmwhile->stmt_->accept(this);
+    this->instruction_manager.jump(before_lbl);
+    this->instruction_manager.new_block(after_lbl);
 }
 
 void Creator_x86::visitStmForeach(StmForeach *stmforeach)
@@ -278,8 +282,9 @@ void Creator_x86::visitStmForeach(StmForeach *stmforeach)
 void Creator_x86::visitStmSExp(StmSExp *stmsexp)
 {
     stmsexp->expr_->accept(this);
-    // TODO: boolean
-    this->instruction_manager.add_to_ESP(1);
+
+    if ((!this->e_was_rel) && (!check_is<Void*>(this->last_type)))
+        this->instruction_manager.add_to_ESP(1);
 }
 
 void Creator_x86::visitStmNoInit(StmNoInit *stmnoinit)
@@ -293,8 +298,12 @@ void Creator_x86::visitStmInit(StmInit *stminit)
 {
     visitIdent(stminit->ident_);
     this->env.add_variable(this->declaration_type, stminit->ident_);
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     stminit->expr_->accept(this);
-    // TODO: boolean
+    if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
 }
 
 void Creator_x86::visitStmInitArray(StmInitArray *stminitarray)
@@ -374,77 +383,80 @@ void Creator_x86::visitExprIndex(ExprIndex *exprindex)
 
 void Creator_x86::visitClass(Class *_class)
 {
-    /* Code For Class Goes Here */
-    /* Latte++ */
-
     visitIdent(_class->ident_);
-
 }
 
 void Creator_x86::visitInt(Int *_int)
 {
-    /* Code For Int Goes Here */
-
-
 }
 
 void Creator_x86::visitStr(Str *str)
 {
-    /* Code For Str Goes Here */
-
-
 }
 
 void Creator_x86::visitBool(Bool *_bool)
 {
-
 }
 
 void Creator_x86::visitVoid(Void *_void)
 {
-
 }
 
 void Creator_x86::visitTType(TType *ttype)
 {
-    /* Code For TType Goes Here */
-    /* Latte++ */
-
     ttype->type_->accept(this);
-
 }
 
 void Creator_x86::visitEVar(EVar *evar)
 {
-    /* Code For EVar Goes Here */
-    /* Latte++ */
-    this->current_var_is_length = false;
     evar->liststructuredident_->accept(this);
-
+    this->instruction_manager.dereference_ESI_to_stack();
+    if (check_is<Bool*>(this->last_type)) {
+        // POP TO EAX
+        // TODO:
+        JVM << "    ifne L" << this->last_true_label << endl;
+        JVM << "    goto L" << this->last_false_label << endl;
+        this->e_was_rel = true;
+    } else {
+        this->e_was_rel = false;
+    }
 }
 
 void Creator_x86::visitELitInt(ELitInt *elitint)
 {
     visitInteger(elitint->integer_);
-    //this->instruction_manager.add(push)
+    this->instruction_manager.push_literal(elitint->integer_);
+    this->last_type = &(this->literal_int);
+    this->e_was_rel = false;
 }
 
 void Creator_x86::visitELitTrue(ELitTrue *elittrue)
 {
+    this->instruction_manager.jump(this->last_true_label);
+    this->e_was_rel = true;
+    this->last_type = &(this->literal_bool);
 }
 
 void Creator_x86::visitELitFalse(ELitFalse *elitfalse)
 {
+    this->instruction_manager.jump(this->last_false_label);
+    this->e_was_rel = true;
+    this->last_type = &(this->literal_bool);
 }
 
 void Creator_x86::visitELitNull(ELitNull *elitnull)
 {
+    this->instruction_manager.push_literal(0);
+    this->last_type = &(this->literal_int);
+    this->e_was_rel = false;
 }
 
 void Creator_x86::visitEApp(EApp *eapp)
 {
+    // arguments
+    // TODO: vtable calls
 
-    eapp->liststructuredident_->accept(this);
+    eapp->liststructuredident_->accept(this); // TODO: function should be last
     eapp->listexpr_->accept(this);
 
     //Block::instr_ptr_t call(new x86_Call(get_from_vtable(eapp->liststructuredident_)));
@@ -455,22 +467,31 @@ void Creator_x86::visitEString(EString *estring)
 {
     visitString(estring->string_);
     this->instruction_manager.add_const_string(estring->string_);
+    this->last_type = &(this->literal_string);
+    this->e_was_rel = false;
 }
 
 void Creator_x86::visitNeg(Neg *neg)
 {
     neg->expr_->accept(this);
+    this->instruction_manager.neg_on_top();
 }
 
 void Creator_x86::visitNot(Not *_not)
 {
+    int tmp = this->last_true_label;
+    this->last_true_label = this->last_false_label;
+    this->last_false_label = tmp;
     _not->expr_->accept(this);
+    this->e_was_rel = true;
 }
 
 void Creator_x86::visitEDynamicCast(EDynamicCast *edynamiccast)
 {
     visitIdent(edynamiccast->ident_);
     edynamiccast->expr_->accept(this);
+    this->fr_env.global_cls_type->ident_ = edynamiccast->ident_;
+    this->last_type = this->fr_env.global_cls_type;
 }
 
 void Creator_x86::visitEMul(EMul *emul)
@@ -484,32 +505,135 @@ void Creator_x86::visitEAdd(EAdd *eadd)
 {
     eadd->expr_1->accept(this);
     eadd->expr_2->accept(this);
-    eadd->addop_->accept(this);
+    if (check_is<Str *>(this->last_type)) {
+        // TODO: Add two strings.
+        JVM << "    new java/lang/StringBuilder" << endl;
+        JVM << "    dup" << endl;
+        JVM << "    invokespecial java/lang/StringBuilder/<init>()V" << endl;
+        JVM << current_block_jvm_e1.str();
+        JVM << "    invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;" << endl;
+        JVM << current_block_jvm_e2.str();
+        JVM << "    invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;" << endl;
+        JVM << "    invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;" << endl;
+    }
+    else
+    {
+        eadd->addop_->accept(this);
+    }
 }
 
 void Creator_x86::visitERel(ERel *erel)
 {
+    // TODO:
+    int this_last_f_label = this->last_false_label;
+    int this_last_t_label = this->last_true_label;
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     erel->expr_1->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    this->last_is_zero = false;
+    this->pop_if_zero = true;
+    label_t = this->next_label++;
+    label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     erel->expr_2->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+
+    if (this->last_is_zero) {
+        JVM << "    if";
+        this->current_function_stack_size -= 1;
+    } else {
+        if (frontend::check_is<Str*>(this->last_type)){
+            JVM << "    if_acmp";
+        } else {
+            JVM << "    if_icmp";
+        }
+        this->current_function_stack_size -= 2;
+    }
+    this->pop_if_zero = false;
+    this->last_is_zero = false;
     erel->relop_->accept(this);
+    JVM << " L" << this_last_t_label << endl;
+    JVM << "    goto L" << this_last_f_label << endl;
+
+    this->last_type = &(this->literal_bool);
+    this->e_was_rel = true;
+    this->last_false_label = this_last_f_label;
+    this->last_true_label = this_last_t_label;
 }
 
 void Creator_x86::visitEAnd(EAnd *eand)
 {
+    int this_true_label = this->last_true_label;
+    int this_false_label = this->last_false_label;
+
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     eand->expr_1->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    JVM << "    ifeq L" << this_false_label << endl;
+
+    label_t = this->next_label++;
+    label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     eand->expr_2->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    JVM << "    ifeq L" << this_false_label << endl;
+    JVM << "    goto L" << this_true_label << endl;
+    this->current_function_stack_size -= 2;
+
+    this->last_true_label = this_true_label;
+    this->last_false_label = this_false_label;
+    this->e_was_rel = true;
 }
 
 void Creator_x86::visitEOr(EOr *eor)
 {
+    int this_true_label = this->last_true_label;
+    int this_false_label = this->last_false_label;
+
+    int label_t = this->next_label++;
+    int label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     eor->expr_1->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    JVM << "    ifne L" << this_true_label << endl;
+
+
+    label_t = this->next_label++;
+    label_f = this->next_label++;
+    this->last_true_label = label_t;
+    this->last_false_label = label_f;
     eor->expr_2->accept(this);
+    if (this->e_was_rel)
+        this->bool_expr_to_stack(label_t, label_f);
+    JVM << "    ifeq L" << this_false_label << endl;
+    JVM << "    goto L" << this_true_label << endl;
+    this->current_function_stack_size -= 2;
+
+    this->last_true_label = this_true_label;
+    this->last_false_label = this_false_label;
+    this->e_was_rel = true;
 
 }
 
 void Creator_x86::visitPlus(Plus *plus)
 {
-    this->instruction_manager.add_on_stack();
+    if (!check_is<Str *>(this->last_type)){
+        this->instruction_manager.add_on_stack();
+    }
 }
 
 void Creator_x86::visitMinus(Minus *minus)
@@ -534,26 +658,32 @@ void Creator_x86::visitMod(Mod *mod)
 
 void Creator_x86::visitLTH(LTH *lth)
 {
+    JVM << "lt";
 }
 
 void Creator_x86::visitLE(LE *le)
 {
+    JVM << "le";
 }
 
 void Creator_x86::visitGTH(GTH *gth)
 {
+    JVM << "gt";
 }
 
 void Creator_x86::visitGE(GE *ge)
 {
+    JVM << "ge";
 }
 
 void Creator_x86::visitEQU(EQU *equ)
 {
+    JVM << "eq";
 }
 
 void Creator_x86::visitNE(NE *ne)
 {
+    JVM << "ne";
 }
 
 
@@ -617,7 +747,12 @@ void Creator_x86::visitListExpr(ListExpr* listexpr)
 {
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
+        int label_t = this->next_label++;
+        int label_f = this->next_label++;
+        this->last_true_label = label_t;
+        this->last_false_label = label_f;
         (*i)->accept(this);
+        if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
     }
 }
 

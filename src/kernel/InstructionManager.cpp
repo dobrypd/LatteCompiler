@@ -31,9 +31,9 @@ void InstructionManager::write_to_stream(std::ostream& stream)
     }
 }
 
-void InstructionManager::new_block(std::string name)
+void InstructionManager::new_block(int id)
 {
-    block_ptr_t new_blc(new Block(name));
+    block_ptr_t new_blc(new Block(Block::ident_prefix + int2str(id)));
     this->blocks.push_back(new_blc);
 }
 
@@ -64,7 +64,6 @@ InstructionManager::list_it_t InstructionManager::end()
     return this->blocks.end();
 }
 
-long Block::current_ident = 0;
 const char *Block::ident_prefix = "_L";
 Block::Block()
 {
@@ -93,15 +92,6 @@ std::string & Block::get_name()
 void Block::add(instr_ptr_t instruction)
 {
     this->i_list.push_back(instruction);
-}
-
-std::string Block::new_ident()
-{
-    Block::current_ident++;
-    std::stringstream ss;
-    ss << Block::current_ident;
-    std::string r_str(Block::ident_prefix);
-    return r_str + ss.str();
 }
 
 void InstructionManager::alloc_var(Type *type)

@@ -31,8 +31,6 @@ private:
     std::string block_name;
 
     Block();
-
-    static long current_ident;
 public:
 
     Block(std::string name);
@@ -43,8 +41,6 @@ public:
     std::string& get_name();
 
     void add(instr_ptr_t instruction);
-
-    static std::string new_ident();
 };
 
 class InstructionManager
@@ -71,8 +67,12 @@ public:
 
     void write_to_stream(std::ostream& stream);
 
-    void new_block(std::string name);
+    void new_block(int id);
+    void new_function_block(std::string name); // as new block but with where call can applicate
     void add(Block::instr_ptr_t instruction);
+
+    // Jumps / calls
+    void jump(int id);
 
     // Funciton:
     void function_prologue();
@@ -90,6 +90,9 @@ public:
     // Stack operations;
     void add_to_ESP(int value);  // value in baits (not bits)!
     void pop_add_to_ESI();
+    void dereference_ESI_to_stack();
+    void push_literal(int value);
+    void pop_to_addr_from_ESI();
 
     // Assign
     void pop_top_to_var(int offset);
@@ -99,12 +102,14 @@ public:
     void increment_var_on_stack(int offset, int inc_by);
     void increment_var_addr_on_top(int inc_by);
     void increment_ESI(int inc_by);
+    void increment_in_ESI(int inc_by); // inc in address in ESI
 
 
     // Arithmetic operations:
     void add_to_ESI_val_address(int value_position);
     void dereference_ESI();
     void add_to_ESI(int value);
+    void neg_on_top();
     void add_on_stack();
     void sub_on_stack();
     void mul_on_stack();

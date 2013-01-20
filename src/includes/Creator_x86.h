@@ -20,21 +20,41 @@ class Creator_x86 : public Visitor
 {
 private:
     InstructionManager& instruction_manager;
-    CompilerEnvironment env;
-    frontend::Environment& fr_env;
+    CompilerEnvironment env;        // Current env
+    frontend::Environment& fr_env;  // Env with all functions / classes
 
-    // Traverse variables
+    // Literal types;
+    Int literal_int;
+    Bool literal_bool;
+    Str literal_string;
+
+    /*
+     * Traverse variables
+     */
+
     // Declarations:
     Type* declaration_type;
     std::string last_class_name;
-    // Localc
+
     // Statements:
     bool current_var_on_stack;
     Type* current_var_type;
+
     // Expressions:
+    Type* last_type;
 
+    // Blocks / jumps:
+    int next_label;
+    int last_true_label;
+    int last_false_label;
+    bool pop_if_zero;
+    bool e_was_rel;  // True if not in stack.
 
-    // End of traverse vars
+    /*
+     * End of traverse vars
+     */
+
+    void bool_expr_to_stack(int label_t, int label_f);
 
     static const char* self_name;
 

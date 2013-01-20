@@ -30,6 +30,7 @@ enum arch_t {x86, x86_64};
 
 std::string type_pretty_print(Type* t);
 std::string ident_to_string(ListStructuredIdent* ident_list);
+std::string int2str(int value);
 
 bool operator==(Type & t1, Type & t2);
 

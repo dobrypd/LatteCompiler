@@ -4,6 +4,7 @@
  *
  */
 
+#include <sstring>
 #include "global.h"
 #include "Absyn.H"
 #include "Environment.h"
@@ -28,6 +29,16 @@ std::string type_pretty_print(Type *t)
                 "Could not find type";
         return "undefined";
     }
+}
+
+/*
+ * Very easy and slow but need it in this way.
+ */
+std::string int2str(int value)
+{
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
 }
 
 bool operator==(Type & t1, Type & t2)
