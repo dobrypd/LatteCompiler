@@ -70,10 +70,6 @@ private:
     /*
      * Globals (in context of Latte program)
      */
-    Void* global_void_type;
-    Int* global_int_type;
-    Str* global_str_type;
-    Class* global_cls_type;
     Environment::FunInfoPtr print_int_f;
     Environment::FunInfoPtr print_string_f;
     Environment::FunInfoPtr error_f;
@@ -89,6 +85,11 @@ private:
     FunInfoPtr create_fun(Type* ret_type, ListArg* args);
 
 public:
+    Void* global_void_type;
+    Int* global_int_type;
+    Str* global_str_type;
+    Class* global_cls_type;
+
     Environment();
     ~Environment();
 

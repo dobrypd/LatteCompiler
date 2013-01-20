@@ -241,6 +241,46 @@ void InstructionManager::concat_str_on_stack()
 {
 }
 
+void InstructionManager::loop(int label_id)
+{
+}
+
+void InstructionManager::dereference_from_ESI_to_ECX_minus_1()
+{
+}
+
+void InstructionManager::push_ECX()
+{
+}
+
+void InstructionManager::pop_ECX()
+{
+}
+
+void InstructionManager::dereference_stack_top_to_ECX()
+{
+}
+
+void InstructionManager::push_ESI()
+{
+}
+
+void InstructionManager::increment_ECX(int inc_by)
+{
+}
+
+void InstructionManager::dereference_var_to_var(int var_1_pos, int var_2_pos)
+{
+}
+
+void InstructionManager::var_to_ECX(int var_pos)
+{
+}
+
+void InstructionManager::add_to_var(int value_position, int literal)
+{
+}
+
 void InstructionManager::pop_to_addr_from_EDI()
 {
 }

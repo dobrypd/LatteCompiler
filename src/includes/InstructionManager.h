@@ -122,10 +122,15 @@ public:
     void increment_ECX(int inc_by);
 
 
-    // Arithmetic operations:
+    // Operations on local variables:
+    void dereference_var_to_var(int var_1_pos, int var_2_pos);
+    void var_to_ECX(int var_pos);
+    void add_to_var(int value_position, int literal);
     void add_to_ESI_val_address(int value_position);
     void dereference_ESI();
     void add_to_ESI(int value);
+
+    // Arithmetic operations:
     void neg_on_top();
     void add_on_stack();
     void sub_on_stack();

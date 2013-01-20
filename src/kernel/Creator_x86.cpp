@@ -273,32 +273,42 @@ void Creator_x86::visitStmWhile(StmWhile *stmwhile)
 
 void Creator_x86::visitStmForeach(StmForeach *stmforeach)
 {
-    // TODO:
     int start = this->next_label++;
     stmforeach->type_->accept(this);
     visitIdent(stmforeach->ident_);
 
     this->env.prepare();
-
     this->instruction_manager.push_ECX();
-    // old ECX on stack
-    this->env.add_variable(this->fr_env.global_int_type,
-            Creator_x86::named_temp_on_stack_prefix);
+    std::string ecx_var_name(Creator_x86::named_temp_on_stack_prefix);
+    ecx_var_name += "foreach ECX";  // save ECX in case of neasted use
+    std::string esi_var_name(Creator_x86::named_temp_on_stack_prefix);
+    esi_var_name += "foreach ESI"; // IDENT reference
 
-    this->env.add_variable(stmforeach->type_, stmforeach->ident_);
+    this->env.add_variable(this->fr_env.global_int_type, ecx_var_name); // loop cond
+
     stmforeach->liststructuredident_->accept(this);
+    this->instruction_manager.push_ESI();
+    this->env.add_variable(this->fr_env.global_int_type, esi_var_name); // ptr to table
 
-    this->instruction_manager.dereference_from_ESI_to_ECX_minus_1();
+    this->instruction_manager.dereference_from_ESI_to_ECX_minus_1(); // size of array - 1
+
+    this->instruction_manager.push_literal(0);
+    this->env.add_variable(stmforeach->type_, stmforeach->ident_);
+    CompilerEnvironment::VarInfoPtr foreach_var_info = this->env.get_variable(
+                        stmforeach->ident_);
 
     this->instruction_manager.new_block(start);
-    this->instruction_manager.add_to_ECX(1);
-    this->instruction_manager.dereference_ESI_to_stack();
-
-    this->instruction_manager.new_block(start);
+    CompilerEnvironment::VarInfoPtr var_info = this->env.get_variable(
+            esi_var_name);
+    this->instruction_manager.add_to_var(var_info->position, 1);
+    this->instruction_manager.dereference_var_to_var(var_info->position,
+            foreach_var_info->position);
     stmforeach->stmt_->accept(this);
     this->instruction_manager.loop(start);
 
-    this->instruction_manager.pop_ECX();
+    this->instruction_manager.var_to_ECX(
+            this->env.get_variable(ecx_var_name)->position);
+
     this->env.back();
 
 }
@@ -308,6 +318,7 @@ void Creator_x86::visitStmSExp(StmSExp *stmsexp)
     stmsexp->expr_->accept(this);
 
     if ((!this->e_was_rel) && (!check_is<Void*>(this->last_type)))
+        // Remove from top of the stack
         this->instruction_manager.add_to_ESP(1);
 }
 
@@ -435,6 +446,7 @@ void Creator_x86::visitTType(TType *ttype)
 
 void Creator_x86::visitEVar(EVar *evar)
 {
+    this->current_var_on_stack = true;
     evar->liststructuredident_->accept(this);
     this->instruction_manager.dereference_ESI_to_stack();
     if (check_is<Bool*>(this->last_type)) {
