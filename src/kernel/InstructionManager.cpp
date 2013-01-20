@@ -59,7 +59,7 @@ void InstructionManager::write_to_stream(std::ostream& stream)
         for (Block::list_it_t i_it = (*it)->begin(); i_it != (*it)->end();
                 i_it++)
         {
-            stream << "\t" << (*i_it)->c_str() << std::endl;
+            stream << "\t" << (*i_it)->str() << std::endl;
         }
     }
 }
