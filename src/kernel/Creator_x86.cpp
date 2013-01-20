@@ -454,7 +454,7 @@ void Creator_x86::visitEApp(EApp *eapp)
 {
     // arguments
     // TODO: vtable calls
-
+    // TODO: last in this list is function application.
     eapp->liststructuredident_->accept(this); // TODO: function should be last
     eapp->listexpr_->accept(this);
 
