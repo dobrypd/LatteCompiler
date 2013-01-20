@@ -14,7 +14,7 @@ namespace backend
 
 InstructionManager::InstructionManager(frontend::Environment& fr_env) : fr_env(fr_env)
 {
-    block_ptr_t block_0(new Block(Block::new_ident()));
+    block_ptr_t block_0(new Block(0));
     this->blocks.push_back(block_0);
 }
 
@@ -124,8 +124,6 @@ void InstructionManager::alloc_array(Type *type)
 
 void InstructionManager::alloc_object(Type *type)
 {
-    // Call constructor of this type
-    //this->fr_env.get_class()
 }
 
 void InstructionManager::pop_top_to_var(int offset)
@@ -165,6 +163,54 @@ void InstructionManager::mod_on_stack()
 }
 
 void InstructionManager::add_const_string(std::string & str)
+{
+}
+
+void InstructionManager::new_function_block(std::string name)
+{
+}
+
+void InstructionManager::jump(int id)
+{
+}
+
+void InstructionManager::pop_add_to_ESI()
+{
+}
+
+void InstructionManager::dereference_ESI_to_stack()
+{
+}
+
+void InstructionManager::push_literal(int value)
+{
+}
+
+void InstructionManager::pop_to_addr_from_ESI()
+{
+}
+
+void InstructionManager::increment_ESI(int inc_by)
+{
+}
+
+void InstructionManager::increment_in_ESI(int inc_by)
+{
+}
+
+void InstructionManager::add_to_ESI_val_address(int value_position)
+{
+}
+
+void InstructionManager::dereference_ESI()
+{
+}
+
+void InstructionManager::add_to_ESI(int value)
+{
+}
+
+void InstructionManager::neg_on_top()
 {
 }
 

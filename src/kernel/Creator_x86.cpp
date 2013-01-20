@@ -38,7 +38,7 @@ Creator_x86::Creator_x86(InstructionManager& instruction_manager,
         frontend::Environment& frontend_environment) :
         instruction_manager(instruction_manager),
         fr_env(frontend_environment),
-        next_label(0)
+        next_label(1)
 {
 
 }
