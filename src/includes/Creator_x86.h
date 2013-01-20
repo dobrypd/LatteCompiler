@@ -47,7 +47,7 @@ private:
     int next_label;
     int last_true_label;
     int last_false_label;
-    bool pop_if_zero;
+    InstructionManager::cmp_val_t last_rel;
     bool e_was_rel;  // True if not in stack.
 
     /*

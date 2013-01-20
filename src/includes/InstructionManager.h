@@ -71,12 +71,17 @@ public:
     void new_function_block(std::string name); // as new block but with where call can applicate
     void add(Block::instr_ptr_t instruction);
 
+    // Bigger fragments/ syscals
+    void compare_strings_on_stack();
+    void concat_str_on_stack();
+
     // Jumps / calls
     void jump(int id);
 
     enum cmp_val_t {LTH, LE, GTH, GE, EQU, NE};
     void jump_if(cmp_val_t type, int label_id);
     void jump_if_0(int label_id);
+    void jump_if_not0(int label_id);
     void cmp_stack();
 
     // Funciton:

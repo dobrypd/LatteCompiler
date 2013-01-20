@@ -578,6 +578,7 @@ void ASTChecker::visitELitNull(ELitNull *elitnull)
 
 void ASTChecker::visitEApp(EApp* eapp)
 {
+    //visitIdent(eapp->ident_);
 //    this->last_line_number = eapp->line_number;
 //    eapp->liststructuredident_->accept(this);
 //    Environment::FunInfoPtr fun_ptr =

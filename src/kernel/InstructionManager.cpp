@@ -7,10 +7,43 @@
 #include <ostream>
 #include <sstream>
 #include "Absyn.H"
+#include "global.h"
 #include "InstructionManager.h"
 
 namespace backend
 {
+
+
+const char *Block::ident_prefix = "_L";
+Block::Block()
+{
+}
+
+Block::Block(std::string name)
+:block_name(name)
+{
+}
+
+Block::list_it_t Block::begin()
+{
+    return this->i_list.begin();
+}
+
+Block::list_it_t Block::end()
+{
+    return this->i_list.end();
+}
+
+std::string & Block::get_name()
+{
+    return this->block_name;
+}
+
+void Block::add(instr_ptr_t instruction)
+{
+    this->i_list.push_back(instruction);
+}
+
 
 InstructionManager::InstructionManager(frontend::Environment& fr_env) : fr_env(fr_env)
 {
@@ -62,36 +95,6 @@ InstructionManager::list_it_t InstructionManager::begin()
 InstructionManager::list_it_t InstructionManager::end()
 {
     return this->blocks.end();
-}
-
-const char *Block::ident_prefix = "_L";
-Block::Block()
-{
-}
-
-Block::Block(std::string name)
-:block_name(name)
-{
-}
-
-Block::list_it_t Block::begin()
-{
-    return this->i_list.begin();
-}
-
-Block::list_it_t Block::end()
-{
-    return this->i_list.end();
-}
-
-std::string & Block::get_name()
-{
-    return this->block_name;
-}
-
-void Block::add(instr_ptr_t instruction)
-{
-    this->i_list.push_back(instruction);
 }
 
 void InstructionManager::alloc_var(Type *type)
@@ -211,6 +214,30 @@ void InstructionManager::add_to_ESI(int value)
 }
 
 void InstructionManager::neg_on_top()
+{
+}
+
+void InstructionManager::compare_strings_on_stack()
+{
+}
+
+void InstructionManager::jump_if(cmp_val_t type, int label_id)
+{
+}
+
+void InstructionManager::jump_if_0(int label_id)
+{
+}
+
+void InstructionManager::jump_if_not0(int label_id)
+{
+}
+
+void InstructionManager::cmp_stack()
+{
+}
+
+void InstructionManager::concat_str_on_stack()
 {
 }
 

@@ -248,7 +248,7 @@ std::map<std::string, Environment::ClsInfoPtr>::iterator Environment::get_env_cl
     return this->env_cls.begin();
 }
 
-Environment::VarInfoPtr Environment::get_field_type(std::string & ident, std::string & cls_name)
+Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string & cls_name)
 {
     ClsInfoPtr cls = this->get_class(cls_name);
     Type* type = NULL;
@@ -264,7 +264,7 @@ Environment::VarInfoPtr Environment::get_field_type(std::string & ident, std::st
     return Environment::VarInfoPtr();
 }
 
-Environment::FunInfoPtr Environment::get_method_type(std::string & ident, std::string & cls_name)
+Environment::FunInfoPtr Environment::get_method(std::string & ident, std::string & cls_name)
 {
     ClsInfoPtr cls = this->get_class(cls_name);
     Type* type = NULL;
@@ -278,10 +278,6 @@ Environment::FunInfoPtr Environment::get_method_type(std::string & ident, std::s
         cls = cls->lat_cls_parent;
     }
     return Environment::FunInfoPtr();
-}
-
-Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string & cls_name)
-{
 }
 
 Environment::VarInfoPtr Environment::find_field(std::string & ident, std::string & cls_name)
@@ -320,7 +316,15 @@ int Environment::get_field_position(std::string & field_name, std::string & clas
 {
 }
 
-int Environment::get_class_size(std::string class_name)
+Environment::FunInfoPtr Environment::find_method(std::string & ident, std::string & cls_name)
+{
+}
+
+int Environment::get_method_position(std::string & field_name, std::string & class_name)
+{
+}
+
+int Environment::get_class_size(std::string & class_name)
 {
 }
 

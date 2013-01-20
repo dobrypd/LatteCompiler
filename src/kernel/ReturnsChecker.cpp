@@ -419,9 +419,8 @@ void ReturnsChecker::visitELitNull(ELitNull *elitnull)
 
 void ReturnsChecker::visitEApp(EApp *eapp)
 {
-    /* Latte++ */
-
     eapp->liststructuredident_->accept(this);
+    visitIdent(eapp->ident_);
     eapp->listexpr_->accept(this);
 
 }

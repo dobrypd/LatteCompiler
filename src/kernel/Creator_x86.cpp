@@ -456,6 +456,10 @@ void Creator_x86::visitEApp(EApp *eapp)
     // TODO: vtable calls
     // TODO: last in this list is function application.
     eapp->liststructuredident_->accept(this); // TODO: function should be last
+    visitIdent(eapp->ident_);
+    frontend::Environment::ClsInfoPtr cls =
+            this->fr_env.get_class((dynamic_cast<Class*>(this->last_type))
+                    ->ident_);
     eapp->listexpr_->accept(this);
 
     //Block::instr_ptr_t call(new x86_Call(get_from_vtable(eapp->liststructuredident_)));
@@ -496,34 +500,22 @@ void Creator_x86::visitEDynamicCast(EDynamicCast *edynamiccast)
 void Creator_x86::visitEMul(EMul *emul)
 {
     emul->expr_1->accept(this);
-    emul->mulop_->accept(this);
     emul->expr_2->accept(this);
+    emul->mulop_->accept(this);
 }
 
 void Creator_x86::visitEAdd(EAdd *eadd)
 {
     eadd->expr_1->accept(this);
     eadd->expr_2->accept(this);
-    if (check_is<Str *>(this->last_type)) {
-        // TODO: Add two strings.
-        JVM << "    new java/lang/StringBuilder" << endl;
-        JVM << "    dup" << endl;
-        JVM << "    invokespecial java/lang/StringBuilder/<init>()V" << endl;
-        JVM << current_block_jvm_e1.str();
-        JVM << "    invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;" << endl;
-        JVM << current_block_jvm_e2.str();
-        JVM << "    invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;" << endl;
-        JVM << "    invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;" << endl;
-    }
+    if (check_is<Str *>(this->last_type))
+        this->instruction_manager.concat_str_on_stack();
     else
-    {
         eadd->addop_->accept(this);
-    }
 }
 
 void Creator_x86::visitERel(ERel *erel)
 {
-    // TODO:
     int this_last_f_label = this->last_false_label;
     int this_last_t_label = this->last_true_label;
     int label_t = this->next_label++;
@@ -531,34 +523,24 @@ void Creator_x86::visitERel(ERel *erel)
     this->last_true_label = label_t;
     this->last_false_label = label_f;
     erel->expr_1->accept(this);
-    if (this->e_was_rel)
-        this->bool_expr_to_stack(label_t, label_f);
-    this->last_is_zero = false;
-    this->pop_if_zero = true;
+    if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
     label_t = this->next_label++;
     label_f = this->next_label++;
     this->last_true_label = label_t;
     this->last_false_label = label_f;
     erel->expr_2->accept(this);
-    if (this->e_was_rel)
-        this->bool_expr_to_stack(label_t, label_f);
+    if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
 
-    if (this->last_is_zero) {
-        JVM << "    if";
-        this->current_function_stack_size -= 1;
-    } else {
-        if (frontend::check_is<Str*>(this->last_type)){
-            JVM << "    if_acmp";
-        } else {
-            JVM << "    if_icmp";
-        }
-        this->current_function_stack_size -= 2;
+    if (check_is<Str*>(this->last_type)){
+        this->instruction_manager.compare_strings_on_stack();
+        // PUT 2 VALUES ON STACK IF EQUAL 0, 0, otherise 0, 1
     }
-    this->pop_if_zero = false;
-    this->last_is_zero = false;
+
+    this->instruction_manager.cmp_stack();
     erel->relop_->accept(this);
-    JVM << " L" << this_last_t_label << endl;
-    JVM << "    goto L" << this_last_f_label << endl;
+    // TODO: Optimize it!
+    this->instruction_manager.jump_if(this->last_rel, this_last_t_label);
+    this->instruction_manager.jump(this_last_f_label);
 
     this->last_type = &(this->literal_bool);
     this->e_was_rel = true;
@@ -576,20 +558,18 @@ void Creator_x86::visitEAnd(EAnd *eand)
     this->last_true_label = label_t;
     this->last_false_label = label_f;
     eand->expr_1->accept(this);
-    if (this->e_was_rel)
-        this->bool_expr_to_stack(label_t, label_f);
-    JVM << "    ifeq L" << this_false_label << endl;
+    if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
+    this->instruction_manager.jump_if_0(this_false_label);
 
     label_t = this->next_label++;
     label_f = this->next_label++;
     this->last_true_label = label_t;
     this->last_false_label = label_f;
     eand->expr_2->accept(this);
-    if (this->e_was_rel)
-        this->bool_expr_to_stack(label_t, label_f);
-    JVM << "    ifeq L" << this_false_label << endl;
-    JVM << "    goto L" << this_true_label << endl;
-    this->current_function_stack_size -= 2;
+    if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
+
+    this->instruction_manager.jump_if_0(this_false_label);
+    this->instruction_manager.jump(this_true_label);
 
     this->last_true_label = this_true_label;
     this->last_false_label = this_false_label;
@@ -606,21 +586,18 @@ void Creator_x86::visitEOr(EOr *eor)
     this->last_true_label = label_t;
     this->last_false_label = label_f;
     eor->expr_1->accept(this);
-    if (this->e_was_rel)
-        this->bool_expr_to_stack(label_t, label_f);
-    JVM << "    ifne L" << this_true_label << endl;
-
+    if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
+    this->instruction_manager.jump_if_not0(this_true_label);
 
     label_t = this->next_label++;
     label_f = this->next_label++;
     this->last_true_label = label_t;
     this->last_false_label = label_f;
     eor->expr_2->accept(this);
-    if (this->e_was_rel)
-        this->bool_expr_to_stack(label_t, label_f);
-    JVM << "    ifeq L" << this_false_label << endl;
-    JVM << "    goto L" << this_true_label << endl;
-    this->current_function_stack_size -= 2;
+    if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
+
+    this->instruction_manager.jump_if_not0(this_false_label);
+    this->instruction_manager.jump(this_true_label);
 
     this->last_true_label = this_true_label;
     this->last_false_label = this_false_label;
@@ -657,32 +634,32 @@ void Creator_x86::visitMod(Mod *mod)
 
 void Creator_x86::visitLTH(LTH *lth)
 {
-    JVM << "lt";
+    this->last_rel = InstructionManager::LTH;
 }
 
 void Creator_x86::visitLE(LE *le)
 {
-    JVM << "le";
+    this->last_rel = InstructionManager::LE;
 }
 
 void Creator_x86::visitGTH(GTH *gth)
 {
-    JVM << "gt";
+    this->last_rel = InstructionManager::GTH;
 }
 
 void Creator_x86::visitGE(GE *ge)
 {
-    JVM << "ge";
+    this->last_rel = InstructionManager::GE;
 }
 
 void Creator_x86::visitEQU(EQU *equ)
 {
-    JVM << "eq";
+    this->last_rel = InstructionManager::EQU;
 }
 
 void Creator_x86::visitNE(NE *ne)
 {
-    JVM << "ne";
+    this->last_rel = InstructionManager::NE;
 }
 
 

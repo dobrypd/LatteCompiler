@@ -114,9 +114,11 @@ public:
     ClsInfoPtr get_class(std::string& ident) const;
 
     Type* get_var_type(ListStructuredIdent* l_ident, std::string* cls_name);
+
     VarInfoPtr get_field(std::string& ident, std::string& cls_name); // Only in this class
     VarInfoPtr find_field(std::string& ident, std::string& cls_name); // On all class in mro.
-    FunInfoPtr get_method_type(std::string& ident, std::string& cls_name);
+    FunInfoPtr get_method(std::string& ident, std::string& cls_name);
+    FunInfoPtr find_method(std::string& ident, std::string& cls_name);
 
     // Direct access to the environment:
     std::vector<MapPtr>::iterator get_env_v_it_begin();
@@ -127,7 +129,8 @@ public:
     std::map<std::string, ClsInfoPtr>::iterator get_env_cls_end();
 
     int get_field_position(std::string& field_name, std::string& class_name);
-    int get_class_size(std::string class_name);
+    int get_method_position(std::string& field_name, std::string& class_name);
+    int get_class_size(std::string& class_name);
 };
 
 } /* namespace frontend */

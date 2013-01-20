@@ -4,7 +4,7 @@
  *
  */
 
-#include <sstring>
+#include <sstream>
 #include "global.h"
 #include "Absyn.H"
 #include "Environment.h"
