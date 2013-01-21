@@ -123,8 +123,10 @@ InstructionManager::list_it_t InstructionManager::end()
 
 void InstructionManager::alloc_default(Type *type)
 {
-        Block::instr_ptr_t instr(new instruction::Push(arg(CONSTANT_FIELD, 0)));
-        this->add(instr);
+    // can be string
+    // XXX:
+    Block::instr_ptr_t instr(new instruction::Push(arg(CONSTANT_FIELD, 0)));
+    this->add(instr);
 }
 
 void InstructionManager::function_prologue()
@@ -159,10 +161,12 @@ void InstructionManager::pop_to_EAX()
 
 void InstructionManager::alloc_array(Type *type)
 {
+    // XXX:
 }
 
 void InstructionManager::alloc_object(Type *type)
 {
+    // XXX:
 }
 
 void InstructionManager::add_on_stack()
@@ -386,6 +390,12 @@ void InstructionManager::pop_ECX()
 void InstructionManager::push_ESI()
 {
     Block::instr_ptr_t instr(new instruction::Push(arg(REGISTER, ESI)));
+    this->add(instr);
+}
+
+void InstructionManager::pop_ESI()
+{
+    Block::instr_ptr_t instr(new instruction::Pop(arg(REGISTER, ESI)));
     this->add(instr);
 }
 

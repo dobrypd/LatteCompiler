@@ -5,7 +5,6 @@
  */
 
 #include "Environment.h"
-#include "Instruction.h"
 #include "CompilerEnvironment.h"
 #include "global.h"
 #include "Creator_x86.h"
@@ -393,13 +392,18 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 void Creator_x86::visitTableVal(TableVal *tableval)
 {
     visitIdent(tableval->ident_);
-    // XXX: TODO: SAVE ESI !
+    this->instruction_manager.push_ESI();
+    std::string ecx_var_name(Creator_x86::named_temp_on_stack_prefix);
+    ecx_var_name += "foreach ECX";  // save ECX in case of neasted use
+    std::string esi_var_name(Creator_x86::named_temp_on_stack_prefix);
+    esi_var_name += "foreach ESI"; // IDENT reference
+    this->env.add_variable(this->fr_env.global_int_type, ecx_var_name); // loop cond
     // In current version only one dimension arrays
     tableval->listarrayindex_->accept(this);
     // because in first value of array is length
-    // XXX: TODO: LOAD ESI !
     this->instruction_manager.add_to_ESI(4); // size of array
     this->instruction_manager.pop_add_to_ESI();
+    this->instruction_manager.pop_ESI();
 }
 
 void Creator_x86::visitSelfIdent(SelfIdent *selfident)
