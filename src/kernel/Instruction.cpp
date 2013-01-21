@@ -14,22 +14,37 @@ namespace backend
 std::string InstructionArgument::str()
 {
     std::stringstream ss;
-    if (this->dereference) ss << "(";
-    if (this->type == REGISTER) ss << "%";
-    ss << this->base;
-    if (this->dereference) ss << ")";
+    if (this->offset > 0) ss << this->offset;
+    ss << "(";
+    if (this->type == CONSTANT_FIELD) ss << "$C";
+    switch (this->base) {
+    case EAX: ss << "%eax"; break;
+    case EDX: ss << "%edx"; break;
+    case EBX: ss << "%ebx"; break;
+    case ECX: ss << "%ecx"; break;
+    case ESI: ss << "%esi"; break;
+    case EDI: ss << "%edi"; break;
+    case ESP: ss << "%esp"; break;
+    case EBP: ss << "%ebp"; break;
+    default:
+        ss << this->base;
+        break;
+    }
+    if ((this->index > 0) or (this->mul > 0)) ss << "," << this->index;
+    if (this->mul > 0) ss << "," << this->mul;
+    ss << ")";
+    break;
+
     return ss.str();
 }
 
-arg_t arg(int base, int type, bool dereference,
-        int offset, int index, int mul) {
+arg_t arg(int type, int base, int offset, int index, int mul) {
     boost::shared_ptr<InstructionArgument> argument(new InstructionArgument);
     argument->base = base;
     argument->offset = offset;
     argument->index = index;
     argument->mul = mul;
     argument->type = type;
-    argument->dereference = dereference;
     return argument;
 }
 

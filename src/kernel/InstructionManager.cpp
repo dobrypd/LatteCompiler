@@ -5,7 +5,6 @@
  */
 
 #include <ostream>
-#include <sstream>
 #include "Absyn.H"
 #include "global.h"
 #include "InstructionManager.h"
@@ -196,7 +195,7 @@ void InstructionManager::push_literal(int value)
 
 void InstructionManager::pop_to_addr_from_ESI()
 {
-    Block::instr_ptr_t instr(new instruction::Pop(arg(ESI, REGISTER, true)));
+    Block::instr_ptr_t instr(new instruction::Pop(arg(ESI, MEMORY)));
     this->add(instr);
 }
 
