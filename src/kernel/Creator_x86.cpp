@@ -496,6 +496,19 @@ void Creator_x86::visitEApp(EApp *eapp)
     visitIdent(eapp->ident_);
     eapp->listexpr_->accept(this);
 
+    // Collect arguments
+//    for (std::vector<frontend::Environment::VarInfoPtr>::iterator it =
+//            fun->arguments.begin(); it != fun->arguments.end(); it++){
+//        JVM << this->type_to_jvm_type((*it)->type, true);
+//        this->current_function_stack_size -= 1;
+//    }
+//
+//    JVM << ")" << this->type_to_jvm_type(fun->ret_type, true) << endl;
+//    if (!frontend::check_is<Void *>(fun->ret_type))
+//        this->current_function_stack_size += 1;
+//    this->last_type = fun->ret_type;
+//    this->e_was_rel = false;
+
     //Block::instr_ptr_t call(new x86_Call(get_from_vtable(eapp->liststructuredident_)));
     //this->instruction_manager.add(call);
 }
