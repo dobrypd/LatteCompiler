@@ -493,15 +493,23 @@ void Creator_x86::visitEApp(EApp *eapp)
     // arguments
     // TODO: vtable calls
     // TODO: last in this list is function application.
-    eapp->liststructuredident_->accept(this); // TODO: function should be last
     visitIdent(eapp->ident_);
-    frontend::Environment::ClsInfoPtr cls =
-            this->fr_env.get_class((dynamic_cast<Class*>(this->last_type))
-                    ->ident_);
     eapp->listexpr_->accept(this);
 
     //Block::instr_ptr_t call(new x86_Call(get_from_vtable(eapp->liststructuredident_)));
     //this->instruction_manager.add(call);
+}
+
+void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
+{
+  /* Code For EMethodApp Goes Here */
+
+    emethodapp->liststructuredident_->accept(this);
+    frontend::Environment::ClsInfoPtr cls =
+        this->fr_env.get_class((dynamic_cast<Class*>(this->last_type))
+                ->ident_);
+    visitIdent(emethodapp->ident_);
+    emethodapp->listexpr_->accept(this);
 }
 
 void Creator_x86::visitEString(EString *estring)

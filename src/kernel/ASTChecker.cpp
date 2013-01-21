@@ -615,6 +615,16 @@ void ASTChecker::visitEApp(EApp* eapp)
 //    this->last_type = fun_ptr->ret_type;
 }
 
+void ASTChecker::visitEMethodApp(EMethodApp *emethodapp)
+{
+  /* Code For EMethodApp Goes Here */
+
+    emethodapp->liststructuredident_->accept(this);
+    visitIdent(emethodapp->ident_);
+    emethodapp->listexpr_->accept(this);
+
+}
+
 void ASTChecker::visitEString(EString* estring)
 {
     this->last_line_number = estring->line_number;

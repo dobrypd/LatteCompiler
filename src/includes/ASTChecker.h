@@ -102,6 +102,7 @@ public:
     void visitELitFalse(ELitFalse* p);
     void visitELitNull(ELitNull* p);
     void visitEApp(EApp* p);
+    void visitEMethodApp(EMethodApp* p);
     void visitEString(EString* p);
     void visitNeg(Neg* p);
     void visitNot(Not* p);

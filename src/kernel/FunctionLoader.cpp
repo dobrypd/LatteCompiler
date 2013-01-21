@@ -331,6 +331,9 @@ void FunctionLoader::visitELitNull(ELitNull *elitnull)
 void FunctionLoader::visitEApp(EApp *eapp)
 {}
 
+void FunctionLoader::visitEMethodApp(EMethodApp *emethodapp)
+{}
+
 void FunctionLoader::visitEString(EString* estring)
 {}
 

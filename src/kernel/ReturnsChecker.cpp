@@ -419,10 +419,18 @@ void ReturnsChecker::visitELitNull(ELitNull *elitnull)
 
 void ReturnsChecker::visitEApp(EApp *eapp)
 {
-    eapp->liststructuredident_->accept(this);
     visitIdent(eapp->ident_);
     eapp->listexpr_->accept(this);
 
+}
+
+void ReturnsChecker::visitEMethodApp(EMethodApp *emethodapp)
+{
+  /* Code For EMethodApp Goes Here */
+
+    emethodapp->liststructuredident_->accept(this);
+    visitIdent(emethodapp->ident_);
+    emethodapp->listexpr_->accept(this);
 }
 
 void ReturnsChecker::visitEString(EString* estring)

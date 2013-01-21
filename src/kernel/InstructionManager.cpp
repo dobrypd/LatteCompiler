@@ -47,7 +47,7 @@ void Block::add(instr_ptr_t instruction)
 
 InstructionManager::InstructionManager(frontend::Environment& fr_env) : fr_env(fr_env)
 {
-    block_ptr_t block_0(new Block(0));
+    block_ptr_t block_0(new Block(""));
     this->blocks.push_back(block_0);
 }
 
@@ -55,7 +55,8 @@ void InstructionManager::write_to_stream(std::ostream& stream)
 {
     for (list_it_t it = this->blocks.begin(); it != this->blocks.end(); it++)
     {
-        stream << (*it)->get_name() << ":" << std::endl;
+        if ((*it)->get_name() != "")
+            stream << (*it)->get_name() << ":" << std::endl;
         for (Block::list_it_t i_it = (*it)->begin(); i_it != (*it)->end();
                 i_it++)
         {
@@ -72,6 +73,8 @@ void InstructionManager::new_block(int id)
 
 void InstructionManager::alloc_scalar_var()
 {
+    Block::instr_ptr_t instr(new instruction::Dec(arg(ESP)));
+    this->add(instr);
 }
 
 void InstructionManager::alloc_object_var()
@@ -175,6 +178,8 @@ void InstructionManager::new_function_block(std::string name)
 
 void InstructionManager::jump(int id)
 {
+    Block::instr_ptr_t instr(new instruction::Jump(std::string("_L") + int2str(id)));
+    this->add(instr);
 }
 
 void InstructionManager::pop_add_to_ESI()
@@ -191,6 +196,8 @@ void InstructionManager::push_literal(int value)
 
 void InstructionManager::pop_to_addr_from_ESI()
 {
+    Block::instr_ptr_t instr(new instruction::Pop(arg(ESI, REGISTER, true)));
+    this->add(instr);
 }
 
 void InstructionManager::increment_ESI(int inc_by)

@@ -4,6 +4,7 @@
  *
  */
 
+#include <sstream>
 #include "global.h"
 #include "Instruction.h"
 
@@ -12,11 +13,16 @@ namespace backend
 
 std::string InstructionArgument::str()
 {
-    return int2str(this->base); // TODO:
+    std::stringstream ss;
+    if (this->dereference) ss << "(";
+    if (this->type == REGISTER) ss << "%";
+    ss << this->base;
+    if (this->dereference) ss << ")";
+    return ss.str();
 }
 
-arg_t arg(int base = 0, int type = 0, bool dereference = false,
-        int offset = 0, int index = 0, int mul = 0) {
+arg_t arg(int base, int type, bool dereference,
+        int offset, int index, int mul) {
     boost::shared_ptr<InstructionArgument> argument(new InstructionArgument);
     argument->base = base;
     argument->offset = offset;
@@ -45,9 +51,9 @@ std::string Instruction::str() const
     case 0:
         return this->cstr;
     case 1:
-        return std::string(this->cstr) + this->arg1->str();
+        return std::string(this->cstr) + " " + this->arg1->str();
     case 2:
-        return std::string(this->cstr) + this->arg1->str()
+        return std::string(this->cstr) + " " + this->arg1->str() + " "
                 + this->arg2->str();
     }
     return std::string();

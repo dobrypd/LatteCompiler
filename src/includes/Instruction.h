@@ -37,9 +37,10 @@ public:
 };
 
 typedef boost::shared_ptr<InstructionArgument> arg_t;
-
-arg_t arg(int base, int type, bool dereference, int offset, int index,
-        int mul);
+//int base, int type, bool dereference, int offset, int index,
+//        int mul
+arg_t arg(int base = 0, int type = 0, bool dereference = false,
+        int offset = 0, int index = 0, int mul = 0);
 
 class Instruction
 {
@@ -62,86 +63,103 @@ namespace instruction
 
 class Mov : public Instruction
 {
+public:
     Mov(arg_t arg1, arg_t arg2);
 };
 
 class Push : public Instruction
 {
+public:
     Push(arg_t arg);
 };
 
 class Pop : public Instruction
 {
+public:
     Pop(arg_t arg);
 };
 
 class Lea : public Instruction
 {
+public:
     Lea(arg_t arg1, arg_t arg2);
 };
 
 class Add : public Instruction
 {
+public:
     Add(arg_t arg1, arg_t arg2);
 };
 
 class Sub : public Instruction
 {
+public:
     Sub(arg_t arg1, arg_t arg2);
 };
 
 class Inc : public Instruction
 {
+public:
     Inc(arg_t arg);
 };
 
 class Dec : public Instruction
 {
+public:
     Dec(arg_t arg);
 };
 
 class Imul : public Instruction
 {
+public:
     Imul(arg_t arg1, arg_t arg2);
 };
 
 class Idiv : public Instruction
 {
+public:
     Idiv(arg_t arg1, arg_t arg2);
 };
 
 class And : public Instruction
 {
+public:
     And(arg_t arg1, arg_t arg2);
 };
 
 class Or : public Instruction
 {
+public:
     Or(arg_t arg1, arg_t arg2);
 };
 
 class Xor : public Instruction
 {
+public:
     Xor(arg_t arg1, arg_t arg2);
 };
 
 class Not : public Instruction
 {
+public:
     Not(arg_t arg);
 };
 
 class Neg : public Instruction
 {
+public:
     Neg(arg_t arg);
 };
 
 class Shl : public Instruction
 {
+public:
     Shl(arg_t arg);
 };
 
 class Shr : public Instruction
 {
+public:
     Shr(arg_t arg);
 };
 
@@ -166,6 +184,7 @@ public:
 
 class Cmp : public Instruction
 {
+public:
     Cmp(arg_t arg1, arg_t arg2);
 };
 
@@ -180,6 +199,7 @@ public:
 
 class Ret : public Instruction
 {
+public:
     Ret();
 };
 
