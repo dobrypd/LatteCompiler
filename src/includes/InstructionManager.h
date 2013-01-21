@@ -96,7 +96,6 @@ public:
     void pop_ECX();
 
     // Allocating:
-    void alloc_var(Type* type);
     void alloc_default(Type* type);
     void alloc_array(Type* type); // with size  of array on top of the stack, save ptr on EAX
     void alloc_object(Type* type); // calculate object size by fr_env, save ptr on EAX

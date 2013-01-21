@@ -23,7 +23,7 @@ void InstructionArgument::address_str(std::stringstream& ss, int value)
     case ESP: ss << "%esp"; break;
     case EBP: ss << "%ebp"; break;
     default:
-        ss << this->base;
+        ss << value;
         break;
     }
 }
@@ -82,7 +82,7 @@ std::string Instruction::str() const
     case 1:
         return std::string(this->cstr) + " " + this->arg1->str();
     case 2:
-        return std::string(this->cstr) + " " + this->arg1->str() + " "
+        return std::string(this->cstr) + " " + this->arg1->str() + ", "
                 + this->arg2->str();
     }
     return std::string();
@@ -117,19 +117,19 @@ Cmp::Cmp(arg_t arg1, arg_t arg2) : Instruction("cmp", 2, arg1, arg2) { }
 Ret::Ret() : Instruction("ret") { }
 
 std::string Jump::str() const {
-    return std::string(this->cstr) + " " + this->label;
+    return (std::string(this->cstr) + " " + this->label);
 }
 
 std::string Loop::str() const {
-    return std::string(this->cstr) + " " + this->label;
+    return (std::string(this->cstr) + " " + this->label);
 }
 
 std::string Call::str() const {
-    return std::string(this->cstr) + " " + this->label;
+    return (std::string(this->cstr) + " " + this->label);
 }
 
 std::string ConditionJump::str() const {
-    return std::string(this->cstr) + " " + this->label;
+    return (std::string(this->cstr) + " " + this->label);
 }
 
 } /* namespace instruction */

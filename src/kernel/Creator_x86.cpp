@@ -148,7 +148,7 @@ void Creator_x86::visitStmBStmt(StmBStmt *stmbstmt)
     this->env.prepare();
     stmbstmt->blk_->accept(this);
     int ESP_diff = this->env.back();
-    this->instruction_manager.add_to_ESP(ESP_diff);
+    this->instruction_manager.add_to_ESP(ESP_diff); // cleaning (block)
     // ESP will be changed by EBP
 }
 
