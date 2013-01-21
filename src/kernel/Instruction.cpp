@@ -27,9 +27,16 @@ arg_t arg(int base = 0, int type = 0, bool dereference = false,
     return argument;
 }
 
-Instruction::Instruction(arg_t arg1 = arg_t(), arg_t arg2 = arg_t()) :
-        arg1(arg1), arg2(arg2), cstr("bare_instruction"), args(0)
+Instruction::Instruction(const char* cstr="bare_instruction", int args = 0,
+        arg_t arg1 = arg_t(), arg_t arg2 = arg_t())
+        : arg1(arg1), arg2(arg2), cstr(cstr), args(args)
 {
+    if ((debug) and (this->args == 2 )
+            and (this->arg1->type == this->arg2->type)
+            and (this->arg1->type == MEMORY)) {
+        std::cerr << "CANNOT USE INSTRUCTION WITH BOTH ARGUMENTS IN MEMORY!!!"
+                << std::endl;
+    }
 }
 
 std::string Instruction::str() const
@@ -49,17 +56,39 @@ std::string Instruction::str() const
 namespace instruction
 {
 
-Mov::Mov(arg_t arg1, arg_t arg2) : Instruction(arg1, arg2),
-        cstr("movl"), args(2)
-{ }
+Mov::Mov(arg_t arg1, arg_t arg2) : Instruction("movl", 2, arg1, arg2) { }
+Push::Push(arg_t arg) : Instruction("pushl", 1, arg) { }
+Pop::Pop(arg_t arg) : Instruction("popl", 1, arg) { }
+Lea::Lea(arg_t arg1, arg_t arg2) : Instruction("lea", 2, arg1, arg2) { }
+Add::Add(arg_t arg1, arg_t arg2) : Instruction("addl", 2, arg1, arg2) { }
+Sub::Sub(arg_t arg1, arg_t arg2) : Instruction("subl", 2, arg1, arg2) { }
+Inc::Inc(arg_t arg) : Instruction("incl", 1, arg) { }
+Dec::Dec(arg_t arg) : Instruction("decl", 1, arg) { }
+Imul::Imul(arg_t arg1, arg_t arg2) : Instruction("imull", 2, arg1, arg2) { }
+Idiv::Idiv(arg_t arg1, arg_t arg2) : Instruction("idivl", 2, arg1, arg2) { }
+And::And(arg_t arg1, arg_t arg2) : Instruction("andl", 2, arg1, arg2) { }
+Or::Or(arg_t arg1, arg_t arg2) : Instruction("orl", 2, arg1, arg2) { }
+Xor::Xor(arg_t arg1, arg_t arg2) : Instruction("xorl", 2, arg1, arg2) { }
+Not::Not(arg_t arg) : Instruction("not", 1, arg) { }
+Neg::Neg(arg_t arg) : Instruction("neg", 1, arg) { }
+Shl::Shl(arg_t arg) : Instruction("shl", 1, arg) { }
+Shr::Shr(arg_t arg) : Instruction("shr", 1, arg) { }
+Jump::Jump(std::string label) : Instruction("jmp"), label(label) { }
+ConditionJump::ConditionJump(std::string label) : Instruction("j"), label(label) { }
+Cmp::Cmp(arg_t arg1, arg_t arg2) : Instruction("cmp", 2, arg1, arg2) { }
+Ret::Ret() : Instruction("ret") { }
 
-Push::Push(arg_t arg) : Instruction(arg),
-        cstr("pushl"), args(2)
-{ }
+std::string Jump::str() const {
+    return std::string(this->cstr) + " " + this->label;
+}
 
-Pop::Pop(arg_t arg) : Instruction(arg),
-        cstr("popl"), args(2)
-{ }
+std::string Call::str() const {
+    return std::string(this->cstr) + " " + this->label;
+}
+
+std::string ConditionJump::str() const {
+    return std::string(this->cstr) + " " + this->label;
+}
 
 } /* namespace instruction */
 

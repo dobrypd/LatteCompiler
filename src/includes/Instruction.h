@@ -18,7 +18,7 @@ enum REGISTERS_T {
 
 enum ARG_TYPES_T {
         REGISTER,
-        ADDRESS,
+        MEMORY,
         CONSTANT_FIELD
 };
 
@@ -46,14 +46,15 @@ class Instruction
 private:
     arg_t arg1;
     arg_t arg2;
+    int args;
+
 public:
-    Instruction(arg_t arg1, arg_t arg2);
+    const char* cstr;
+
+    Instruction(const char* cstr, int args, arg_t arg1, arg_t arg2);
     virtual ~Instruction() {};
 
     std::string str() const;
-
-    const char* cstr;
-    int args;
 };
 
 namespace instruction
@@ -62,24 +63,128 @@ namespace instruction
 class Mov : public Instruction
 {
     Mov(arg_t arg1, arg_t arg2);
-    const char* cstr;
-    int args;
 };
 
 class Push : public Instruction
 {
     Push(arg_t arg);
-    const char* cstr;
-    int args;
 };
 
 class Pop : public Instruction
 {
     Pop(arg_t arg);
-    const char* cstr;
-    int args;
 };
+
+class Lea : public Instruction
+{
+    Lea(arg_t arg1, arg_t arg2);
+};
+
+class Add : public Instruction
+{
+    Add(arg_t arg1, arg_t arg2);
+};
+
+class Sub : public Instruction
+{
+    Sub(arg_t arg1, arg_t arg2);
+};
+
+class Inc : public Instruction
+{
+    Inc(arg_t arg);
+};
+
+class Dec : public Instruction
+{
+    Dec(arg_t arg);
+};
+
+class Imul : public Instruction
+{
+    Imul(arg_t arg1, arg_t arg2);
+};
+
+class Idiv : public Instruction
+{
+    Idiv(arg_t arg1, arg_t arg2);
+};
+
+class And : public Instruction
+{
+    And(arg_t arg1, arg_t arg2);
+};
+
+class Or : public Instruction
+{
+    Or(arg_t arg1, arg_t arg2);
+};
+
+class Xor : public Instruction
+{
+    Xor(arg_t arg1, arg_t arg2);
+};
+
+class Not : public Instruction
+{
+    Not(arg_t arg);
+};
+
+class Neg : public Instruction
+{
+    Neg(arg_t arg);
+};
+
+class Shl : public Instruction
+{
+    Shl(arg_t arg);
+};
+
+class Shr : public Instruction
+{
+    Shr(arg_t arg);
+};
+
+class Jump : public Instruction
+{
+private:
+    std::string label;
+public:
+    Jump(std::string label);
+    std::string str() const;
+};
+
+class ConditionJump : public Instruction
+{
+private:
+    std::string label;
+    std::string condition_string;
+public:
+    ConditionJump(std::string label);
+    std::string str() const;
+};
+
+class Cmp : public Instruction
+{
+    Cmp(arg_t arg1, arg_t arg2);
+};
+
+class Call : public Instruction
+{
+private:
+    std::string label;
+public:
+    Call(std::string label);
+    std::string str() const;
+};
+
+class Ret : public Instruction
+{
+    Ret();
+};
+
 
 } /* namesppace instruction */
 } /* namespace backend */
+
 #endif /* INSTRUCTION_H_ */
