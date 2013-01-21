@@ -22,7 +22,7 @@ enum ARG_TYPES_T {
         CONSTANT_FIELD
 };
 
-class Argument
+class InstructionArgument
 {
 public:
     int base;
@@ -36,7 +36,7 @@ public:
     std::string str();
 };
 
-typedef boost::shared_ptr<Argument> arg_t;
+typedef boost::shared_ptr<InstructionArgument> arg_t;
 
 arg_t arg(int base, int type, bool dereference, int offset, int index,
         int mul);

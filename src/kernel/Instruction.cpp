@@ -10,14 +10,14 @@
 namespace backend
 {
 
-std::string Argument::str()
+std::string InstructionArgument::str()
 {
     return int2str(this->base); // TODO:
 }
 
 arg_t arg(int base = 0, int type = 0, bool dereference = false,
         int offset = 0, int index = 0, int mul = 0) {
-    boost::shared_ptr<Argument> argument(new Argument);
+    boost::shared_ptr<InstructionArgument> argument(new InstructionArgument);
     argument->base = base;
     argument->offset = offset;
     argument->index = index;
@@ -29,7 +29,7 @@ arg_t arg(int base = 0, int type = 0, bool dereference = false,
 
 Instruction::Instruction(const char* cstr="bare_instruction", int args = 0,
         arg_t arg1 = arg_t(), arg_t arg2 = arg_t())
-        : arg1(arg1), arg2(arg2), cstr(cstr), args(args)
+        : arg1(arg1), arg2(arg2), args(args), cstr(cstr)
 {
     if ((debug) and (this->args == 2 )
             and (this->arg1->type == this->arg2->type)
