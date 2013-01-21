@@ -11,13 +11,9 @@
 namespace backend
 {
 
-std::string InstructionArgument::str()
+void InstructionArgument::address_str(std::stringstream& ss, int value)
 {
-    std::stringstream ss;
-    if (this->offset > 0) ss << this->offset;
-    ss << "(";
-    if (this->type == CONSTANT_FIELD) ss << "$C";
-    switch (this->base) {
+    switch (value) {
     case EAX: ss << "%eax"; break;
     case EDX: ss << "%edx"; break;
     case EBX: ss << "%ebx"; break;
@@ -30,10 +26,28 @@ std::string InstructionArgument::str()
         ss << this->base;
         break;
     }
-    if ((this->index > 0) or (this->mul > 0)) ss << "," << this->index;
-    if (this->mul > 0) ss << "," << this->mul;
-    ss << ")";
-    break;
+}
+
+std::string InstructionArgument::str()
+{
+    std::stringstream ss;
+    if ((this->offset != 0) and (this->type != CONSTANT_FIELD))
+        this->address_str(ss, this->offset);
+    if (this->type == MEMORY) ss << "(";
+    if (this->type == CONSTANT_FIELD)
+        ss << ((this->offset != 0) ? "$C" : "$");
+
+    this->address_str(ss, this->base);
+
+    if ((this->index != 0) or (this->mul != 0)) {
+        ss << ",";
+        this->address_str(ss, this->index);
+    }
+    if (this->mul != 0) {
+        ss << ",";
+        this->address_str(ss, this->mul);
+    }
+    if (this->type == MEMORY) ss << ")";
 
     return ss.str();
 }
@@ -86,20 +100,27 @@ Sub::Sub(arg_t arg1, arg_t arg2) : Instruction("subl", 2, arg1, arg2) { }
 Inc::Inc(arg_t arg) : Instruction("incl", 1, arg) { }
 Dec::Dec(arg_t arg) : Instruction("decl", 1, arg) { }
 Imul::Imul(arg_t arg1, arg_t arg2) : Instruction("imull", 2, arg1, arg2) { }
-Idiv::Idiv(arg_t arg1, arg_t arg2) : Instruction("idivl", 2, arg1, arg2) { }
+Idiv::Idiv(arg_t arg) : Instruction("idivl", 1, arg) { }
 And::And(arg_t arg1, arg_t arg2) : Instruction("andl", 2, arg1, arg2) { }
 Or::Or(arg_t arg1, arg_t arg2) : Instruction("orl", 2, arg1, arg2) { }
 Xor::Xor(arg_t arg1, arg_t arg2) : Instruction("xorl", 2, arg1, arg2) { }
 Not::Not(arg_t arg) : Instruction("not", 1, arg) { }
 Neg::Neg(arg_t arg) : Instruction("neg", 1, arg) { }
-Shl::Shl(arg_t arg) : Instruction("shl", 1, arg) { }
-Shr::Shr(arg_t arg) : Instruction("shr", 1, arg) { }
+Sar::Sar(arg_t arg1, arg_t arg2) : Instruction("sarl", 2, arg1, arg2) { }
+Shl::Shl(arg_t arg1, arg_t arg2) : Instruction("shl", 2, arg1, arg2) { }
+Shr::Shr(arg_t arg1, arg_t arg2) : Instruction("shr", 2, arg1, arg2) { }
 Jump::Jump(std::string label) : Instruction("jmp"), label(label) { }
-ConditionJump::ConditionJump(std::string label) : Instruction("j"), label(label) { }
+Loop::Loop(std::string label) : Instruction("loop"), label(label) { }
+ConditionJump::ConditionJump(std::string label, std::string condition_string)
+    : Instruction("j"), label(label), condition_string(condition_string) { }
 Cmp::Cmp(arg_t arg1, arg_t arg2) : Instruction("cmp", 2, arg1, arg2) { }
 Ret::Ret() : Instruction("ret") { }
 
 std::string Jump::str() const {
+    return std::string(this->cstr) + " " + this->label;
+}
+
+std::string Loop::str() const {
     return std::string(this->cstr) + " " + this->label;
 }
 

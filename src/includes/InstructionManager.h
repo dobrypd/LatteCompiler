@@ -52,13 +52,10 @@ public:
 
 private:
     blocks_list_t blocks;
-
-    void alloc_scalar_var();
-    void alloc_object_var();
-    void alloc_array_var();
-
+    std::vector<std::string> constant_strings;
     frontend::Environment& fr_env;  // To know information about objects.
 
+    int cstr_add(std::string& string);
 public:
     InstructionManager(frontend::Environment& fr_env);
 
@@ -70,6 +67,9 @@ public:
     void new_block(int id);
     void new_function_block(std::string name); // as new block but with where call can applicate
     void add(Block::instr_ptr_t instruction);
+    void add(Block::instr_ptr_t i1, Block::instr_ptr_t i2);
+    void add(Block::instr_ptr_t i1, Block::instr_ptr_t i2, Block::instr_ptr_t i3);
+    void add(Block::instr_ptr_t i1, Block::instr_ptr_t i2, Block::instr_ptr_t i3, Block::instr_ptr_t i4);
 
     // Bigger fragments/ syscals
     void compare_strings_on_stack();
@@ -90,7 +90,7 @@ public:
     void function_epilogue();
 
     // Op on reg:
-    void top_to_EAX();
+    void pop_to_EAX();
     void dereference_from_ESI_to_ECX_minus_1();
     void push_ECX();
     void pop_ECX();
@@ -105,28 +105,19 @@ public:
     void add_to_ESP(int value);  // value in baits (not bits)!
     void pop_add_to_ESI();
     void dereference_ESI_to_stack();
-    void dereference_stack_top_to_ECX();
     void push_literal(int value);
     void pop_to_addr_from_ESI();
     void push_ESI();
 
-    // Assign
-    void pop_top_to_var(int offset);
-    void pop_sec_top_to_addr_on_top();
-
     // Incrementation
-    void increment_var_on_stack(int offset, int inc_by);
-    void increment_var_addr_on_top(int inc_by);
-    void increment_ESI(int inc_by);
     void increment_in_ESI(int inc_by); // inc in address in ESI
-    void increment_ECX(int inc_by);
 
 
     // Operations on local variables:
     void dereference_var_to_var(int var_1_pos, int var_2_pos);
     void var_to_ECX(int var_pos);
-    void add_to_var(int value_position, int literal);
-    void add_to_ESI_val_address(int value_position);
+    void add_to_var(int var_pos, int literal);
+    void add_to_ESI_val_address(int var_pos);
     void dereference_ESI();
     void add_to_ESI(int value);
 
@@ -140,11 +131,6 @@ public:
 
     // Statics
     void add_const_string(std::string& str); // and push on stack
-
-    // Moving:
-    void pop_to_addr_from_EDI();
-
-
 };
 
 

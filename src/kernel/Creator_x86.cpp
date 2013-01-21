@@ -148,7 +148,7 @@ void Creator_x86::visitStmBStmt(StmBStmt *stmbstmt)
     this->env.prepare();
     stmbstmt->blk_->accept(this);
     int ESP_diff = this->env.back();
-    this->instruction_manager.add_to_ESP(ESP_diff * 4);
+    this->instruction_manager.add_to_ESP(ESP_diff);
     // ESP will be changed by EBP
 }
 
@@ -219,7 +219,7 @@ void Creator_x86::visitStmRet(StmRet *stmret)
     this->last_false_label = label_f;
     stmret->expr_->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
-    this->instruction_manager.top_to_EAX();
+    this->instruction_manager.pop_to_EAX();
     this->instruction_manager.function_epilogue();
 }
 
@@ -398,7 +398,7 @@ void Creator_x86::visitTableVal(TableVal *tableval)
     tableval->listarrayindex_->accept(this);
     // because in first value of array is length
     // XXX: TODO: LOAD ESI !
-    this->instruction_manager.increment_ESI(1);
+    this->instruction_manager.add_to_ESI(4); // size of array
     this->instruction_manager.pop_add_to_ESI();
 }
 

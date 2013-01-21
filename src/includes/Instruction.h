@@ -24,6 +24,9 @@ enum ARG_TYPES_T {
 
 class InstructionArgument
 {
+private:
+    void address_str(std::stringstream& ss, int value);
+
 public:
     int base;
     int offset;
@@ -32,7 +35,8 @@ public:
 
     int type;
     // if != MEMORY, it stores value in base ie.
-    // for constant `$C2` base==2 (constants has only integer identifier)
+    // for constant `$2` base==2 (constants has only integer identifier)
+    // for constant `$C2` base==2 and offset!=0 (constants has only integer identifier)
     // for register `%edx` base==EDX (base==-2)
 
     std::string str();
@@ -118,7 +122,7 @@ public:
 class Idiv : public Instruction
 {
 public:
-    Idiv(arg_t arg1, arg_t arg2);
+    Idiv(arg_t arg);
 };
 
 class And : public Instruction
@@ -151,16 +155,31 @@ public:
     Neg(arg_t arg);
 };
 
+class Sar : public Instruction
+{
+public:
+    Sar(arg_t arg1, arg_t arg2);
+};
+
 class Shl : public Instruction
 {
 public:
-    Shl(arg_t arg);
+    Shl(arg_t arg1, arg_t arg2);
 };
 
 class Shr : public Instruction
 {
 public:
-    Shr(arg_t arg);
+    Shr(arg_t arg1, arg_t arg2);
+};
+
+class Loop : public Instruction
+{
+private:
+    std::string label;
+public:
+    Loop(std::string label);
+    std::string str() const;
 };
 
 class Jump : public Instruction
@@ -178,7 +197,7 @@ private:
     std::string label;
     std::string condition_string;
 public:
-    ConditionJump(std::string label);
+    ConditionJump(std::string label, std::string condition_string);
     std::string str() const;
 };
 
