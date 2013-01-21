@@ -129,7 +129,7 @@ std::string Call::str() const {
 }
 
 std::string ConditionJump::str() const {
-    return (std::string(this->cstr) + " " + this->label);
+    return (std::string(this->cstr) + this->condition_string + " " + this->label);
 }
 
 } /* namespace instruction */

@@ -59,7 +59,17 @@ void InstructionManager::write_to_stream(std::ostream& stream)
         for (Block::list_it_t i_it = (*it)->begin(); i_it != (*it)->end();
                 i_it++)
         {
-            stream << "\t" << (*i_it)->str() << std::endl;
+            stream << "\t";
+            if (check_is<instruction::Jump*>((*i_it).get())) {
+                stream << dynamic_cast<instruction::Jump*>((*i_it).get())->str();
+            } else  if (check_is<instruction::Loop*>((*i_it).get())) {
+                stream << dynamic_cast<instruction::Loop*>((*i_it).get())->str();
+            } else  if (check_is<instruction::ConditionJump*>((*i_it).get())) {
+                stream << dynamic_cast<instruction::ConditionJump*>((*i_it).get())->str();
+            } else {
+                stream << (*i_it)->str();
+            }
+            stream << std::endl;
         }
     }
 }

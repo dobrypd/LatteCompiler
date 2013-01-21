@@ -54,6 +54,7 @@ const char* linker_flags = "";
     const char* compiler_arch_flags = "-m32";
     const char* linker_arch_flags =
             "-melf_i386 -l:./lib/lib32/libc.a ./lib/lib32/crt?.o";
+    // XXX: better way to link it is by gcc! -m32!!
 #endif
 
 
