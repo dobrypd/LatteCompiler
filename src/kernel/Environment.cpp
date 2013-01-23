@@ -147,12 +147,14 @@ bool Environment::can_add_variable(std::string& ident) const
 void Environment::add_class(std::string ident)
 {
     Environment::ClsInfoPtr new_class(new Environment::lat_class);
+    new_class->ident = ident;
     this->env_cls[ident] = new_class;
 }
 
 void Environment::add_class(std::string ident, std::string extends_ident)
 {
     Environment::ClsInfoPtr new_class(new Environment::lat_class);
+    new_class->ident = ident;
     Environment::ClsInfoPtr parent = this->get_class(extends_ident);
     new_class->lat_cls_parent = parent;
     this->env_cls[ident] = new_class;

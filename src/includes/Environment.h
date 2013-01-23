@@ -48,6 +48,8 @@ public:
         methods_t methods;
         fields_t fields;
 
+        std::string ident;
+
         boost::shared_ptr<Environment::lat_class> lat_cls_parent;
     };
 

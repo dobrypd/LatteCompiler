@@ -399,7 +399,7 @@ void InstructionManager::pop_ESI()
     this->add(instr);
 }
 
-void push_EAX()
+void InstructionManager::push_EAX()
 {
     Block::instr_ptr_t instr(new instruction::Push(arg(REGISTER, EAX)));
     this->add(instr);

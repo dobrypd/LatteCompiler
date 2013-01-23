@@ -118,7 +118,7 @@ bool ASTChecker::is_subclass(Class* base, Class* maybe_inher) {
     Environment::ClsInfoPtr cls_base = this->env.get_class(base->ident_);
     Environment::ClsInfoPtr cls_inher = this->env.get_class(maybe_inher->ident_);
     while(cls_inher) {
-        if (*cls_base == *cls_inher) {
+        if ((cls_base->ident) == (cls_inher->ident)) {
             return true;
         }
         cls_inher = cls_inher->lat_cls_parent;
@@ -152,7 +152,7 @@ void ASTChecker::visitFnDef(FnDef* fndef)
     fndef->type_->accept(this);
     this->last_function_type = fndef->type_;
     visitIdent(fndef->ident_);
-    this->last_function_ident = fndef->ident_;
+    this->last_function_ident = &fndef->ident_;
 
     this->env.prepare();
     fndef->listarg_->accept(this);
@@ -165,7 +165,7 @@ void ASTChecker::visitFnDef(FnDef* fndef)
 void ASTChecker::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 {
     visitIdent(clsdefnoinher->ident_);
-    this->last_class_ident = clsdefnoinher->ident_;
+    this->last_class_ident = &clsdefnoinher->ident_;
     clsdefnoinher->listclsdef_->accept(this);
 
     this->last_class_ident = 0;
@@ -174,7 +174,7 @@ void ASTChecker::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 void ASTChecker::visitClsDefInher(ClsDefInher *clsdefinher)
 {
     visitIdent(clsdefinher->ident_1);
-    this->last_class_ident = clsdefinher->ident_1;
+    this->last_class_ident = &clsdefinher->ident_1;
     visitIdent(clsdefinher->ident_2);
     clsdefinher->listclsdef_->accept(this);
 
@@ -194,7 +194,7 @@ void ASTChecker::visitMethodDef(MethodDef *methoddef)
   methoddef->type_->accept(this);
   this->last_function_type = methoddef->type_;
   visitIdent(methoddef->ident_);
-  this->last_function_ident = methoddef->ident_;
+  this->last_function_ident = &methoddef->ident_;
 
   this->env.prepare();
   methoddef->listarg_->accept(this);
@@ -268,14 +268,14 @@ void ASTChecker::visitStmAssArr(StmAssArr *stmassarr)
         this->error_handler.error(stmassarr->line_number, msg);
         return;
     }
-    if (*variable_type->type_ != stmassarr->type_) {
+    if (!((*variable_type->type_) == (*stmassarr->type_))) {
         std::string msg = "arrays cannot inherit.";
         this->error_handler.error(stmassarr->line_number, msg);
         return;
     }
     stmassarr->type_->accept(this);
     this->check_type(stmassarr->liststructuredident_, variable_type->type_, 0,
-            stmassarr->type_, stmassarr->line_number)
+            stmassarr->type_, stmassarr->line_number);
 
     this->last_type = 0;
     stmassarr->expr_->accept(this);
@@ -352,7 +352,7 @@ void ASTChecker::visitStmVRet(StmVRet* stmvret)
     if (!(check_is<Void *>(this->last_function_type)))
     {
         std::string msg = "function `";
-        msg += this->last_function_ident;
+        msg += *this->last_function_ident;
         msg += "` is not void type, should return ";
         msg += type_pretty_print(this->last_function_type);
         msg += ".";
@@ -446,14 +446,14 @@ void ASTChecker::visitStmForeach(StmForeach *stmforeach)
     stmforeach->liststructuredident_->accept(this);
     if (!check_is<TType*>(this->ident_type)) {
         std::string msg = "variable ";
-        msg += ident_to_string(stmforeach->liststructuredident_)
+        msg += ident_to_string(stmforeach->liststructuredident_);
         msg += " type ";
         msg += type_pretty_print(this->ident_type);
         msg += " is not iterable.";
         this->error_handler.error(stmforeach->line_number, msg);
     } else {
         TType* arary_type = dynamic_cast<TType*>(this->ident_type);
-        this->check_type(0, stmforeach->type_, 0, this->ident_type,
+        this->check_type(0, stmforeach->type_, 0, arary_type->type_,
                 stmforeach->line_number);
         this->add_variable(stmforeach->type_, stmforeach->ident_,
                 stmforeach->type_->line_number);
@@ -518,7 +518,7 @@ void ASTChecker::visitStmInitArray(StmInitArray *stminitarray)
         this->error_handler.error(stminitarray->line_number, msg);
         return;
     }
-    if (*variable_type->type_ != stminitarray->type_) {
+    if (!((*variable_type->type_) == (*stminitarray->type_))) {
         std::string msg = "arrays cannot inherit.";
         this->error_handler.error(stminitarray->line_number, msg);
         return;
@@ -568,7 +568,7 @@ void ASTChecker::visitSingleIdent(SingleIdent *singleident)
         if (!(singleident->ident_ != "length")) {
             std::string msg = "cannot get field of array typed ";
             msg += type_pretty_print(this->ident_type);
-            msg += " maybe you want to get length?"
+            msg += " maybe you want to get length?";
             this->error_handler.error(singleident->line_number, msg);
         }
         this->last_type = &(this->literal_int);
@@ -1032,7 +1032,7 @@ void ASTChecker::visitListStructuredIdent(ListStructuredIdent* liststructuredide
 void ASTChecker::visitListExpr(ListExpr* listexpr)
 {
     Ident fun_arg("function ");
-    fun_arg += ident_to_string(this->last_function_ident);
+    //fun_arg += ident_to_string(this->last_function_ident);
     fun_arg += " argument";
 
     int n = 0;
