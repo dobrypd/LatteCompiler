@@ -258,13 +258,18 @@ void ASTChecker::visitStmAssArr(StmAssArr *stmassarr)
     stmassarr->liststructuredident_->accept(this);
     TType* variable_type = (dynamic_cast<TType*>(this->ident_type));
     if (variable_type == 0) {
-        std::string msg = "cannot arary of `";
+        std::string msg = "cannot assign array of `";
         msg += type_pretty_print(stmassarr->type_);
         msg += "` to variable `";
         msg += ident_to_string(stmassarr->liststructuredident_);
         msg += "` which is type `";
         msg += type_pretty_print(this->ident_type);
         msg += "`.";
+        this->error_handler.error(stmassarr->line_number, msg);
+        return;
+    }
+    if (*variable_type->type_ != stmassarr->type_) {
+        std::string msg = "arrays cannot inherit.";
         this->error_handler.error(stmassarr->line_number, msg);
         return;
     }
@@ -276,7 +281,7 @@ void ASTChecker::visitStmAssArr(StmAssArr *stmassarr)
     stmassarr->expr_->accept(this);
     if (!check_is<Int*>(this->last_type))
     {
-        std::string msg = "evaluation of table size ";
+        std::string msg = "evaluation of array size ";
         msg += " with type ";
         msg += type_pretty_print(this->last_type);
         msg += " cannot be used in this context, integer should.";
@@ -370,9 +375,9 @@ void ASTChecker::visitStmCond(StmCond* stmcond)
     else
     if (!(check_is<Bool *>(this->last_type)))
     {
-        std::string msg = "expression must evaluate to boolean type instead of [";
+        std::string msg = "expression must evaluate to boolean type instead of ";
         msg += type_pretty_print(this->last_type);
-        msg += "].";
+        msg += ".";
         this->error_handler.error(stmcond->expr_->line_number, msg);
     }
     stmcond->stmt_->accept(this);
@@ -395,9 +400,9 @@ void ASTChecker::visitStmCondElse(StmCondElse* stmcondelse)
     else
     if (!(check_is<Bool *>(this->last_type)))
     {
-        std::string msg = "expression must evaluate to boolean type instead of [";
+        std::string msg = "expression must evaluate to boolean type instead of ";
         msg += type_pretty_print(this->last_type);
-        msg += "].";
+        msg += ".";
         this->error_handler.error(stmcondelse->expr_->line_number, msg);
     }
     stmcondelse->stmt_1->accept(this);
@@ -432,12 +437,30 @@ void ASTChecker::visitStmWhile(StmWhile* stmwhile)
 
 void ASTChecker::visitStmForeach(StmForeach *stmforeach)
 {
-    /* latte++ */
-
+    this->last_line_number = stmforeach->type_->line_number;
+    this->env.prepare();
     stmforeach->type_->accept(this);
     visitIdent(stmforeach->ident_);
+
+    this->ident_type = 0;
     stmforeach->liststructuredident_->accept(this);
+    if (!check_is<TType*>(this->ident_type)) {
+        std::string msg = "variable ";
+        msg += ident_to_string(stmforeach->liststructuredident_)
+        msg += " type ";
+        msg += type_pretty_print(this->ident_type);
+        msg += " is not iterable.";
+        this->error_handler.error(stmforeach->line_number, msg);
+    } else {
+        TType* arary_type = dynamic_cast<TType*>(this->ident_type);
+        this->check_type(0, stmforeach->type_, 0, this->ident_type,
+                stmforeach->line_number);
+        this->add_variable(stmforeach->type_, stmforeach->ident_,
+                stmforeach->type_->line_number);
+    }
+
     stmforeach->stmt_->accept(this);
+    this->env.back();
 
 }
 
@@ -467,45 +490,76 @@ void ASTChecker::visitStmInit(StmInit* stminit)
 
     visitIdent(stminit->ident_);
 
+    this->last_type = 0;
     stminit->expr_->accept(this);
 
-    Ident evalident("type evaluation of expression");
-    //this->check_type(stminit->ident_, this->last_declaration_type, evalident, this->last_type, stminit->line_number);
-    //TODO: check types
+    this->check_type(0, this->last_declaration_type, 0,
+            this->last_type, stminit->line_number);
     this->add_variable(this->last_declaration_type, stminit->ident_, stminit->line_number);
 }
 
 void ASTChecker::visitStmInitArray(StmInitArray *stminitarray)
 {
-    /* Latte++ */
+    this->last_line_number = stminitarray->line_number;
 
     visitIdent(stminitarray->ident_);
     stminitarray->type_->accept(this);
+    this->last_type = 0;
     stminitarray->expr_->accept(this);
 
+    TType* variable_type = (dynamic_cast<TType*>(this->last_declaration_type));
+    if (variable_type == 0) {
+        std::string msg = "cannot init array of `";
+        msg += type_pretty_print(stminitarray->type_);
+        msg += "` to variable ";
+        msg += " with  type `";
+        msg += type_pretty_print(this->last_declaration_type);
+        msg += "`.";
+        this->error_handler.error(stminitarray->line_number, msg);
+        return;
+    }
+    if (*variable_type->type_ != stminitarray->type_) {
+        std::string msg = "arrays cannot inherit.";
+        this->error_handler.error(stminitarray->line_number, msg);
+        return;
+    }
+    this->check_type(0, variable_type->type_, 0,
+            stminitarray->type_, stminitarray->line_number);
+
+    if (!check_is<Int*>(this->last_type))
+    {
+        std::string msg = "evaluation of array size ";
+        msg += " with type ";
+        msg += type_pretty_print(this->last_type);
+        msg += " cannot be used in this context, integer should.";
+        this->error_handler.error(stminitarray->expr_->line_number, msg);
+    }
+
+    this->add_variable(this->last_declaration_type, stminitarray->ident_,
+            stminitarray->line_number);
 }
 
 void ASTChecker::visitStmInitObj(StmInitObj *stminitobj)
 {
-    /* Latte++ */
+    this->last_line_number = stminitobj->line_number;
 
     visitIdent(stminitobj->ident_);
     stminitobj->type_->accept(this);
-
+    this->check_type(0, this->last_declaration_type, 0,
+            stminitobj->type_, stminitobj->line_number);
+    this->add_variable(this->last_declaration_type, stminitobj->ident_,
+            stminitobj->line_number);
 }
 
 void ASTChecker::visitSingleIdent(SingleIdent *singleident)
 {
-    /* Latte++ */
-
+    //this->ident_type
     visitIdent(singleident->ident_);
 
 }
 
 void ASTChecker::visitTableVal(TableVal *tableval)
 {
-    /* Latte++ */
-
     visitIdent(tableval->ident_);
     tableval->listarrayindex_->accept(this);
 
@@ -513,25 +567,16 @@ void ASTChecker::visitTableVal(TableVal *tableval)
 
 void ASTChecker::visitSelfIdent(SelfIdent *selfident)
 {
-  /* Code For SelfIdent Goes Here */
-
-
 }
 
 void ASTChecker::visitExprIndex(ExprIndex *exprindex)
 {
-    /* Latte++ */
-
     exprindex->expr_->accept(this);
-
 }
 
 void ASTChecker::visitClass(Class *_class)
 {
-    /* Latte++ */
-
     visitIdent(_class->ident_);
-
 }
 
 void ASTChecker::visitInt(Int* integer)
