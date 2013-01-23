@@ -20,6 +20,8 @@ private:
     ErrorHandler& error_handler;
     Environment& env;
 
+    std::string last_class_ident;
+
     bool r_flag; // return was found in this function.
 
     // 0 - do not know, -1 - always false, 1 -  always true, 2 - constant variable
@@ -66,8 +68,6 @@ public:
     void visitStmInitArray(StmInitArray* p);
     void visitStmInitObj(StmInitObj* p);
     void visitSingleIdent(SingleIdent* p);
-    void visitObjectIdent(ObjectIdent* p);
-    void visitTableVal(TableVal* p);
     void visitSelfIdent(SelfIdent* p);
     void visitStmAss(StmAss* p);
     void visitStmAssArr(StmAssArr* p);
@@ -88,6 +88,7 @@ public:
     void visitVoid(Void* p);
     void visitTType(TType* p);
     void visitEVar(EVar* p);
+    void visitEArrVar(EArrVar* p);
     void visitELitInt(ELitInt* p);
     void visitELitTrue(ELitTrue* p);
     void visitELitFalse(ELitFalse* p);

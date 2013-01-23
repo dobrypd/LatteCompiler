@@ -45,15 +45,13 @@ StmInitObj.     Item ::= Ident "=" "new" Type ;
 
 separator nonempty Item "," ;   
 
+
 SingleIdent.    StructuredIdent ::= Ident ;
 
-ObjectIdent.    StructuredIdent ::= Ident "." ;
+SelfIdent.      StructuredIdent ::= "self" ;
 
-TableVal.       StructuredIdent ::= "[" Expr "]" ;
+separator nonempty StructuredIdent "."  ;
 
-SelfIdent.      StructuredIdent ::= "self" "." ;
-
-separator nonempty StructuredIdent "" ;
 
 StmAss.     Stmt ::= [StructuredIdent] "=" Expr  ";" ;
 
@@ -100,6 +98,8 @@ TType.     Type ::= Type "[" "]" ;
 -- Expressions ---------------------------------------------
 
 EVar.      Expr6 ::= [StructuredIdent] ;
+
+EArrVar.   Expr6 ::= [StructuredIdent] "[" Expr "]" ;
 
 ELitInt.   Expr6 ::= Integer ;
 

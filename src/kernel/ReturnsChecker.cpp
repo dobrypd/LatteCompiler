@@ -54,35 +54,30 @@ void ReturnsChecker::visitFnDef(FnDef* fndef)
 {
     this->r_flag = false;
     fndef->blk_->accept(this);
-//    //Environment::FunInfoPtr f = this->env.get_function(fndef->ident_);
-//    if ((!this->r_flag) && (!(check_is<Void *>(f->ret_type))))
-//    {
-//        std::string msg;
-//        msg += "function : `";
-//        msg += fndef->ident_;
-//        msg += "` should returns [";
-//        msg += type_pretty_print(f->ret_type);
-//        msg += "].";
-//        this->error_handler.error(fndef->type_->line_number, msg);
-//    }
+    Environment::FunInfoPtr f = this->env.get_function(fndef->ident_);
+    if ((!this->r_flag) && (!(check_is<Void *>(f->ret_type))))
+    {
+        std::string msg;
+        msg += "function : `";
+        msg += fndef->ident_;
+        msg += "` should returns [";
+        msg += type_pretty_print(f->ret_type);
+        msg += "].";
+        this->error_handler.error(fndef->type_->line_number, msg);
+    }
 }
 
 void ReturnsChecker::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 {
-    /* Code For ClsDefNoInher Goes Here */
-    /* Latte++ */
-
     visitIdent(clsdefnoinher->ident_);
+    this->last_class_ident = clsdefnoinher->ident_;
     clsdefnoinher->listclsdef_->accept(this);
-
 }
 
 void ReturnsChecker::visitClsDefInher(ClsDefInher *clsdefinher)
 {
-    /* Code For ClsDefInher Goes Here */
-    /* Latte++ */
-
     visitIdent(clsdefinher->ident_1);
+    this->last_class_ident = clsdefinher->ident_1;
     visitIdent(clsdefinher->ident_2);
     clsdefinher->listclsdef_->accept(this);
 
@@ -96,24 +91,32 @@ void ReturnsChecker::visitArgument(Argument* argument)
 
 void ReturnsChecker::visitMethodDef(MethodDef *methoddef)
 {
-    /* Code For MethodDef Goes Here */
-    /* Latte++ */
-
     methoddef->type_->accept(this);
     visitIdent(methoddef->ident_);
     methoddef->listarg_->accept(this);
+
+
+
+    this->r_flag = false;
     methoddef->blk_->accept(this);
+    Environment::FunInfoPtr f = this->env.get_method(methoddef->ident_, this->last_class_ident);
+    if ((!this->r_flag) && (!(check_is<Void *>(f->ret_type))))
+    {
+        std::string msg;
+        msg += "function : `";
+        msg += methoddef->ident_;
+        msg += "` should returns [";
+        msg += type_pretty_print(f->ret_type);
+        msg += "].";
+        this->error_handler.error(methoddef->type_->line_number, msg);
+    }
 
 }
 
 void ReturnsChecker::visitFieldDef(FieldDef *fielddef)
 {
-    /* Code For FieldDef Goes Here */
-    /* Latte++ */
-
     fielddef->type_->accept(this);
     visitIdent(fielddef->ident_);
-
 }
 
 void ReturnsChecker::visitStmBlock(StmBlock* stmblock)
@@ -146,9 +149,6 @@ void ReturnsChecker::visitStmAss(StmAss* stmass)
 
 void ReturnsChecker::visitStmAssArr(StmAssArr *stmassarr)
 {
-    /* Code For StmAssArr Goes Here */
-    /* Latte++ */
-
     stmassarr->liststructuredident_->accept(this);
     stmassarr->type_->accept(this);
     stmassarr->expr_->accept(this);
@@ -157,9 +157,6 @@ void ReturnsChecker::visitStmAssArr(StmAssArr *stmassarr)
 
 void ReturnsChecker::visitStmAssObj(StmAssObj *stmassobj)
 {
-    /* Code For StmAssObj Goes Here */
-    /* Latte++ */
-
     stmassobj->liststructuredident_->accept(this);
     stmassobj->type_->accept(this);
 
@@ -167,20 +164,12 @@ void ReturnsChecker::visitStmAssObj(StmAssObj *stmassobj)
 
 void ReturnsChecker::visitStmIncr(StmIncr *stmincr)
 {
-    /* Code For StmIncr Goes Here */
-    /* Latte++ */
-
     stmincr->liststructuredident_->accept(this);
-
 }
 
 void ReturnsChecker::visitStmDecr(StmDecr *stmdecr)
 {
-    /* Code For StmDecr Goes Here */
-    /* Latte++ */
-
     stmdecr->liststructuredident_->accept(this);
-
 }
 
 void ReturnsChecker::visitStmRet(StmRet* stmret)
@@ -189,7 +178,6 @@ void ReturnsChecker::visitStmRet(StmRet* stmret)
     stmret->expr_->accept(this);
     if (this->expression_optimization != 0)
     {
-        // TODO: function optimization.
         this->to_the_end = true;
         this->remove = true;
     }
@@ -257,13 +245,12 @@ void ReturnsChecker::visitStmWhile(StmWhile* stmwhile)
 
 void ReturnsChecker::visitStmForeach(StmForeach *stmforeach)
 {
-    /* Code For StmForeach Goes Here */
-    /* Latte++ */
 
     stmforeach->type_->accept(this);
     visitIdent(stmforeach->ident_);
     stmforeach->liststructuredident_->accept(this);
     stmforeach->stmt_->accept(this);
+    this->expression_optimization = 0;
 
 }
 
@@ -286,27 +273,21 @@ void ReturnsChecker::visitStmInit(StmInit* stminit)
     stminit->expr_->accept(this);
     if (this->expression_optimization != 0)
     {
-        // TODO: variable const initialization.
         ;
     }
 }
 
 void ReturnsChecker::visitStmInitArray(StmInitArray *stminitarray)
 {
-    /* Code For StmInitArray Goes Here */
-    /* Latte++ */
-
     visitIdent(stminitarray->ident_);
     stminitarray->type_->accept(this);
+    this->expression_optimization = 0;
     stminitarray->expr_->accept(this);
 
 }
 
 void ReturnsChecker::visitStmInitObj(StmInitObj *stminitobj)
 {
-    /* Code For StmInitObj Goes Here */
-    /* Latte++ */
-
     visitIdent(stminitobj->ident_);
     stminitobj->type_->accept(this);
 
@@ -314,41 +295,27 @@ void ReturnsChecker::visitStmInitObj(StmInitObj *stminitobj)
 
 void ReturnsChecker::visitSingleIdent(SingleIdent *singleident)
 {
-    /* Code For SingleIdent Goes Here */
-    /* Latte++ */
-
     visitIdent(singleident->ident_);
 
 }
 
 void ReturnsChecker::visitObjectIdent(ObjectIdent *objectident)
 {
-    //XXX:
-  /* Code For ObjectIdent Goes Here */
-
-  visitIdent(objectident->ident_);
-
+    visitIdent(objectident->ident_);
 }
 
 void ReturnsChecker::visitTableVal(TableVal *tableval)
 {
     tableval->expr_->accept(this);
-
 }
 
 void ReturnsChecker::visitSelfIdent(SelfIdent *selfident)
 {
-  /* Code For SelfIdent Goes Here */
-
-
 }
 
 void ReturnsChecker::visitClass(Class* _class)
 {
-    /* Latte++ */
-
     visitIdent(_class->ident_);
-
 }
 
 void ReturnsChecker::visitInt(Int* integer)
@@ -369,18 +336,11 @@ void ReturnsChecker::visitVoid(Void* void_field)
 
 void ReturnsChecker::visitTType(TType *ttype)
 {
-    /* Code For TType Goes Here */
-    /* Latte++ */
-
     ttype->type_->accept(this);
-
 }
 
 void ReturnsChecker::visitEVar(EVar *evar)
 {
-    /* Code For EVar Goes Here */
-    /* Latte++ */
-
     evar->liststructuredident_->accept(this);
     this->expression_optimization = 0;
 
@@ -407,8 +367,6 @@ void ReturnsChecker::visitELitFalse(ELitFalse* elitfalse)
 
 void ReturnsChecker::visitELitNull(ELitNull *elitnull)
 {
-  /* Code For ELitNull Goes Here */
-
 }
 
 
@@ -421,10 +379,7 @@ void ReturnsChecker::visitEApp(EApp *eapp)
 
 void ReturnsChecker::visitEMethodApp(EMethodApp *emethodapp)
 {
-  /* Code For EMethodApp Goes Here */
-
     emethodapp->liststructuredident_->accept(this);
-    //visitIdent(emethodapp->ident_);
     emethodapp->listexpr_->accept(this);
 }
 
@@ -451,9 +406,6 @@ void ReturnsChecker::visitNot(Not* not_field)
 
 void ReturnsChecker::visitEDynamicCast(EDynamicCast *edynamiccast)
 {
-    /* Code For EDynamicCast Goes Here */
-    /* Latte++ */
-
     visitIdent(edynamiccast->ident_);
     edynamiccast->expr_->accept(this);
 

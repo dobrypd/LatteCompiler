@@ -277,12 +277,6 @@ void FunctionLoader::visitStmInitObj(StmInitObj *stminitobj)
 void FunctionLoader::visitSingleIdent(SingleIdent *singleident)
 {}
 
-void FunctionLoader::visitObjectIdent(ObjectIdent *objectident)
-{}
-
-void FunctionLoader::visitTableVal(TableVal *tableval)
-{}
-
 void FunctionLoader::visitSelfIdent(SelfIdent *selfident)
 {}
 
@@ -305,6 +299,9 @@ void FunctionLoader::visitTType(TType *ttype)
 {}
 
 void FunctionLoader::visitEVar(EVar *evar)
+{}
+
+void FunctionLoader::visitEArrVar(EArrVar *earrvar)
 {}
 
 void FunctionLoader::visitELitInt(ELitInt* elitint)
