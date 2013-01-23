@@ -201,7 +201,6 @@ Environment::VarInfoPtr Environment::get_variable(std::string & ident) const
             return fit->second;
         }
     }
-
     return Environment::VarInfoPtr();
 }
 

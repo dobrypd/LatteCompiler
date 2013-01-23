@@ -21,7 +21,9 @@ std::string ASTChecker::null_class("null");
 ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env, Ident& pr_name)
     : error_handler(error_handler), env(env), last_line_number(0),
       error_flag(false), last_declaration_type(0), last_type(0),
-      last_arguments_iterator(0), last_arguments_end(0)
+      last_arguments_iterator(0), last_arguments_end(0),
+      literal_class("not initialized")
+
 {
 }
 
@@ -31,6 +33,7 @@ void ASTChecker::check(Visitable* v)
     this->last_line_number = 0;
     this->error_flag = false;
     v->accept(this);
+    if (debug) std::cout << "AST Checker finished." << std::endl;
 }
 
 void ASTChecker::add_variable(Type* t, Ident& ident, int line_number)
@@ -704,6 +707,7 @@ void ASTChecker::visitEVar(EVar* evar)
     this->last_line_number = evar->line_number;
     this->ident_type = 0;
     evar->liststructuredident_->accept(this);
+    this->last_type = this->ident_type;
 }
 
 void ASTChecker::visitELitInt(ELitInt* elitint)
