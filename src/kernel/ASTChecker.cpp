@@ -553,13 +553,57 @@ void ASTChecker::visitStmInitObj(StmInitObj *stminitobj)
 
 void ASTChecker::visitSingleIdent(SingleIdent *singleident)
 {
-    //this->ident_type
     visitIdent(singleident->ident_);
-
+    if (this->last_type == 0){
+        Environment::VarInfoPtr var = this->env.get_variable(singleident->ident_);
+        if (!var) {
+            std::string msg = "cannot find variable `";
+            msg += singleident->ident_;
+            msg += "`";
+            this->error_handler.error(singleident->line_number, msg);
+        } else {
+            this->ident_type = var->type;
+        }
+    } else if (check_is<TType*>(this->ident_type)) {
+        if (!(singleident->ident_ != "length")) {
+            std::string msg = "cannot get field of array typed ";
+            msg += type_pretty_print(this->ident_type);
+            msg += " maybe you want to get length?"
+            this->error_handler.error(singleident->line_number, msg);
+        }
+        this->last_type = &(this->literal_int);
+    } else {
+        if (!check_is<Class*>(this->ident_type)) {
+            std::string msg = "cannot get field of non class type ";
+            msg += type_pretty_print(this->ident_type);
+            this->error_handler.error(singleident->line_number, msg);
+        } else {
+            Class* my_cls = dynamic_cast<Class*>(this->ident_type);
+            Environment::VarInfoPtr var = this->env.get_field(
+                    singleident->ident_, my_cls->ident_);
+            if (!var) {
+                std::string msg = "cannot find field `";
+                msg += singleident->ident_;
+                msg += "` in class chain (begins from class `";
+                msg += my_cls->ident_;
+                msg += "`)";
+                this->error_handler.error(singleident->line_number, msg);
+            } else {
+                this->ident_type = var->type;
+            }
+        }
+    }
 }
 
 void ASTChecker::visitTableVal(TableVal *tableval)
 {
+    if (!check_is<TType*>(this->ident_type)) {
+        std::string msg = "cannot get array index from not iterable type `";
+        msg += type_pretty_print(this->ident_type);
+        msg += "`";
+        this->error_handler.error(tableval->line_number, msg);
+        return;
+    }
     visitIdent(tableval->ident_);
     tableval->listarrayindex_->accept(this);
 
