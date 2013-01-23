@@ -571,13 +571,13 @@ void ASTChecker::visitSingleIdent(SingleIdent *singleident)
             this->ident_type = var->type;
         }
     } else if (check_is<TType*>(this->ident_type)) {
-        if (!(singleident->ident_ != "length")) {
+        if (singleident->ident_ != "length") {
             std::string msg = "cannot get field of array typed ";
             msg += type_pretty_print(this->ident_type);
             msg += " maybe you want to get length?";
             this->error_handler.error(singleident->line_number, msg);
         }
-        this->last_type = &(this->literal_int);
+        this->ident_type = &(this->literal_int);
     } else {
         if (!check_is<Class*>(this->ident_type)) {
             std::string msg = "cannot get field of non class type ";
@@ -601,31 +601,74 @@ void ASTChecker::visitSingleIdent(SingleIdent *singleident)
     }
 }
 
-void ASTChecker::visitArrayIdent(ArrayIdent * tableval)
+void ASTChecker::visitArrayIdent(ArrayIdent * arrayindex)
 {
-    this->last_line_number = tableval->line_number;
-    // XXX
-    if (!check_is<TType*>(this->ident_type)) {
-        std::string msg = "cannot get array index from not iterable type `";
-        msg += type_pretty_print(this->ident_type);
-        msg += "`";
-        this->error_handler.error(tableval->line_number, msg);
-        return;
-    }
+    this->last_line_number = arrayindex->line_number;
+
+    Type* my_ident_last_type = this->ident_type;
 
     this->last_type = 0;
-    tableval->expr_->accept(this);
-
-    if (!check_is<Int*>(this->last_type))
-    {
-        std::string msg = "evaluation of array index ";
-        msg += " with type ";
+    arrayindex->expr_->accept(this);
+    if (!check_is<Int*>(this->last_type)) {
+        std::string msg = "evaluation of array size ";
+        msg += " with type [";
         msg += type_pretty_print(this->last_type);
-        msg += " cannot be used in this context, integer should.";
-        this->error_handler.error(tableval->expr_->line_number, msg);
+        msg += "] cannot be used in this context, integer should.";
+        this->error_handler.error(arrayindex->expr_->line_number, msg);
     }
 
-    this->ident_type = (dynamic_cast<TType*>(this->ident_type))->type_;
+    visitIdent(arrayindex->ident_);
+
+    if (my_ident_last_type == 0){
+        Environment::VarInfoPtr var = this->env.get_variable(arrayindex->ident_);
+        if (!var) {
+            std::string msg = "cannot find array `";
+            msg += arrayindex->ident_;
+            msg += "`";
+            this->error_handler.error(arrayindex->line_number, msg);
+        } else {
+            this->ident_type = var->type;
+        }
+    } else if (check_is<TType*>(my_ident_last_type)) {
+        std::string msg = "cannot get field of array typed ";
+        msg += type_pretty_print(this->ident_type);
+        msg += " maybe you want to get length?";
+        this->error_handler.error(arrayindex->line_number, msg);
+        return;
+    } else {
+        if (!check_is<Class*>(my_ident_last_type)) {
+            std::string msg = "cannot get field of non class type ";
+            msg += type_pretty_print(this->ident_type);
+            this->error_handler.error(arrayindex->line_number, msg);
+        } else {
+            Class* my_cls = dynamic_cast<Class*>(my_ident_last_type);
+            Environment::VarInfoPtr var = this->env.get_field(
+                    arrayindex->ident_, my_cls->ident_);
+            if (!var) {
+                std::string msg = "cannot find field `";
+                msg += arrayindex->ident_;
+                msg += "` in class chain (begins from class `";
+                msg += my_cls->ident_;
+                msg += "`)";
+                this->error_handler.error(arrayindex->line_number, msg);
+            } else {
+                this->ident_type = var->type;
+            }
+        }
+    }
+
+    TType* array_type = dynamic_cast<TType*>(this->ident_type);
+
+    if (array_type == 0) {
+        std::string msg = "cannot get array field from non iterable object `";
+        msg += arrayindex->ident_;
+        msg += "` type: `";
+        msg += type_pretty_print(this->ident_type);
+        msg += "`";
+        this->error_handler.error(arrayindex->line_number, msg);
+    } else {
+        this->ident_type = array_type->type_;
+    }
 }
 
 void ASTChecker::visitSelfIdent(SelfIdent *selfident)
