@@ -104,7 +104,6 @@ void FunctionLoader::visitBlk(Blk* t) {} //abstract class
 void FunctionLoader::visitStmt(Stmt* t) {} //abstract class
 void FunctionLoader::visitItem(Item* t) {} //abstract class
 void FunctionLoader::visitStructuredIdent(StructuredIdent* t) {} //abstract class
-void FunctionLoader::visitArrayIndex(ArrayIndex* t) {} //abstract class
 void FunctionLoader::visitType(Type* t) {} //abstract class
 void FunctionLoader::visitExpr(Expr* t) {} //abstract class
 void FunctionLoader::visitAddOp(AddOp* t) {} //abstract class
@@ -278,13 +277,13 @@ void FunctionLoader::visitStmInitObj(StmInitObj *stminitobj)
 void FunctionLoader::visitSingleIdent(SingleIdent *singleident)
 {}
 
+void FunctionLoader::visitObjectIdent(ObjectIdent *objectident)
+{}
+
 void FunctionLoader::visitTableVal(TableVal *tableval)
 {}
 
 void FunctionLoader::visitSelfIdent(SelfIdent *selfident)
-{}
-
-void FunctionLoader::visitExprIndex(ExprIndex *exprindex)
 {}
 
 void FunctionLoader::visitClass(Class *_class)
@@ -410,9 +409,6 @@ void FunctionLoader::visitListStmt(ListStmt* liststmt)
 {}
 
 void FunctionLoader::visitListItem(ListItem* listitem)
-{}
-
-void FunctionLoader::visitListArrayIndex(ListArrayIndex* listarrayindex)
 {}
 
 void FunctionLoader::visitListStructuredIdent(ListStructuredIdent* liststructuredident)

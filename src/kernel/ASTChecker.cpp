@@ -135,7 +135,6 @@ void ASTChecker::visitBlk(Blk* t) {} //abstract class
 void ASTChecker::visitStmt(Stmt* t) {} //abstract class
 void ASTChecker::visitItem(Item* t) {} //abstract class
 void ASTChecker::visitStructuredIdent(StructuredIdent* t) {} //abstract class
-void ASTChecker::visitArrayIndex(ArrayIndex* t) {} //abstract class
 void ASTChecker::visitType(Type* t) {} //abstract class
 void ASTChecker::visitExpr(Expr* t) {} //abstract class
 void ASTChecker::visitAddOp(AddOp* t) {} //abstract class
@@ -554,7 +553,7 @@ void ASTChecker::visitStmInitObj(StmInitObj *stminitobj)
 void ASTChecker::visitSingleIdent(SingleIdent *singleident)
 {
     visitIdent(singleident->ident_);
-    if (this->last_type == 0){
+    if (this->ident_type == 0){
         Environment::VarInfoPtr var = this->env.get_variable(singleident->ident_);
         if (!var) {
             std::string msg = "cannot find variable `";
@@ -595,6 +594,41 @@ void ASTChecker::visitSingleIdent(SingleIdent *singleident)
     }
 }
 
+void ASTChecker::visitObjectIdent(ObjectIdent *objectident)
+{
+    visitIdent(objectident->ident_);
+
+    if (this->ident_type == 0){
+        Environment::VarInfoPtr var = this->env.get_variable(objectident->ident_);
+        if (!var) {
+            std::string msg = "cannot find object `";
+            msg += objectident->ident_;
+            msg += "`";
+            this->error_handler.error(objectident->line_number, msg);
+        } else {
+          this->ident_type = var->type;
+        }
+    } else if (!check_is<Class*>(this->ident_type)) {
+        std::string msg = "cannot get field of non class type ";
+        msg += type_pretty_print(this->ident_type);
+        this->error_handler.error(objectident->line_number, msg);
+    } else {
+        Class* my_cls = dynamic_cast<Class*>(this->ident_type);
+        Environment::VarInfoPtr var = this->env.get_field(
+                objectident->ident_, my_cls->ident_);
+        if (!var) {
+            std::string msg = "cannot find field `";
+            msg += objectident->ident_;
+            msg += "` in class chain (begins from class `";
+            msg += my_cls->ident_;
+            msg += "`)";
+            this->error_handler.error(objectident->line_number, msg);
+        } else {
+            this->ident_type = var->type;
+        }
+    }
+}
+
 void ASTChecker::visitTableVal(TableVal *tableval)
 {
     if (!check_is<TType*>(this->ident_type)) {
@@ -604,8 +638,7 @@ void ASTChecker::visitTableVal(TableVal *tableval)
         this->error_handler.error(tableval->line_number, msg);
         return;
     }
-    visitIdent(tableval->ident_);
-    tableval->listarrayindex_->accept(this);
+    tableval->expr_->accept(this);
 
 }
 
@@ -613,10 +646,6 @@ void ASTChecker::visitSelfIdent(SelfIdent *selfident)
 {
 }
 
-void ASTChecker::visitExprIndex(ExprIndex *exprindex)
-{
-    exprindex->expr_->accept(this);
-}
 
 void ASTChecker::visitClass(Class *_class)
 {
@@ -1007,14 +1036,6 @@ void ASTChecker::visitListItem(ListItem* listitem)
     {
         (*i)->accept(this);
     }
-}
-
-void ASTChecker::visitListArrayIndex(ListArrayIndex* listarrayindex)
-{
-  for (ListArrayIndex::iterator i = listarrayindex->begin() ; i != listarrayindex->end() ; ++i)
-  {
-    (*i)->accept(this);
-  }
 }
 
 void ASTChecker::visitListStructuredIdent(ListStructuredIdent* liststructuredident)

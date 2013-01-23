@@ -25,8 +25,6 @@ std::string type_pretty_print(Type *t)
     } else if (check_is<Class*>(t)) {
         return "class " + (dynamic_cast<Class*>(t))->ident_;
     } else {
-        if (debug) std::cerr << "Did you changed the grammar? "
-                "Could not find type";
         return "undefined";
     }
 }
@@ -87,8 +85,6 @@ std::string ident_to_string(ListStructuredIdent* ident_list)
             identifier += si->ident_;
         }
         else if (dynamic_cast<TableVal*>(*it) != 0) {
-            TableVal* tv = dynamic_cast<TableVal*>(*it);
-            identifier += tv->ident_;
             identifier += "[]";
         }
     }

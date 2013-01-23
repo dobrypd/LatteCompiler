@@ -36,7 +36,6 @@ public:
     void visitStmt(Stmt* p);
     void visitItem(Item* p);
     void visitStructuredIdent(StructuredIdent* p);
-    void visitArrayIndex(ArrayIndex* p);
     void visitType(Type* p);
     void visitExpr(Expr* p);
     void visitAddOp(AddOp* p);
@@ -58,9 +57,9 @@ public:
     void visitStmInitArray(StmInitArray* p);
     void visitStmInitObj(StmInitObj* p);
     void visitSingleIdent(SingleIdent* p);
+    void visitObjectIdent(ObjectIdent* p);
     void visitTableVal(TableVal* p);
     void visitSelfIdent(SelfIdent* p);
-    void visitExprIndex(ExprIndex* p);
     void visitStmAss(StmAss* p);
     void visitStmAssArr(StmAssArr* p);
     void visitStmAssObj(StmAssObj* p);
@@ -111,7 +110,6 @@ public:
     void visitListClsDef(ListClsDef* p);
     void visitListStmt(ListStmt* p);
     void visitListItem(ListItem* p);
-    void visitListArrayIndex(ListArrayIndex* p);
     void visitListStructuredIdent(ListStructuredIdent* p);
     void visitListExpr(ListExpr* p);
 

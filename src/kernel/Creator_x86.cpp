@@ -51,8 +51,7 @@ void Creator_x86::visitClsDef(ClsDef* t) {} //abstract class
 void Creator_x86::visitBlk(Blk* t) {} //abstract class
 void Creator_x86::visitStmt(Stmt* t) {} //abstract class
 void Creator_x86::visitItem(Item* t) {} //abstract class
-void Creator_x86::visitStructuredIdent(StructuredIdent* t) {} //abstract class
-void Creator_x86::visitArrayIndex(ArrayIndex* t) {} //abstract class
+void Creator_x86::visitStructuredIdent(StructuredIdent* t) {} //abs
 void Creator_x86::visitType(Type* t) {} //abstract class
 void Creator_x86::visitExpr(Expr* t) {} //abstract class
 void Creator_x86::visitAddOp(AddOp* t) {} //abstract class
@@ -390,9 +389,18 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
     }
 }
 
+void Creator_x86::visitObjectIdent(ObjectIdent *objectident)
+{
+    //XXX:
+  /* Code For ObjectIdent Goes Here */
+
+  visitIdent(objectident->ident_);
+
+}
+
 void Creator_x86::visitTableVal(TableVal *tableval)
 {
-    visitIdent(tableval->ident_);
+    // TODO:
     this->instruction_manager.push_ESI();
     std::string ecx_var_name(Creator_x86::named_temp_on_stack_prefix);
     ecx_var_name += "foreach ECX";  // save ECX in case of neasted use
@@ -400,7 +408,6 @@ void Creator_x86::visitTableVal(TableVal *tableval)
     esi_var_name += "foreach ESI"; // IDENT reference
     this->env.add_variable(this->fr_env.global_int_type, ecx_var_name); // loop cond
     // In current version only one dimension arrays
-    tableval->listarrayindex_->accept(this);
     // because in first value of array is length
     this->instruction_manager.add_to_ESI(4); // size of array
     this->instruction_manager.pop_add_to_ESI();
@@ -416,11 +423,6 @@ void Creator_x86::visitSelfIdent(SelfIdent *selfident)
     this->instruction_manager.add_to_ESI_val_address(v->position);
     this->current_var_type = v->type;
     this->current_var_on_stack = false;
-}
-
-void Creator_x86::visitExprIndex(ExprIndex *exprindex)
-{
-    exprindex->expr_->accept(this);
 }
 
 void Creator_x86::visitClass(Class *_class)
@@ -763,14 +765,6 @@ void Creator_x86::visitListStmt(ListStmt* liststmt)
 void Creator_x86::visitListItem(ListItem* listitem)
 {
     for (ListItem::iterator i = listitem->begin() ; i != listitem->end() ; ++i)
-    {
-        (*i)->accept(this);
-    }
-}
-
-void Creator_x86::visitListArrayIndex(ListArrayIndex* listarrayindex)
-{
-    for (ListArrayIndex::iterator i = listarrayindex->begin() ; i != listarrayindex->end() ; ++i)
     {
         (*i)->accept(this);
     }

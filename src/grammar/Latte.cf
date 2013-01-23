@@ -47,15 +47,13 @@ separator nonempty Item "," ;
 
 SingleIdent.    StructuredIdent ::= Ident ;
 
-TableVal.       StructuredIdent ::= Ident "[" [ArrayIndex] "]" ;
+ObjectIdent.    StructuredIdent ::= Ident "." ;
 
-SelfIdent.      StructuredIdent ::= "self" ;
+TableVal.       StructuredIdent ::= "[" Expr "]" ;
 
-ExprIndex.  ArrayIndex ::= Expr ;
+SelfIdent.      StructuredIdent ::= "self" "." ;
 
-separator nonempty ArrayIndex "][" ;
-
-separator nonempty StructuredIdent "." ;
+separator nonempty StructuredIdent "" ;
 
 StmAss.     Stmt ::= [StructuredIdent] "=" Expr  ";" ;
 

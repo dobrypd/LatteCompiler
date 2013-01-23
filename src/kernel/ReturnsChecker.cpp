@@ -39,7 +39,6 @@ void ReturnsChecker::visitBlk(Blk* t) {} //abstract class
 void ReturnsChecker::visitStmt(Stmt* t) {} //abstract class
 void ReturnsChecker::visitItem(Item* t) {} //abstract class
 void ReturnsChecker::visitStructuredIdent(StructuredIdent* t) {} //abstract class
-void ReturnsChecker::visitArrayIndex(ArrayIndex* t) {} //abstract class
 void ReturnsChecker::visitType(Type* t) {} //abstract class
 void ReturnsChecker::visitExpr(Expr* t) {} //abstract class
 void ReturnsChecker::visitAddOp(AddOp* t) {} //abstract class
@@ -322,13 +321,18 @@ void ReturnsChecker::visitSingleIdent(SingleIdent *singleident)
 
 }
 
+void ReturnsChecker::visitObjectIdent(ObjectIdent *objectident)
+{
+    //XXX:
+  /* Code For ObjectIdent Goes Here */
+
+  visitIdent(objectident->ident_);
+
+}
+
 void ReturnsChecker::visitTableVal(TableVal *tableval)
 {
-    /* Code For TableVal Goes Here */
-    /* Latte++ */
-
-    visitIdent(tableval->ident_);
-    tableval->listarrayindex_->accept(this);
+    tableval->expr_->accept(this);
 
 }
 
@@ -336,15 +340,6 @@ void ReturnsChecker::visitSelfIdent(SelfIdent *selfident)
 {
   /* Code For SelfIdent Goes Here */
 
-
-}
-
-void ReturnsChecker::visitExprIndex(ExprIndex *exprindex)
-{
-    /* Code For ExprIndex Goes Here */
-    /* Latte++ */
-
-    exprindex->expr_->accept(this);
 
 }
 
@@ -730,15 +725,6 @@ void ReturnsChecker::visitListStmt(ListStmt* liststmt)
 void ReturnsChecker::visitListItem(ListItem* listitem)
 {
     for (ListItem::iterator i = listitem->begin() ; i != listitem->end() ; ++i)
-    {
-        (*i)->accept(this);
-    }
-}
-
-void ReturnsChecker::visitListArrayIndex(ListArrayIndex* listarrayindex)
-{
-    /* Latte++ */
-    for (ListArrayIndex::iterator i = listarrayindex->begin() ; i != listarrayindex->end() ; ++i)
     {
         (*i)->accept(this);
     }
