@@ -299,13 +299,9 @@ void ReturnsChecker::visitSingleIdent(SingleIdent *singleident)
 
 }
 
-void ReturnsChecker::visitObjectIdent(ObjectIdent *objectident)
+void ReturnsChecker::visitArrayIdent(ArrayIdent *tableval)
 {
-    visitIdent(objectident->ident_);
-}
-
-void ReturnsChecker::visitTableVal(TableVal *tableval)
-{
+    visitIdent(tableval->ident_);
     tableval->expr_->accept(this);
 }
 

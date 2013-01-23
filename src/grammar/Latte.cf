@@ -48,6 +48,8 @@ separator nonempty Item "," ;
 
 SingleIdent.    StructuredIdent ::= Ident ;
 
+ArrayIdent.     StructuredIdent ::= Ident "[" Expr "]" ;
+
 SelfIdent.      StructuredIdent ::= "self" ;
 
 separator nonempty StructuredIdent "."  ;
@@ -98,8 +100,6 @@ TType.     Type ::= Type "[" "]" ;
 -- Expressions ---------------------------------------------
 
 EVar.      Expr6 ::= [StructuredIdent] ;
-
-EArrVar.   Expr6 ::= [StructuredIdent] "[" Expr "]" ;
 
 ELitInt.   Expr6 ::= Integer ;
 

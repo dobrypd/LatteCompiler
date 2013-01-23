@@ -84,7 +84,9 @@ std::string ident_to_string(ListStructuredIdent* ident_list)
             SingleIdent* si = dynamic_cast<SingleIdent*>(*it);
             identifier += si->ident_;
         }
-        else if (dynamic_cast<TableVal*>(*it) != 0) {
+        else if (dynamic_cast<ArrayIdent*>(*it) != 0) {
+            ArrayIdent* ai = dynamic_cast<ArrayIdent*>(*it);
+            identifier += ai->ident_;
             identifier += "[]";
         }
     }

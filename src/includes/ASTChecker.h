@@ -80,6 +80,7 @@ public:
     void visitStmInitArray(StmInitArray* p);
     void visitStmInitObj(StmInitObj* p);
     void visitSingleIdent(SingleIdent* p);
+    void visitArrayIdent(ArrayIdent* p);
     void visitSelfIdent(SelfIdent* p);
     void visitStmAss(StmAss* p);
     void visitStmAssArr(StmAssArr* p);
@@ -100,7 +101,6 @@ public:
     void visitVoid(Void* p);
     void visitTType(TType* p);
     void visitEVar(EVar* p);
-    void visitEArrVar(EArrVar* p);
     void visitELitInt(ELitInt* p);
     void visitELitTrue(ELitTrue* p);
     void visitELitFalse(ELitFalse* p);

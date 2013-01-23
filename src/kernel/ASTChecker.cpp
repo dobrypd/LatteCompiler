@@ -601,45 +601,10 @@ void ASTChecker::visitSingleIdent(SingleIdent *singleident)
     }
 }
 
-void ASTChecker::visitObjectIdent(ObjectIdent *objectident)
-{
-    this->last_line_number = objectident->line_number;
-    visitIdent(objectident->ident_);
-
-    if (this->ident_type == 0){
-        Environment::VarInfoPtr var = this->env.get_variable(objectident->ident_);
-        if (!var) {
-            std::string msg = "cannot find object `";
-            msg += objectident->ident_;
-            msg += "`";
-            this->error_handler.error(objectident->line_number, msg);
-        } else {
-          this->ident_type = var->type;
-        }
-    } else if (!check_is<Class*>(this->ident_type)) {
-        std::string msg = "cannot get field of non class type ";
-        msg += type_pretty_print(this->ident_type);
-        this->error_handler.error(objectident->line_number, msg);
-    } else {
-        Class* my_cls = dynamic_cast<Class*>(this->ident_type);
-        Environment::VarInfoPtr var = this->env.get_field(
-                objectident->ident_, my_cls->ident_);
-        if (!var) {
-            std::string msg = "cannot find field `";
-            msg += objectident->ident_;
-            msg += "` in class chain (begins from class `";
-            msg += my_cls->ident_;
-            msg += "`)";
-            this->error_handler.error(objectident->line_number, msg);
-        } else {
-            this->ident_type = var->type;
-        }
-    }
-}
-
-void ASTChecker::visitTableVal(TableVal *tableval)
+void ASTChecker::visitArrayIdent(ArrayIdent * tableval)
 {
     this->last_line_number = tableval->line_number;
+    // XXX
     if (!check_is<TType*>(this->ident_type)) {
         std::string msg = "cannot get array index from not iterable type `";
         msg += type_pretty_print(this->ident_type);

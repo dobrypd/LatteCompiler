@@ -389,16 +389,7 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
     }
 }
 
-void Creator_x86::visitObjectIdent(ObjectIdent *objectident)
-{
-    //XXX:
-  /* Code For ObjectIdent Goes Here */
-
-  visitIdent(objectident->ident_);
-
-}
-
-void Creator_x86::visitTableVal(TableVal *tableval)
+void Creator_x86::visitArrayIdent(ArrayIdent * tableval)
 {
     // TODO:
     this->instruction_manager.push_ESI();
