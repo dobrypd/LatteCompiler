@@ -107,7 +107,8 @@ public:
     void push_literal(int value);
     void pop_to_addr_from_ESI();
     void push_ESI();
-    void pop_ESI()
+    void pop_ESI();
+    void push_EAX();
 
     // Incrementation
     void increment_in_ESI(int inc_by); // inc in address in ESI

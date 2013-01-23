@@ -27,7 +27,9 @@ private:
     Type* last_declaration_type;
     Type* last_type;  // For expressions.
     Type* last_function_type;
-    ListStructuredIdent* last_function_ident;
+    Type* ident_type; // For idents list.
+    std::string* last_function_ident;
+    std::string* last_class_ident;
     std::vector<Environment::VarInfoPtr>::const_iterator last_arguments_iterator;
     std::vector<Environment::VarInfoPtr>::const_iterator last_arguments_end;
 
@@ -40,6 +42,8 @@ private:
     void check_type(ListStructuredIdent* i1, Type* t1, ListStructuredIdent* i2, Type* t2, int line_number);
     std::string args_pretty_print(std::vector<Environment::VarInfoPtr>::const_iterator it,
             std::vector<Environment::VarInfoPtr>::const_iterator end);
+
+    bool is_subclass(Class* base, Class* maybe_inher);
 
 public:
     ASTChecker(ErrorHandler& error_handler, Environment& env, Ident& pr_name);

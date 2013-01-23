@@ -26,6 +26,7 @@ void Creator_x86::bool_expr_to_stack(int label_t, int label_f)
 }
 
 const char* Creator_x86::self_name = "self";
+const char* Creator_x86::v_table_name = "__vtable_ptr";
 const char* Creator_x86::named_temp_on_stack_prefix = "#_TEMP__ON__STACK_#";
 
 std::string Creator_x86::method_ident(std::string& class_name,
@@ -40,7 +41,6 @@ Creator_x86::Creator_x86(InstructionManager& instruction_manager,
         fr_env(frontend_environment),
         next_label(1)
 {
-
 }
 
 
@@ -115,6 +115,7 @@ void Creator_x86::visitMethodDef(MethodDef *methoddef)
     this->instruction_manager.function_prologue();
     this->env.prepare();
     this->env.new_fun();
+    // pointer to vtable'll be in in object - (get it by self!).
     this->env.add_obj(Creator_x86::self_name,
             this->fr_env.get_class(this->last_class_name));
     // Then add arguments.
@@ -494,6 +495,7 @@ void Creator_x86::visitELitNull(ELitNull *elitnull)
 
 void Creator_x86::visitEApp(EApp *eapp)
 {
+    std::cout << "funciton " << eapp->ident_ <<  " application" << std::endl;
     // arguments
     // TODO: vtable calls
     // TODO: last in this list is function application.
@@ -508,13 +510,13 @@ void Creator_x86::visitEApp(EApp *eapp)
 //    }
 //
 //    JVM << ")" << this->type_to_jvm_type(fun->ret_type, true) << endl;
-//    if (!frontend::check_is<Void *>(fun->ret_type))
-//        this->current_function_stack_size += 1;
-//    this->last_type = fun->ret_type;
-//    this->e_was_rel = false;
+    //Environment::
+    //this->last_type = fun->ret_type;
+    //this->e_was_rel = false;
 
     //Block::instr_ptr_t call(new x86_Call(get_from_vtable(eapp->liststructuredident_)));
     //this->instruction_manager.add(call);
+    this->instruction_manager.push_EAX();
 }
 
 void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
@@ -522,10 +524,10 @@ void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
   /* Code For EMethodApp Goes Here */
 
     emethodapp->liststructuredident_->accept(this);
-    frontend::Environment::ClsInfoPtr cls =
-        this->fr_env.get_class((dynamic_cast<Class*>(this->last_type))
-                ->ident_);
-    visitIdent(emethodapp->ident_);
+//    frontend::Environment::ClsInfoPtr cls =
+//        this->fr_env.get_class((dynamic_cast<Class*>(this->last_type))
+//                ->ident_);
+//    //visitIdent(emethodapp->ident_);
     emethodapp->listexpr_->accept(this);
 }
 

@@ -194,8 +194,6 @@ int check_file(FILE* input, const char* file_name,
     frontend::FunctionLoader function_loader(file_error_handler, env);
     function_loader.check(ast_root);
 
-    /*
-
     if (!file_error_handler.has_errors()){
         // Type check (without returns).
         Ident pr_name(file_name);
@@ -208,11 +206,6 @@ int check_file(FILE* input, const char* file_name,
         frontend::ReturnsChecker returns_checker(file_error_handler, env);
         returns_checker.check(ast_root);
     }
-
-     *
-     *
-     *
-     */
 
     // End of semantic check, typecheck and tree optimization.
     if (file_error_handler.has_errors()){

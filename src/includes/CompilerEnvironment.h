@@ -24,7 +24,7 @@ class CompilerEnvironment
 public:
     typedef struct {
         Type* type;
-        int position; // Difference between current function EBP.
+        int position; // Difference between current function and EBP.
         bool on_stack; // Is simple type.
     } var_info;
     typedef boost::shared_ptr<var_info> VarInfoPtr;
@@ -49,6 +49,7 @@ public:
     void add_variable(Type* type, std::string name);
     void add_obj(std::string obj_name, frontend::Environment::ClsInfoPtr cls);
     void add_array(Type* type, std::string name);
+    void add_vtable();
 
     VarInfoPtr get_variable(std::string& name);
 

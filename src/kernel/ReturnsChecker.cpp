@@ -429,7 +429,7 @@ void ReturnsChecker::visitEMethodApp(EMethodApp *emethodapp)
   /* Code For EMethodApp Goes Here */
 
     emethodapp->liststructuredident_->accept(this);
-    visitIdent(emethodapp->ident_);
+    //visitIdent(emethodapp->ident_);
     emethodapp->listexpr_->accept(this);
 }
 

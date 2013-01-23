@@ -57,6 +57,7 @@ private:
     void bool_expr_to_stack(int label_t, int label_f);
 
     static const char* self_name;
+    static const char* v_table_name;
     static const char* named_temp_on_stack_prefix;
 
     static std::string method_ident(std::string& class_name,

@@ -50,18 +50,6 @@ void FunctionLoader::check(Visitable* v)
         // Log what was added and checked.
         std::cout << "Function loader finished with environment:" << std::endl;
         std::cout << std::endl;
-        std::cout << "Variables: (shouldn't be any):" << std::endl;
-        for (std::vector<Environment::MapPtr>::iterator m_it =
-                this->env.get_env_v_it_begin();
-                m_it != this->env.get_env_v_it_end();
-                m_it++) {
-            for (Environment::MapType::iterator it = (*m_it)->begin();
-                    it != (*m_it)->end(); it++) {
-                std::cout << "\t" << type_pretty_print(it->second->type) << " "
-                        << it->first << std::endl;
-            }
-
-        }
         std::cout << "Functions:" << std::endl;
         for (std::map<std::string, Environment::FunInfoPtr>::iterator it =
                 this->env.get_env_f_begin(); it != this->env.get_env_f_end();
@@ -205,18 +193,22 @@ void FunctionLoader::visitMethodDef(MethodDef *methoddef)
 void FunctionLoader::visitFieldDef(FieldDef *fielddef)
 {
     Environment::ClsInfoPtr cls = this->env.get_class(this->last_cls_name);
-    for (Environment::lat_class::fields_t::iterator it = cls->fields.begin();
-            it != cls->fields.end(); it++) {
-        if (it->first == fielddef->ident_) {
-            std::string comunicate;
-            comunicate += "function `";
-            comunicate += fielddef->ident_;
-            comunicate += "` already declared in class `";
-            comunicate += this->last_cls_name;
-            comunicate += "`.";
-            this->error_handler.error(fielddef->type_->line_number, comunicate);
-            return;
+
+    while(cls) {
+        for (Environment::lat_class::fields_t::iterator it = cls->fields.begin();
+                it != cls->fields.end(); it++) {
+            if (it->first == fielddef->ident_) {
+                std::string comunicate;
+                comunicate += "function `";
+                comunicate += fielddef->ident_;
+                comunicate += "` already declared in class `";
+                comunicate += this->last_cls_name;
+                comunicate += "`.";
+                this->error_handler.error(fielddef->type_->line_number, comunicate);
+                return;
+            }
         }
+        cls = cls->lat_cls_parent;
     }
 
     this->env.add_field_to_cls(this->last_cls_name, fielddef->type_,

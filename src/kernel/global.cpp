@@ -75,6 +75,9 @@ bool operator==(Type & t1, Type & t2)
 std::string ident_to_string(ListStructuredIdent* ident_list)
 {
     std::string identifier;
+    if (ident_list == 0)
+        return "type evaluation";
+
     for (ListStructuredIdent::iterator it = ident_list->begin();
             it != ident_list->end(); it++) {
         if (it != ident_list->begin())

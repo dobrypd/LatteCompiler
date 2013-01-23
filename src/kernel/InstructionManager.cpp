@@ -399,6 +399,12 @@ void InstructionManager::pop_ESI()
     this->add(instr);
 }
 
+void push_EAX()
+{
+    Block::instr_ptr_t instr(new instruction::Push(arg(REGISTER, EAX)));
+    this->add(instr);
+}
+
 void InstructionManager::dereference_var_to_var(int var_1_pos, int var_2_pos)
 {
     Block::instr_ptr_t mov1(
