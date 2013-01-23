@@ -37,6 +37,8 @@ private:
     Int literal_int;
     Bool literal_bool;
     Str literal_string;
+    Class literal_class;
+    static std::string null_class;
 
     void add_variable(Type* t, Ident& ident, int line_number);
     void check_type(ListStructuredIdent* i1, Type* t1, ListStructuredIdent* i2, Type* t2, int line_number);

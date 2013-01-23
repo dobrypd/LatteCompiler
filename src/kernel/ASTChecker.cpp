@@ -15,6 +15,9 @@
 namespace frontend
 {
 
+
+std::string ASTChecker::null_class("null");
+
 ASTChecker::ASTChecker(ErrorHandler& error_handler, Environment& env, Ident& pr_name)
     : error_handler(error_handler), env(env), last_line_number(0),
       error_flag(false), last_declaration_type(0), last_type(0),
@@ -552,6 +555,7 @@ void ASTChecker::visitStmInitObj(StmInitObj *stminitobj)
 
 void ASTChecker::visitSingleIdent(SingleIdent *singleident)
 {
+    this->last_line_number = singleident->line_number;
     visitIdent(singleident->ident_);
     if (this->ident_type == 0){
         Environment::VarInfoPtr var = this->env.get_variable(singleident->ident_);
@@ -596,6 +600,7 @@ void ASTChecker::visitSingleIdent(SingleIdent *singleident)
 
 void ASTChecker::visitObjectIdent(ObjectIdent *objectident)
 {
+    this->last_line_number = objectident->line_number;
     visitIdent(objectident->ident_);
 
     if (this->ident_type == 0){
@@ -631,6 +636,7 @@ void ASTChecker::visitObjectIdent(ObjectIdent *objectident)
 
 void ASTChecker::visitTableVal(TableVal *tableval)
 {
+    this->last_line_number = tableval->line_number;
     if (!check_is<TType*>(this->ident_type)) {
         std::string msg = "cannot get array index from not iterable type `";
         msg += type_pretty_print(this->ident_type);
@@ -638,12 +644,32 @@ void ASTChecker::visitTableVal(TableVal *tableval)
         this->error_handler.error(tableval->line_number, msg);
         return;
     }
+
+    this->last_type = 0;
     tableval->expr_->accept(this);
 
+    if (!check_is<Int*>(this->last_type))
+    {
+        std::string msg = "evaluation of array index ";
+        msg += " with type ";
+        msg += type_pretty_print(this->last_type);
+        msg += " cannot be used in this context, integer should.";
+        this->error_handler.error(tableval->expr_->line_number, msg);
+    }
+
+    this->ident_type = (dynamic_cast<TType*>(this->ident_type))->type_;
 }
 
 void ASTChecker::visitSelfIdent(SelfIdent *selfident)
 {
+    this->last_line_number = selfident->line_number;
+    if (this->ident_type != 0 ) {
+        std::string msg = "wrong field, self should be applied first ";
+        this->error_handler.error(selfident->line_number, msg);
+    } else {
+        this->literal_class.ident_ = *this->last_class_ident;
+        this->ident_type = &this->literal_class;
+    }
 }
 
 
@@ -670,28 +696,14 @@ void ASTChecker::visitVoid(Void* void_field)
 
 void ASTChecker::visitTType(TType *ttype)
 {
-  /* Latte++ */
-
     ttype->type_->accept(this);
-
 }
 
 void ASTChecker::visitEVar(EVar* evar)
 {
-//    this->last_line_number = evar->line_number;
-//    evar->liststructuredident_->accept(this);
-//    Environment::VarInfoPtr var_info =
-//            this->env.get_variable(evar->liststructuredident_);
-//    if (!var_info) {
-//        std::string msg = "variable `";
-//        msg += ident_to_string(evar->liststructuredident_);
-//        msg += "` used before declaration.";
-//        this->error_handler.error(evar->line_number, msg);
-//    }
-//    else
-//    {
-//        this->last_type = var_info->type;
-//    }
+    this->last_line_number = evar->line_number;
+    this->ident_type = 0;
+    evar->liststructuredident_->accept(this);
 }
 
 void ASTChecker::visitELitInt(ELitInt* elitint)
@@ -715,58 +727,102 @@ void ASTChecker::visitELitFalse(ELitFalse* elitfalse)
 
 void ASTChecker::visitELitNull(ELitNull *elitnull)
 {
-  /* Code For ELitNull Goes Here */
-
-
+    this->last_line_number = elitnull->line_number;
+    this->literal_class.ident_ = this->null_class;
+    this->last_type = &(this->literal_class);
 }
 
 void ASTChecker::visitEApp(EApp* eapp)
 {
-    //visitIdent(eapp->ident_);
-//    this->last_line_number = eapp->line_number;
-//    eapp->liststructuredident_->accept(this);
-//    Environment::FunInfoPtr fun_ptr =
-//            this->env.get_function(eapp->liststructuredident_);
-//    // Check if function exists.
-//    if (!fun_ptr)
-//    {
-//        std::string msg = "function `";
-//        msg += ident_to_string(eapp->liststructuredident_);
-//        msg += "` does not exist.";
-//        this->error_handler.error(eapp->line_number, msg);
-//        return;
-//    }
-//
-//    // Check arguments.
-//    this->last_arguments_iterator = fun_ptr->arguments.begin();
-//    this->last_arguments_end = fun_ptr->arguments.end();
-//    eapp->listexpr_->accept(this);
-//    if ((this->last_arguments_iterator != this->last_arguments_end) || this->error_flag)
-//    {
-//        std::string msg = "function `";
-//        msg += ident_to_string(eapp->liststructuredident_);
-//        msg += "` need ";
-//        std::ostringstream ss;
-//        ss << fun_ptr->arguments.size();
-//        msg += ss.str();
-//        msg += " arguments: ";
-//        msg += this->args_pretty_print(fun_ptr->arguments.begin(), fun_ptr->arguments.end());
-//        this->error_handler.error(eapp->line_number, msg);
-//        this->error_flag = false;
-//    }
-//    // Args checked.
+    visitIdent(eapp->ident_);
+    this->last_line_number = eapp->line_number;
+    Environment::FunInfoPtr fun_ptr =
+            this->env.get_function(eapp->ident_);
+    // Check if function exists.
+    if (!fun_ptr)
+    {
+        std::string msg = "function `";
+        msg += eapp->ident_;
+        msg += "` does not exist.";
+        this->error_handler.error(eapp->line_number, msg);
+        return;
+    }
 
-//    this->last_type = fun_ptr->ret_type;
+    // Check arguments.
+    this->last_arguments_iterator = fun_ptr->arguments.begin();
+    this->last_arguments_end = fun_ptr->arguments.end();
+    eapp->listexpr_->accept(this);
+    if ((this->last_arguments_iterator != this->last_arguments_end) || this->error_flag)
+    {
+        std::string msg = "function `";
+        msg += eapp->ident_;
+        msg += "` need ";
+        msg += int2str(fun_ptr->arguments.size());
+        msg += " arguments: ";
+        msg += this->args_pretty_print(fun_ptr->arguments.begin(), fun_ptr->arguments.end());
+        this->error_handler.error(eapp->line_number, msg);
+        this->error_flag = false;
+    }
+    // Args checked.
+
+    this->last_type = fun_ptr->ret_type;
 }
 
 void ASTChecker::visitEMethodApp(EMethodApp *emethodapp)
 {
-  /* Code For EMethodApp Goes Here */
+    this->ident_type = 0;
+    for (ListStructuredIdent::iterator i = emethodapp->liststructuredident_->begin() ; i != emethodapp->liststructuredident_->end() - 1; ++i)
+    {
+        (*i)->accept(this);
+    }
 
-    emethodapp->liststructuredident_->accept(this);
-    //visitIdent(emethodapp->ident_);
+    SingleIdent* sid = dynamic_cast<SingleIdent*>(emethodapp->liststructuredident_->back());
+    if (sid == 0) {
+        std::string msg = "application works only to methods or functions";
+        this->error_handler.error(emethodapp->line_number, msg);
+        return;
+    }
+
+    Class* cls_t = dynamic_cast<Class*>(this->ident_type);
+    if (cls_t == 0) {
+        std::string msg = "methods can be applied only on objects";
+        this->error_handler.error(emethodapp->line_number, msg);
+        return;
+    }
+
+    // apply sid on cls object
+
+    Environment::ClsInfoPtr cls = this->env.get_class(cls_t->ident_);
+    Environment::FunInfoPtr fun = this->env.find_method(sid->ident_, cls_t->ident_);
+
+    if (!fun) {
+        std::string msg = "cannot find method `";
+        msg += sid->ident_;
+        msg += "` in class chain starting from `";
+        msg += cls_t->ident_;
+        msg += "`";
+        this->error_handler.error(emethodapp->line_number, msg);
+        return;
+    }
+
+    // Check arguments.
+    this->last_arguments_iterator = fun->arguments.begin();
+    this->last_arguments_end = fun->arguments.end();
     emethodapp->listexpr_->accept(this);
+    if ((this->last_arguments_iterator != this->last_arguments_end) || this->error_flag)
+    {
+        std::string msg = "method `";
+        msg += sid->ident_;
+        msg += "` need ";
+        msg += int2str(fun->arguments.size());
+        msg += " arguments: ";
+        msg += this->args_pretty_print(fun->arguments.begin(), fun->arguments.end());
+        this->error_handler.error(emethodapp->line_number, msg);
+        this->error_flag = false;
+    }
+    // Args checked.
 
+    this->last_type = fun->ret_type;
 }
 
 void ASTChecker::visitEString(EString* estring)
@@ -806,11 +862,14 @@ void ASTChecker::visitNot(Not* not_field)
 
 void ASTChecker::visitEDynamicCast(EDynamicCast *edynamiccast)
 {
-    /* Latte++ */
-
     visitIdent(edynamiccast->ident_);
+    this->last_type = 0;
     edynamiccast->expr_->accept(this);
-
+    Class* cls = dynamic_cast<Class*>(this->last_type);
+    if ((cls == 0) or (cls->ident_ != this->null_class)){
+        std::string msg = "only possibility is to cast null to class";
+        this->error_handler.error(edynamiccast->line_number, msg);
+    }
 }
 
 void ASTChecker::visitEMul(EMul* emul)
@@ -819,13 +878,10 @@ void ASTChecker::visitEMul(EMul* emul)
     this->last_type = 0;
     emul->expr_1->accept(this);
     Type* type1 = this->last_type;
-    Ident left("left side of * / %");
     emul->mulop_->accept(this);
     emul->expr_2->accept(this);
-    Ident right("right side of * / %");
     Type* type2 = this->last_type;
-    //this->check_type(left, type1, right, type2, emul->line_number);
-    //TODO: type check
+    this->check_type(0, type1, 0, type2, emul->line_number);
     if ((!(check_is<Int *>(type1))) || (!(check_is<Int *>(type2))))
     {
         std::string msg = "* / % should be only applied to numbers not [";
@@ -844,13 +900,10 @@ void ASTChecker::visitEAdd(EAdd* eadd)
     this->last_type = 0;
     eadd->expr_1->accept(this);
     Type* type1 = this->last_type;
-    Ident left("left side of + -");
     eadd->addop_->accept(this);
     eadd->expr_2->accept(this);
-    Ident right("right side of + -");
     Type* type2 = this->last_type;
-    //this->check_type(left, type1, right, type2, eadd->line_number);
-    //TODO: type check
+    this->check_type(0, type1, 0, type2, eadd->line_number);
     if (((!(check_is<Int *>(type1))) || (!(check_is<Int *>(type2))))
         && (! ( check_is<Str *>(type1) && check_is<Str *>(type2) && check_is<Plus *>(eadd->addop_)) )
         )
@@ -873,13 +926,10 @@ void ASTChecker::visitERel(ERel* erel)
     this->last_type = 0;
     erel->expr_1->accept(this);
     Type* type1 = this->last_type;
-    Ident left("left side of relation");
     erel->relop_->accept(this);
     erel->expr_2->accept(this);
-    Ident right("right side of relation");
     Type* type2 = this->last_type;
-    //this->check_type(left, type1, right, type2, erel->line_number);
-    //TOOD: type check
+    this->check_type(0, type1, 0, type2, erel->line_number);
     if (    ((!(check_is<Int *>(type1))) || (!(check_is<Int *>(type2)))) &&
             ((!(check_is<Bool *>(type1))) || (!(check_is<Bool *>(type2))))
             )
@@ -900,12 +950,9 @@ void ASTChecker::visitEAnd(EAnd* eand)
     this->last_type = 0;
     eand->expr_1->accept(this);
     Type* type1 = this->last_type;
-    Ident left("left side of &&");
     eand->expr_2->accept(this);
-    Ident right("right side of &&");
     Type* type2 = this->last_type;
-    // this->check_type(left, type1, right, type2, eand->line_number);
-    // TODO: type check
+    this->check_type(0, type1, 0, type2, eand->line_number);
     if ((!(check_is<Bool *>(type1))) || (!(check_is<Bool *>(type2))))
     {
         std::string msg = "&& should be only applied to booleans not [";
@@ -924,12 +971,9 @@ void ASTChecker::visitEOr(EOr* eor)
     this->last_type = 0;
     eor->expr_1->accept(this);
     Type* type1 = this->last_type;
-    Ident left("left side of ||");
     eor->expr_2->accept(this);
-    Ident right("right side of ||");
     Type* type2 = this->last_type;
-    //this->check_type(left, type1, right, type2, eor->line_number);
-    // TODO: type check
+    this->check_type(0, type1, 0, type2, eor->line_number);
     if ((!(check_is<Bool *>(type1))) || (!(check_is<Bool *>(type2))))
     {
         std::string msg = "|| should be only applied to booleans and numbers not [";
@@ -1040,7 +1084,6 @@ void ASTChecker::visitListItem(ListItem* listitem)
 
 void ASTChecker::visitListStructuredIdent(ListStructuredIdent* liststructuredident)
 {
-    /* Latte++ */
     for (ListStructuredIdent::iterator i = liststructuredident->begin() ; i != liststructuredident->end() ; ++i)
     {
         (*i)->accept(this);
@@ -1052,9 +1095,7 @@ void ASTChecker::visitListStructuredIdent(ListStructuredIdent* liststructuredide
  */
 void ASTChecker::visitListExpr(ListExpr* listexpr)
 {
-    Ident fun_arg("function ");
-    //fun_arg += ident_to_string(this->last_function_ident);
-    fun_arg += " argument";
+    this->error_flag = false;
 
     int n = 0;
     std::vector<Environment::VarInfoPtr>::const_iterator arguments_iterator = this->last_arguments_iterator;
@@ -1076,8 +1117,8 @@ void ASTChecker::visitListExpr(ListExpr* listexpr)
 
         (*i)->accept(this);
 
-        //this->check_type(fun_arg, (*(arguments_iterator))->type, arg_no, this->last_type, this->last_line_number);
-        // TODO: check type
+        this->check_type(0, (*(arguments_iterator))->type, 0, this->last_type,
+                this->last_line_number);
         arguments_iterator++;
     }
     this->last_arguments_iterator = arguments_iterator;
