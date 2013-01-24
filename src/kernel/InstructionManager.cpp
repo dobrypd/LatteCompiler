@@ -44,7 +44,7 @@ void Block::add(instr_ptr_t instruction)
 }
 
 
-InstructionManager::InstructionManager(frontend::Environment& fr_env) : fr_env(fr_env)
+InstructionManager::InstructionManager()
 {
     block_ptr_t block_0(new Block(""));
     this->blocks.push_back(block_0);
@@ -159,14 +159,20 @@ void InstructionManager::pop_to_EAX()
     this->add(ret_value);
 }
 
-void InstructionManager::alloc_array(Type *type)
+
+// Arrays will be inited always with zeros (in case of non primitives it means
+// that it'll be filled with nulls!)
+// Got len on top of a stack. Remove from it.
+void InstructionManager::alloc_array()
 {
     // XXX:
+    // DO NOT FORGET ABOUT ARRAY SIZE
 }
 
-void InstructionManager::alloc_object(Type *type)
+void InstructionManager::alloc_object(int fields)
 {
     // XXX:
+    // DO NOT FORGET ABOUT VTABLE
 }
 
 void InstructionManager::add_on_stack()

@@ -12,7 +12,6 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 #include "Absyn.H"
-#include "Environment.h"
 #include "Instruction.h"
 
 namespace backend
@@ -53,11 +52,10 @@ public:
 private:
     blocks_list_t blocks;
     std::vector<std::string> constant_strings;
-    frontend::Environment& fr_env;  // To know information about objects.
 
     int cstr_add(std::string& string);
 public:
-    InstructionManager(frontend::Environment& fr_env);
+    InstructionManager();
 
     list_it_t begin();
     list_it_t end();
@@ -97,8 +95,8 @@ public:
 
     // Allocating:
     void alloc_default(Type* type);
-    void alloc_array(Type* type); // with size  of array on top of the stack, save ptr on EAX
-    void alloc_object(Type* type); // calculate object size by fr_env, save ptr on EAX
+    void alloc_array(); // with size  of array on top of the stack, save ptr on EAX
+    void alloc_object(int fields);
 
     // Stack operations;
     void add_to_ESP(int value);  // value in baits (not bits)!

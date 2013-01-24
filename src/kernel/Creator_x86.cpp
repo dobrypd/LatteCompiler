@@ -40,7 +40,7 @@ Creator_x86::Creator_x86(InstructionManager& instruction_manager,
         frontend::Environment& frontend_environment) :
         instruction_manager(instruction_manager),
         fr_env(frontend_environment),
-        next_label(1)
+        next_label(1), last_class_type("null")
 {
 }
 
@@ -84,6 +84,7 @@ void Creator_x86::visitFnDef(FnDef *fndef)
 void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 {
     this->last_class = this->fr_env.get_class(clsdefnoinher->ident_);
+    this->last_class_type.ident_ = clsdefnoinher->ident_;
     assert(this->last_class);
 
     visitIdent(clsdefnoinher->ident_);
@@ -97,6 +98,7 @@ void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
 {
     this->last_class = this->fr_env.get_class(clsdefinher->ident_1);
+    this->last_class_type.ident_ = clsdefinher->ident_1;
     assert(this->last_class);
 
     visitIdent(clsdefinher->ident_1);
@@ -125,7 +127,7 @@ void Creator_x86::visitMethodDef(MethodDef *methoddef)
     this->env.prepare();
     this->env.new_fun();
     // pointer to vtable'll be in in object - (get it by self!).
-    this->env.add_obj(Creator_x86::self_name, this->last_class);
+    this->env.add_variable(&(this->last_class_type), Creator_x86::self_name);
 
     methoddef->type_->accept(this);
     visitIdent(methoddef->ident_);
@@ -187,24 +189,25 @@ void Creator_x86::visitStmAss(StmAss *stmass)
 
 void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 {
-    this->current_var_on_stack = true;
-    stmassarr->liststructuredident_->accept(this);
-
     stmassarr->type_->accept(this);
     stmassarr->expr_->accept(this);
 
-    this->instruction_manager.alloc_array(stmassarr->type_); // with len on stack
+    this->instruction_manager.alloc_array(); // with len on stack
+
+    this->current_var_on_stack = true;
+    stmassarr->liststructuredident_->accept(this);
     this->instruction_manager.pop_to_addr_from_ESI();
 }
 
 void Creator_x86::visitStmAssObj(StmAssObj* stmassobj)
 {
     this->current_var_on_stack = true;
-
     stmassobj->liststructuredident_->accept(this);
     stmassobj->type_->accept(this);
 
-    this->instruction_manager.alloc_object(stmassobj->type_);
+    this->instruction_manager.alloc_object(this->fr_env.get_class_size(
+            (dynamic_cast<Class*>(stmassobj->type_))->ident_));
+
     this->instruction_manager.pop_to_addr_from_ESI();
 }
 
@@ -224,13 +227,11 @@ void Creator_x86::visitStmDecr(StmDecr *stmdecr)
 
 void Creator_x86::visitStmRet(StmRet *stmret)
 {
-    int label_t = this->next_label++;
-    int label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
+    int label_t = this->last_true_label = this->next_label++;
+    int label_f = this->last_false_label = this->next_label++;
     stmret->expr_->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
-    this->instruction_manager.pop_to_EAX();
+    this->instruction_manager.pop_to_EAX();  // Function calling conventions
     this->instruction_manager.function_epilogue();
 }
 
@@ -241,11 +242,10 @@ void Creator_x86::visitStmVRet(StmVRet *stmvret)
 
 void Creator_x86::visitStmCond(StmCond *stmcond)
 {
-    int label_t = this->next_label++;
-    int label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
-    stmcond->expr_->accept(this);
+    int label_t = this->last_true_label = this->next_label++;
+    int label_f = this->last_false_label = this->next_label++;
+    stmcond->expr_->accept(this);  // TODO: cond jumps optimization
+
     this->instruction_manager.new_block(label_t);
     stmcond->stmt_->accept(this);
     this->instruction_manager.new_block(label_f);
@@ -253,28 +253,29 @@ void Creator_x86::visitStmCond(StmCond *stmcond)
 
 void Creator_x86::visitStmCondElse(StmCondElse *stmcondelse)
 {
-    int label_t = this->next_label++;
-    int label_f = this->next_label++;
+    int label_t = this->last_true_label = this->next_label++;
+    int label_f = this->last_false_label =this->next_label++;
     int label_end = this->next_label++;
-    this->last_false_label = label_f;
-    this->last_true_label = label_t;
-    stmcondelse->expr_->accept(this);
+    stmcondelse->expr_->accept(this);  // TODO: cond jumps optimization
+
     this->instruction_manager.new_block(label_t);
     stmcondelse->stmt_1->accept(this);
+
     this->instruction_manager.jump(label_end);
+
     this->instruction_manager.new_block(label_f);
     stmcondelse->stmt_2->accept(this);
+
     this->instruction_manager.new_block(label_end);
 }
 
 void Creator_x86::visitStmWhile(StmWhile *stmwhile)
 {
     int before_lbl = this->next_label++;
-    int after_lbl = this->next_label++;
-    int block_start = this->next_label++;
+    int after_lbl = this->last_false_label = this->next_label++;
+    int block_start = this->last_true_label = this->next_label++;
+
     this->instruction_manager.new_block(before_lbl);
-    this->last_false_label = after_lbl;
-    this->last_true_label = block_start;
     stmwhile->expr_->accept(this);
     this->instruction_manager.new_block(block_start);
     stmwhile->stmt_->accept(this);
@@ -289,20 +290,24 @@ void Creator_x86::visitStmForeach(StmForeach *stmforeach)
     visitIdent(stmforeach->ident_);
 
     this->env.prepare();
-    this->instruction_manager.push_ECX();
     std::string ecx_var_name(Creator_x86::named_temp_on_stack_prefix);
     ecx_var_name += "foreach ECX";  // save ECX in case of neasted use
     std::string esi_var_name(Creator_x86::named_temp_on_stack_prefix);
     esi_var_name += "foreach ESI"; // IDENT reference
 
-    this->env.add_variable(this->fr_env.global_int_type, ecx_var_name); // loop cond
+    // loop cond
+    this->instruction_manager.push_ECX();
+    this->env.add_variable(this->fr_env.global_int_type, ecx_var_name);
 
+    // ptr to array
     stmforeach->liststructuredident_->accept(this);
     this->instruction_manager.push_ESI();
-    this->env.add_variable(this->fr_env.global_int_type, esi_var_name); // ptr to table
+    this->env.add_variable(this->fr_env.global_int_type, esi_var_name);
 
-    this->instruction_manager.dereference_from_ESI_to_ECX_minus_1(); // size of array - 1
+    // size of array - 1 (iterations)
+    this->instruction_manager.dereference_from_ESI_to_ECX_minus_1();
 
+    // default value as variable from array (make place holder on stack)
     this->instruction_manager.push_literal(0);
     this->env.add_variable(stmforeach->type_, stmforeach->ident_);
     CompilerEnvironment::VarInfoPtr foreach_var_info = this->env.get_variable(
@@ -311,6 +316,7 @@ void Creator_x86::visitStmForeach(StmForeach *stmforeach)
     this->instruction_manager.new_block(start);
     CompilerEnvironment::VarInfoPtr var_info = this->env.get_variable(
             esi_var_name);
+    // in first iteration will omit size of array
     this->instruction_manager.add_to_var(var_info->position, 1);
     this->instruction_manager.dereference_var_to_var(var_info->position,
             foreach_var_info->position);
@@ -344,10 +350,8 @@ void Creator_x86::visitStmInit(StmInit *stminit)
 {
     visitIdent(stminit->ident_);
     this->env.add_variable(this->declaration_type, stminit->ident_);
-    int label_t = this->next_label++;
-    int label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
+    int label_t = this->last_true_label = this->next_label++;
+    int label_f = this->last_false_label = this->next_label++;
     stminit->expr_->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
 }
@@ -356,21 +360,18 @@ void Creator_x86::visitStmInitArray(StmInitArray *stminitarray)
 {
     visitIdent(stminitarray->ident_);
     stminitarray->type_->accept(this);
-    this->env.add_array(stminitarray->type_, stminitarray->ident_);
     stminitarray->expr_->accept(this);
-    this->instruction_manager.alloc_array(stminitarray->type_);
-    // with len on stack
+    this->env.add_variable(this->declaration_type, stminitarray->ident_);
+    this->instruction_manager.alloc_array();
 }
 
 void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)
 {
     visitIdent(stminitobj->ident_);
     stminitobj->type_->accept(this);
-    frontend::Environment::ClsInfoPtr cls =
-            this->fr_env.get_class(
-                    (dynamic_cast<Class*>(stminitobj->type_)->ident_));
-    this->env.add_obj(stminitobj->ident_, cls);
-    this->instruction_manager.alloc_object(stminitobj->type_);
+    this->env.add_variable(this->declaration_type, stminitobj->ident_);
+    this->instruction_manager.alloc_object(this->fr_env.get_class_size(
+            (dynamic_cast<Class*>(stminitobj->type_))->ident_));
 }
 
 void Creator_x86::visitSingleIdent(SingleIdent* singleident)

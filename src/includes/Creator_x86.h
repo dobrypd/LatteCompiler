@@ -35,6 +35,7 @@ private:
 
     // Declarations:
     Type* declaration_type;
+    Class last_class_type;
     ClsInfoPtr last_class;
 
     // Statements:

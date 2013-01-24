@@ -11,7 +11,6 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include "Absyn.H"
-#include "Environment.h"
 
 namespace backend
 {
@@ -46,8 +45,6 @@ public:
     int stack_size();
 
     void add_variable(Type* type, std::string name);
-    void add_obj(std::string obj_name, frontend::Environment::ClsInfoPtr cls);
-    void add_array(Type* type, std::string name);
     void add_vtable();
 
     VarInfoPtr get_variable(std::string& name);
