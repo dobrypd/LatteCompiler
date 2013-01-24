@@ -25,7 +25,7 @@ void Creator_x86::bool_expr_to_stack(int label_t, int label_f)
     this->instruction_manager.new_block(label_end);
 }
 
-const int Creator_x86::words_per_var = 4; // 32
+const int Creator_x86::words_per_var = 4; // 32 = word * 4
 const char* Creator_x86::self_name = "self";
 const char* Creator_x86::v_table_name = "__vtable_ptr";
 const char* Creator_x86::named_temp_on_stack_prefix = "#_TEMP__ON__STACK_#";
@@ -67,6 +67,7 @@ void Creator_x86::visitProgram(Program *program)
 
 void Creator_x86::visitFnDef(FnDef *fndef)
 {
+    this->last_class = ClsInfoPtr();
     this->instruction_manager.new_function_block(fndef->ident_);
     this->instruction_manager.function_prologue();
     this->env.prepare();
@@ -82,21 +83,29 @@ void Creator_x86::visitFnDef(FnDef *fndef)
 
 void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 {
-    this->last_class_name = clsdefnoinher->ident_;
+    this->last_class = this->fr_env.get_class(clsdefnoinher->ident_);
+    assert(this->last_class);
+
     visitIdent(clsdefnoinher->ident_);
-    clsdefnoinher->listclsdef_->accept(this);
 
     // TODO: Create vtable and constructor
+    //this->instruction_manager.new_vtable(clsdefnoinher->ident_, cls);
+
+    clsdefnoinher->listclsdef_->accept(this);
 }
 
 void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
 {
-    this->last_class_name = clsdefinher->ident_1;
+    this->last_class = this->fr_env.get_class(clsdefinher->ident_1);
+    assert(this->last_class);
+
     visitIdent(clsdefinher->ident_1);
     visitIdent(clsdefinher->ident_2);
-    clsdefinher->listclsdef_->accept(this);
 
     // TODO: Create vtable and constructor
+    //this->instruction_manager.new_vtable(clsdefnoinher->ident_, cls);
+
+    clsdefinher->listclsdef_->accept(this);
 
 }
 
@@ -111,21 +120,25 @@ void Creator_x86::visitArgument(Argument *argument)
 void Creator_x86::visitMethodDef(MethodDef *methoddef)
 {
     this->instruction_manager.new_function_block(Creator_x86::method_ident(
-            this->last_class_name, methoddef->ident_));
+            this->last_class->ident, methoddef->ident_));
     this->instruction_manager.function_prologue();
     this->env.prepare();
     this->env.new_fun();
     // pointer to vtable'll be in in object - (get it by self!).
-    this->env.add_obj(Creator_x86::self_name,
-            this->fr_env.get_class(this->last_class_name));
-    // Then add arguments.
+    this->env.add_obj(Creator_x86::self_name, this->last_class);
+
     methoddef->type_->accept(this);
     visitIdent(methoddef->ident_);
+    // Add arguments.
     methoddef->listarg_->accept(this);
+
+    // Code block.
     methoddef->blk_->accept(this);
+
     if (check_is<Void*>(methoddef->type_))
-            this->instruction_manager.function_epilogue(); // TODO: want it?
-    this->env.back(); // ESP will be changed by EBP
+            this->instruction_manager.function_epilogue();
+
+    this->env.back();
 }
 
 void Creator_x86::visitFieldDef(FieldDef *fielddef)
@@ -148,8 +161,8 @@ void Creator_x86::visitStmBStmt(StmBStmt *stmbstmt)
     this->env.prepare();
     stmbstmt->blk_->accept(this);
     int ESP_diff = this->env.back();
-    this->instruction_manager.add_to_ESP(ESP_diff); // cleaning (block)
-    // ESP will be changed by EBP
+    if (ESP_diff > 0) this->instruction_manager.add_to_ESP(ESP_diff);
+    // ESP will be changed by EBP in case of returning from function
 }
 
 void Creator_x86::visitStmDecl(StmDecl *stmdecl)
@@ -161,16 +174,14 @@ void Creator_x86::visitStmDecl(StmDecl *stmdecl)
 
 void Creator_x86::visitStmAss(StmAss *stmass)
 {
-    this->current_var_on_stack = true;
-    int label_t = this->next_label++;
-    int label_f = this->next_label++;
+    int label_t = this->last_true_label = label_t;
+    int label_f = this->last_false_label = label_f;
 
-    stmass->liststructuredident_->accept(this);
-
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
     stmass->expr_->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
+
+    this->current_var_on_stack = true;
+    stmass->liststructuredident_->accept(this);
     this->instruction_manager.pop_to_addr_from_ESI();
 }
 

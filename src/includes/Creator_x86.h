@@ -19,6 +19,7 @@ namespace backend
 class Creator_x86 : public Visitor
 {
 private:
+    typedef frontend::Environment::ClsInfoPtr ClsInfoPtr;
     InstructionManager& instruction_manager;
     CompilerEnvironment env;        // Current env
     frontend::Environment& fr_env;  // Env with all functions / classes
@@ -34,7 +35,7 @@ private:
 
     // Declarations:
     Type* declaration_type;
-    std::string last_class_name;
+    ClsInfoPtr last_class;
 
     // Statements:
     bool current_var_on_stack;
