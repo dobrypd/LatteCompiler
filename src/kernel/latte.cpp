@@ -41,10 +41,10 @@ enum arch_t {x86, x86_64};
 #endif
 
 const char* compiler_executable = "gcc";
-const char* linker_executable = "ld";
+const char* linker_executable = "gcc";  // ld
 
 const char* compiler_flags = "-c";
-const char* linker_flags = "";
+const char* linker_flags = "./lib/runtime.o";
 
 #ifdef _ARCH_x86_64
     const char* compiler_arch_flags = "-m64";
@@ -53,8 +53,8 @@ const char* linker_flags = "";
 #ifdef _ARCH_x86
     const char* compiler_arch_flags = "-m32";
     const char* linker_arch_flags =
-            "-melf_i386 -l:./lib/lib32/libc.a ./lib/lib32/crt?.o";
-    // XXX: better way to link it is by gcc! -m32!!
+//          "-melf_i386 -l:./lib/lib32/libc.a ./lib/lib32/crt?.o";
+            "-m32";
 #endif
 
 

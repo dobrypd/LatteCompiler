@@ -13,7 +13,7 @@ namespace backend
 {
 
 
-const char *Block::ident_prefix = "_L";
+const char *Block::ident_prefix = "._L";
 Block::Block()
 {
 }
@@ -66,6 +66,8 @@ void InstructionManager::write_to_stream(std::ostream& stream)
                 stream << dynamic_cast<instruction::Loop*>((*i_it).get())->str();
             } else  if (check_is<instruction::ConditionJump*>((*i_it).get())) {
                 stream << dynamic_cast<instruction::ConditionJump*>((*i_it).get())->str();
+            } else  if (check_is<instruction::Call*>((*i_it).get())) {
+                stream << dynamic_cast<instruction::Call*>((*i_it).get())->str();
             } else {
                 stream << (*i_it)->str();
             }

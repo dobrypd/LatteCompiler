@@ -57,28 +57,33 @@ Environment::Environment()
     this->print_int_f.reset(new Environment::fun_info);
     print_int_f->ret_type = this->global_void_type;
     print_int_f->is_extern = true;
+    print_int_f->position = -1;
     print_int_f->arguments.push_back(this->arg_int);
     this->env_f["printInt"] = this->print_int_f;
 
     this->print_string_f.reset(new Environment::fun_info);
     print_string_f->ret_type = this->global_void_type;
     print_string_f->is_extern = true;
+    print_string_f->position = -1;
     print_string_f->arguments.push_back(this->arg_str);
     this->env_f["printString"] = this->print_string_f;
 
     this->error_f.reset(new Environment::fun_info);
     error_f->ret_type = this->global_void_type;
     error_f->is_extern = true;
+    error_f->position = -1;
     this->env_f["error"] = this->error_f;
 
     this->read_int_f.reset(new Environment::fun_info);
     read_int_f->ret_type = this->global_int_type;
     read_int_f->is_extern = true;
+    read_int_f->position = -1;
     this->env_f["readInt"] = this->read_int_f;
 
     this->read_string_f.reset(new Environment::fun_info);
     read_string_f->ret_type = this->global_str_type;
     read_string_f->is_extern = true;
+    read_string_f->position = -1;
     this->env_f["readString"] = this->read_string_f;
 }
 

@@ -540,8 +540,9 @@ void Creator_x86::function_call(std::string& ident,
 void Creator_x86::visitEApp(EApp *eapp)
 {
     visitIdent(eapp->ident_);
-    frontend::Environment::FunInfoPtr fun = this->fr_env.get_method(eapp->ident_,
-            this->last_class->ident);
+    frontend::Environment::FunInfoPtr fun;
+    if (this->last_class)
+        fun = this->fr_env.get_method(eapp->ident_, this->last_class->ident);
     if (!fun) fun = this->fr_env.get_function(eapp->ident_);
 
     this->function_call(eapp->ident_, fun, eapp->listexpr_);
