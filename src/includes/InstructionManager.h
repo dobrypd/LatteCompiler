@@ -86,6 +86,7 @@ public:
     // Funciton:
     void function_prologue();
     void function_epilogue();
+    void function_call(std::string ident);
 
     // Op on reg:
     void pop_to_EAX();

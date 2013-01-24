@@ -22,6 +22,7 @@ Environment::FunInfoPtr Environment::create_fun(Type* ret_type, ListArg* args)
     Environment::FunInfoPtr new_function(new Environment::fun_info);
     new_function->ret_type = ret_type;
     new_function->is_extern = false;
+    new_function->position = -1;
 
     for(ListArg::iterator it = args->begin(); it != args->end();it++){
         Environment::VarInfoPtr next_argument(new Environment::var_info);

@@ -144,6 +144,12 @@ void InstructionManager::function_epilogue()
     this->add(restore_esp, restore_ebp, ret);
 }
 
+void InstructionManager::function_call(std::string ident)
+{
+    Block::instr_ptr_t call(new instruction::Call(ident));
+    this->add(call);
+}
+
 void InstructionManager::add_to_ESP(int value)
 {
     if ((debug) and (value == 0))
@@ -172,7 +178,7 @@ void InstructionManager::alloc_array()
 void InstructionManager::alloc_object(int fields)
 {
     // XXX:
-    // DO NOT FORGET ABOUT VTABLE
+    // DO NOT FORGET ABOUT VTABLE (ON THE LAST POSITION)
 }
 
 void InstructionManager::add_on_stack()

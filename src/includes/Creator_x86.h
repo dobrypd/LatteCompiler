@@ -57,6 +57,9 @@ private:
 
     void bool_expr_to_stack(int label_t, int label_f);
     void visit_ident(std::string& ident);
+    void function_call(std::string& ident,
+            frontend::Environment::FunInfoPtr fun, ListExpr * arguments);
+    void method_call(std::string& cls_ident, std::string method_ident);
 
     static const int words_per_var;
     static const int object_fields_offset;

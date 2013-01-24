@@ -467,11 +467,12 @@ void Creator_x86::visitTType(TType *ttype)
 void Creator_x86::visitEVar(EVar *evar)
 {
     evar->liststructuredident_->accept(this);
+    this->last_type = this->ident_type;
     this->instruction_manager.dereference_ESI_to_stack();
     if (check_is<Bool*>(this->last_type)) {
-        this->instruction_manager.cmp_stack();
-        this->instruction_manager.jump_if(InstructionManager::NE, this->last_true_label);
-        this->instruction_manager.jump(this->last_false_label);
+        //this->instruction_manager.cmp_stack();
+        this->instruction_manager.jump_if_0(this->last_false_label);
+        this->instruction_manager.jump(this->last_true_label);
         this->e_was_rel = true;
     } else {
         this->e_was_rel = false;
@@ -507,42 +508,73 @@ void Creator_x86::visitELitNull(ELitNull *elitnull)
     this->e_was_rel = false;
 }
 
+void Creator_x86::method_call(std::string& cls_ident, std::string method_ident)
+{
+    // GOT object address in ESI
+    frontend::Environment::FunInfoPtr fun =
+            this->fr_env.get_method(method_ident, cls_ident);
+    // get vtable from object addresed in (ESI + vtable position).
+    // call $(method_ident @ cls_ident) + fun->position
+}
+
+void Creator_x86::function_call(std::string& ident,
+        frontend::Environment::FunInfoPtr fun, ListExpr * arguments)
+{
+    if (fun->position < 0) {
+        arguments->accept(this);
+        this->instruction_manager.function_call(ident);
+    }
+    else
+    {
+        std::string self = Creator_x86::self_name;
+        CompilerEnvironment::VarInfoPtr v = this->env.get_variable(self);
+        this->instruction_manager.add_to_ESI_val_address(v->position);
+        this->instruction_manager.push_ESI();  //SELF
+        arguments->accept(this);
+        this->method_call(this->last_class_type.ident_, ident);
+    }
+
+}
+
 void Creator_x86::visitEApp(EApp *eapp)
 {
-    std::cout << "funciton " << eapp->ident_ <<  " application" << std::endl;
-    // arguments
-    // TODO: vtable calls
-    // TODO: last in this list is function application.
     visitIdent(eapp->ident_);
-    eapp->listexpr_->accept(this);
+    frontend::Environment::FunInfoPtr fun = this->fr_env.get_method(eapp->ident_,
+            this->last_class->ident);
+    if (!fun) fun = this->fr_env.get_function(eapp->ident_);
 
-    // Collect arguments
-//    for (std::vector<frontend::Environment::VarInfoPtr>::iterator it =
-//            fun->arguments.begin(); it != fun->arguments.end(); it++){
-//        JVM << this->type_to_jvm_type((*it)->type, true);
-//        this->current_function_stack_size -= 1;
-//    }
-//
-//    JVM << ")" << this->type_to_jvm_type(fun->ret_type, true) << endl;
-    //Environment::
-    //this->last_type = fun->ret_type;
-    //this->e_was_rel = false;
+    this->function_call(eapp->ident_, fun, eapp->listexpr_);
 
-    //Block::instr_ptr_t call(new x86_Call(get_from_vtable(eapp->liststructuredident_)));
-    //this->instruction_manager.add(call);
+    this->last_type = fun->ret_type;
+    this->e_was_rel = false;
     this->instruction_manager.push_EAX();
 }
 
 void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
 {
-  /* Code For EMethodApp Goes Here */
+    this->ident_type = 0;
+    for (ListStructuredIdent::iterator
+            i = emethodapp->liststructuredident_->begin();
+            i != emethodapp->liststructuredident_->end() - 1; ++i)
+    {
+        (*i)->accept(this);
+    }
 
-    emethodapp->liststructuredident_->accept(this);
-//    frontend::Environment::ClsInfoPtr cls =
-//        this->fr_env.get_class((dynamic_cast<Class*>(this->last_type))
-//                ->ident_);
-//    //visitIdent(emethodapp->ident_);
-    emethodapp->listexpr_->accept(this);
+    // Do not accept method name.
+    SingleIdent* sid = dynamic_cast<Class*>(
+            emethodapp->liststructuredident_->back());
+
+    Class* cls_type = dynamic_cast<Class*>(this->ident_type);
+    frontend::Environment::FunInfoPtr fun = this->fr_env.get_method(sid->ident_,
+                cls_type->ident_);
+
+    this->instruction_manager.push_ESI();  // object
+    emethodapp->listexpr_->accept(this);  // arguments
+    this->method_call(cls_type->ident_, sid->ident_);
+
+    this->last_type = fun->ret_type;
+    this->e_was_rel = false;
+    this->instruction_manager.push_EAX();
 }
 
 void Creator_x86::visitEString(EString *estring)
