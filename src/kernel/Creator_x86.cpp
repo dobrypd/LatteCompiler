@@ -25,6 +25,7 @@ void Creator_x86::bool_expr_to_stack(int label_t, int label_f)
     this->instruction_manager.new_block(label_end);
 }
 
+const int Creator_x86::words_per_var = 4; // 32
 const char* Creator_x86::self_name = "self";
 const char* Creator_x86::v_table_name = "__vtable_ptr";
 const char* Creator_x86::named_temp_on_stack_prefix = "#_TEMP__ON__STACK_#";
@@ -374,12 +375,11 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
     } else {
         this->instruction_manager.dereference_ESI();
         if (check_is<Class*>(this->current_var_type)) {
-            int field_pos = this->fr_env.get_field_position(singleident->ident_,
-                    (dynamic_cast<Class*>(this->current_var_type))->ident_);
             frontend::Environment::VarInfoPtr field_info =
-                    this->fr_env.find_field(singleident->ident_,
+                    this->fr_env.get_field(singleident->ident_,
                     (dynamic_cast<Class*>(this->current_var_type))->ident_);
-            this->instruction_manager.add_to_ESI(field_pos * 4);
+            // XXX: change it
+            this->instruction_manager.add_to_ESI(field_info->position * Creator_x86::words_per_var);
         } else if (check_is<TType*>(this->current_var_type)){
             this->current_var_type = this->fr_env.global_int_type;
         } else {
@@ -391,7 +391,7 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 
 void Creator_x86::visitArrayIdent(ArrayIdent * tableval)
 {
-    // TODO:
+    // XXX:
     this->instruction_manager.push_ESI();
     std::string ecx_var_name(Creator_x86::named_temp_on_stack_prefix);
     ecx_var_name += "foreach ECX";  // save ECX in case of neasted use
@@ -400,7 +400,7 @@ void Creator_x86::visitArrayIdent(ArrayIdent * tableval)
     this->env.add_variable(this->fr_env.global_int_type, ecx_var_name); // loop cond
     // In current version only one dimension arrays
     // because in first value of array is length
-    this->instruction_manager.add_to_ESI(4); // size of array
+    this->instruction_manager.add_to_ESI(Creator_x86::words_per_var); // size of array
     this->instruction_manager.pop_add_to_ESI();
     this->instruction_manager.pop_ESI();
 }

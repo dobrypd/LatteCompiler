@@ -22,7 +22,7 @@ public:
     struct var_info
     {
         Type* type;
-        int field_pos; // If field in class otherwise undefined. (in variables not real size)
+        int position;  // assigned in time of searching.
     };
 
     typedef boost::shared_ptr<var_info> VarInfoPtr;
@@ -34,6 +34,7 @@ public:
         bool is_extern;
         Type* ret_type;
         std::vector<VarInfoPtr> arguments;
+        int position;  // assigned in time of searching.
     } fun_info;
 
     typedef boost::shared_ptr<fun_info> FunInfoPtr;
@@ -116,12 +117,9 @@ public:
     FunInfoPtr get_function(std::string& ident) const;
     ClsInfoPtr get_class(std::string& ident) const;
 
-    Type* get_var_type(ListStructuredIdent* l_ident, std::string* cls_name);
-
-    VarInfoPtr get_field(std::string& ident, std::string& cls_name); // Only in this class
-    VarInfoPtr find_field(std::string& ident, std::string& cls_name); // On all class in mro.
+    // Assign position -> no for exacly selected type!
+    VarInfoPtr get_field(std::string& ident, std::string& cls_name);
     FunInfoPtr get_method(std::string& ident, std::string& cls_name);
-    FunInfoPtr find_method(std::string& ident, std::string& cls_name);
 
     // Direct access to the environment:
     std::vector<MapPtr>::iterator get_env_v_it_begin();
@@ -131,9 +129,7 @@ public:
     std::map<std::string, ClsInfoPtr>::iterator get_env_cls_begin();
     std::map<std::string, ClsInfoPtr>::iterator get_env_cls_end();
 
-    int get_field_position(std::string& field_name, std::string& class_name);
-    int get_method_position(std::string& field_name, std::string& class_name);
-    int get_class_size(std::string& class_name);
+    int get_class_size(std::string& cls_name);
 };
 
 } /* namespace frontend */

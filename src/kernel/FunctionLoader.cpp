@@ -179,7 +179,7 @@ void FunctionLoader::visitMethodDef(MethodDef *methoddef)
             comunicate += "function `";
             comunicate += methoddef->ident_;
             comunicate += "` already declared in class `";
-            comunicate += this->last_cls_name;
+            comunicate += cls->ident;
             comunicate += "`.";
             this->error_handler.error(methoddef->type_->line_number, comunicate);
             return;
@@ -198,10 +198,10 @@ void FunctionLoader::visitFieldDef(FieldDef *fielddef)
                 it != cls->fields.end(); it++) {
             if (it->first == fielddef->ident_) {
                 std::string comunicate;
-                comunicate += "function `";
+                comunicate += "field `";
                 comunicate += fielddef->ident_;
                 comunicate += "` already declared in class `";
-                comunicate += this->last_cls_name;
+                comunicate += cls->ident;
                 comunicate += "`.";
                 this->error_handler.error(fielddef->type_->line_number, comunicate);
                 return;

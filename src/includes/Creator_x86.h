@@ -56,6 +56,7 @@ private:
 
     void bool_expr_to_stack(int label_t, int label_f);
 
+    static const int words_per_var;
     static const char* self_name;
     static const char* v_table_name;
     static const char* named_temp_on_stack_prefix;

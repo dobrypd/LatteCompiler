@@ -21,6 +21,7 @@ Environment::FunInfoPtr Environment::create_fun(Type* ret_type, ListArg* args)
 {
     Environment::FunInfoPtr new_function(new Environment::fun_info);
     new_function->ret_type = ret_type;
+    new_function->is_extern = false;
 
     for(ListArg::iterator it = args->begin(); it != args->end();it++){
         Environment::VarInfoPtr next_argument(new Environment::var_info);
@@ -129,7 +130,6 @@ void Environment::add_variable(Type *t, std::string & ident)
 void Environment::add_function(FnDef *function_definition,
         bool is_extern = false)
 {
-
     Environment::FunInfoPtr new_function =
             this->create_fun(function_definition->type_,
                     function_definition->listarg_);
@@ -163,7 +163,9 @@ void Environment::add_class(std::string ident, std::string extends_ident)
 void Environment::add_method_to_cls(std::string & class_name, MethodDef *method_definition)
 {
     Environment::ClsInfoPtr this_class = this->get_class(class_name);
-    this_class->methods.push_back(std::make_pair(method_definition->ident_, this->create_fun(method_definition->type_, method_definition->listarg_)));
+    this_class->methods.push_back(std::make_pair(method_definition->ident_,
+            this->create_fun(method_definition->type_,
+                    method_definition->listarg_)));
 }
 
 void Environment::add_field_to_cls(std::string & class_name, Type *type, std::string & ident)
@@ -171,10 +173,6 @@ void Environment::add_field_to_cls(std::string & class_name, Type *type, std::st
     Environment::ClsInfoPtr this_class = this->get_class(class_name);
     Environment::VarInfoPtr new_variable(new Environment::var_info);
     new_variable->type = type;
-    if (this_class->fields.empty())
-        new_variable->field_pos = 0;
-    else
-        new_variable->field_pos = 1 + this_class->fields.back().second->field_pos;
     this_class->fields.push_back(std::make_pair(ident, new_variable));
 }
 
@@ -249,16 +247,23 @@ std::map<std::string, Environment::ClsInfoPtr>::iterator Environment::get_env_cl
     return this->env_cls.begin();
 }
 
+std::map<std::string,Environment::ClsInfoPtr>::iterator Environment::get_env_cls_end()
+{
+    return this->env_cls.end();
+}
+
 Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string & cls_name)
 {
     ClsInfoPtr cls = this->get_class(cls_name);
-    Type* type = NULL;
-    while ((type == NULL) or (cls->lat_cls_parent != NULL)) {
+    int position = 0;
+    while (cls) {
         for(Environment::lat_class::fields_t::iterator it = cls->fields.begin();
                 it != cls->fields.end(); it++) {
             if (it->first == ident) {
+                it->second->position = position;
                 return it->second;
             }
+            position++;
         }
         cls = cls->lat_cls_parent;
     }
@@ -268,65 +273,31 @@ Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string 
 Environment::FunInfoPtr Environment::get_method(std::string & ident, std::string & cls_name)
 {
     ClsInfoPtr cls = this->get_class(cls_name);
-    Type* type = NULL;
-    while ((type == NULL) or (cls->lat_cls_parent != NULL)) {
+    int position = 0;
+    while (cls) {
         for(Environment::lat_class::methods_t::iterator it = cls->methods.begin();
                 it != cls->methods.end(); it++) {
             if (it->first == ident) {
+                it->second->position = position;
                 return it->second;
             }
+            position++;
         }
         cls = cls->lat_cls_parent;
     }
     return Environment::FunInfoPtr();
 }
 
-Environment::VarInfoPtr Environment::find_field(std::string & ident, std::string & cls_name)
+int Environment::get_class_size(std::string & cls_name)
 {
-}
-
-std::map<std::string,Environment::ClsInfoPtr>::iterator Environment::get_env_cls_end()
-{
-    return this->env_cls.end();
-}
-
-Type *Environment::get_var_type(ListStructuredIdent *l_ident, std::string *cls_name = NULL)
-{
-    Type* last_type = NULL;
-    ListStructuredIdent::iterator it;
-    if(check_is<SelfIdent*>(l_ident)){
-        this->global_cls_type->ident_ = *cls_name;
-        last_type = this->global_cls_type;
-        it = l_ident->begin() + 1;
-    }else{
-        it = l_ident->begin();
+    // All fields size in chain;
+    ClsInfoPtr cls = this->get_class(cls_name);
+    int sum = 0;
+    while (cls) {
+        sum += cls->fields.size();
+        cls = cls->lat_cls_parent;
     }
-    for(;it != l_ident->end();++it){
-        StructuredIdent *str_ident = (*it);
-        if(check_is<Class*>(str_ident)){
-        }else
-            if(check_is<TType*>(str_ident))
-                last_type = dynamic_cast<TType*>(str_ident)->type_;
-
-
-    }
-    return last_type;
-}
-
-int Environment::get_field_position(std::string & field_name, std::string & class_name)
-{
-}
-
-Environment::FunInfoPtr Environment::find_method(std::string & ident, std::string & cls_name)
-{
-}
-
-int Environment::get_method_position(std::string & field_name, std::string & class_name)
-{
-}
-
-int Environment::get_class_size(std::string & class_name)
-{
+    return sum;
 }
 
 

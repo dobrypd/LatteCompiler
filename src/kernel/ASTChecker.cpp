@@ -79,8 +79,8 @@ void ASTChecker::check_type(ListStructuredIdent* i1, Type* t1_base, ListStructur
         ;
     }
     else if (check_is<Class*>(t1_base) and check_is<Class*>(t2_inher)) {
-        Class* ass_base = dynamic_cast<Class*>(this->ident_type);
-        Class* ass_inher = dynamic_cast<Class*>(this->last_type);
+        Class* ass_base = dynamic_cast<Class*>(t1_base);
+        Class* ass_inher = dynamic_cast<Class*>(t2_inher);
         // Maybe in inheritance chain.
         if (!this->is_subclass(ass_base, ass_inher)) {
             std::string msg = "class  `";
@@ -123,6 +123,7 @@ std::string ASTChecker::args_pretty_print(std::vector<Environment::VarInfoPtr>::
 bool ASTChecker::is_subclass(Class* base, Class* maybe_inher) {
     Environment::ClsInfoPtr cls_base = this->env.get_class(base->ident_);
     Environment::ClsInfoPtr cls_inher = this->env.get_class(maybe_inher->ident_);
+
     while(cls_inher) {
         if ((cls_base->ident) == (cls_inher->ident)) {
             return true;
@@ -154,6 +155,7 @@ void ASTChecker::visitProgram(Program* program)
 
 void ASTChecker::visitFnDef(FnDef* fndef)
 {
+    this->last_class_ident = 0;
     fndef->type_->accept(this);
     this->last_function_type = fndef->type_;
     visitIdent(fndef->ident_);
@@ -173,7 +175,7 @@ void ASTChecker::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
     this->last_class_ident = &clsdefnoinher->ident_;
     clsdefnoinher->listclsdef_->accept(this);
 
-    this->last_class_ident = 0;
+    this->last_class_ident = &null_class;
 }
 
 void ASTChecker::visitClsDefInher(ClsDefInher *clsdefinher)
@@ -183,7 +185,7 @@ void ASTChecker::visitClsDefInher(ClsDefInher *clsdefinher)
     visitIdent(clsdefinher->ident_2);
     clsdefinher->listclsdef_->accept(this);
 
-    this->last_class_ident = 0;
+    this->last_class_ident = &null_class;
 }
 
 void ASTChecker::visitArgument(Argument* argument)
@@ -202,8 +204,21 @@ void ASTChecker::visitMethodDef(MethodDef *methoddef)
   this->last_function_ident = &methoddef->ident_;
 
   this->env.prepare();
+  // ADD CLASS FIELDS AND FUNCTIONS
+  Environment::ClsInfoPtr cls = this->env.get_class(*this->last_class_ident);
+  while(cls) {
+      for(Environment::lat_class::fields_t::iterator it = cls->fields.begin();
+              it != cls->fields.end(); it++) {
+          this->env.add_variable(it->second->type, it->first);
+      }
+      cls = cls->lat_cls_parent;
+  }
+  this->env.prepare();
+
   methoddef->listarg_->accept(this);
   methoddef->blk_->accept(this);
+
+  this->env.back();
   this->env.back();
 
   this->last_function_type = 0;
@@ -248,11 +263,12 @@ void ASTChecker::visitStmAss(StmAss* stmass)
     this->last_line_number = stmass->line_number;
     this->ident_type = 0;
     stmass->liststructuredident_->accept(this);
+    Type* saved_ident_type = this->ident_type;
 
     this->last_type = 0;
     stmass->expr_->accept(this);
 
-    this->check_type(stmass->liststructuredident_, this->ident_type,
+    this->check_type(stmass->liststructuredident_, saved_ident_type,
             0, this->last_type, stmass->line_number);
 }
 
@@ -748,8 +764,14 @@ void ASTChecker::visitEApp(EApp* eapp)
 {
     visitIdent(eapp->ident_);
     this->last_line_number = eapp->line_number;
-    Environment::FunInfoPtr fun_ptr =
-            this->env.get_function(eapp->ident_);
+    Environment::FunInfoPtr fun_ptr = this->env.get_function(eapp->ident_);
+    if (this->last_class_ident != 0  and ((*this->last_class_ident) != ASTChecker::null_class)) {
+        Environment::FunInfoPtr tmp = fun_ptr;
+        Environment::FunInfoPtr fun_ptr = this->env.get_method(eapp->ident_,
+                *this->last_class_ident);
+        if (!fun_ptr) fun_ptr = tmp;
+    }
+
     // Check if function exists.
     if (!fun_ptr)
     {
@@ -805,7 +827,7 @@ void ASTChecker::visitEMethodApp(EMethodApp *emethodapp)
     // apply sid on cls object
 
     Environment::ClsInfoPtr cls = this->env.get_class(cls_t->ident_);
-    Environment::FunInfoPtr fun = this->env.find_method(sid->ident_, cls_t->ident_);
+    Environment::FunInfoPtr fun = this->env.get_method(sid->ident_, cls_t->ident_);
 
     if (!fun) {
         std::string msg = "cannot find method `";
@@ -882,6 +904,8 @@ void ASTChecker::visitEDynamicCast(EDynamicCast *edynamiccast)
         std::string msg = "only possibility is to cast null to class";
         this->error_handler.error(edynamiccast->line_number, msg);
     }
+    this->literal_class.ident_ = edynamiccast->ident_;
+    this->last_type = &(this->literal_class);
 }
 
 void ASTChecker::visitEMul(EMul* emul)
@@ -942,8 +966,14 @@ void ASTChecker::visitERel(ERel* erel)
     erel->expr_2->accept(this);
     Type* type2 = this->last_type;
     this->check_type(0, type1, 0, type2, erel->line_number);
-    if (    ((!(check_is<Int *>(type1))) || (!(check_is<Int *>(type2)))) &&
-            ((!(check_is<Bool *>(type1))) || (!(check_is<Bool *>(type2))))
+    if (check_is<Class* >(type1) and check_is<Class *>(type2)) {
+        if (!(check_is<EQU*>(erel->relop_) or check_is<NE*>(erel->relop_))) {
+            std::string msg = "it is possible to apply only == and != on objects";
+            this->error_handler.error(erel->line_number, msg);
+        }
+    }
+    else if (    ((!(check_is<Int  *>(type1))) || (!(check_is<Int  *>(type2))))
+         && ((!(check_is<Bool *>(type1))) || (!(check_is<Bool *>(type2))))
             )
     {
         std::string msg = "relation should be only applied to booleans or numbers not [";
