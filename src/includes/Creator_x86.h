@@ -39,8 +39,7 @@ private:
     ClsInfoPtr last_class;
 
     // Statements:
-    bool current_var_on_stack;
-    Type* current_var_type;
+    Type* ident_type;
 
     // Expressions:
     Type* last_type;
@@ -57,8 +56,10 @@ private:
      */
 
     void bool_expr_to_stack(int label_t, int label_f);
+    void visit_ident(std::string& ident);
 
     static const int words_per_var;
+    static const int object_fields_offset;
     static const char* self_name;
     static const char* v_table_name;
     static const char* named_temp_on_stack_prefix;

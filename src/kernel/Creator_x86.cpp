@@ -26,6 +26,7 @@ void Creator_x86::bool_expr_to_stack(int label_t, int label_f)
 }
 
 const int Creator_x86::words_per_var = 4; // 32 = word * 4
+const int Creator_x86::object_fields_offset = 1;  // for v_table
 const char* Creator_x86::self_name = "self";
 const char* Creator_x86::v_table_name = "__vtable_ptr";
 const char* Creator_x86::named_temp_on_stack_prefix = "#_TEMP__ON__STACK_#";
@@ -182,7 +183,6 @@ void Creator_x86::visitStmAss(StmAss *stmass)
     stmass->expr_->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
 
-    this->current_var_on_stack = true;
     stmass->liststructuredident_->accept(this);
     this->instruction_manager.pop_to_addr_from_ESI();
 }
@@ -194,14 +194,12 @@ void Creator_x86::visitStmAssArr(StmAssArr *stmassarr)
 
     this->instruction_manager.alloc_array(); // with len on stack
 
-    this->current_var_on_stack = true;
     stmassarr->liststructuredident_->accept(this);
     this->instruction_manager.pop_to_addr_from_ESI();
 }
 
 void Creator_x86::visitStmAssObj(StmAssObj* stmassobj)
 {
-    this->current_var_on_stack = true;
     stmassobj->liststructuredident_->accept(this);
     stmassobj->type_->accept(this);
 
@@ -213,14 +211,12 @@ void Creator_x86::visitStmAssObj(StmAssObj* stmassobj)
 
 void Creator_x86::visitStmIncr(StmIncr *stmincr)
 {
-    this->current_var_on_stack = true;
     stmincr->liststructuredident_->accept(this);
     this->instruction_manager.increment_in_ESI(1);
 }
 
 void Creator_x86::visitStmDecr(StmDecr *stmdecr)
 {
-    this->current_var_on_stack = true;
     stmdecr->liststructuredident_->accept(this);
     this->instruction_manager.increment_in_ESI(-1);
 }
@@ -374,58 +370,72 @@ void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)
             (dynamic_cast<Class*>(stminitobj->type_))->ident_));
 }
 
+
+void Creator_x86::visit_ident(std::string& ident)
+{
+    if (this->ident_type == 0){
+        CompilerEnvironment::VarInfoPtr var = this->env.get_variable(ident);
+        if (!var) {
+            // self object field
+            std::string self = Creator_x86::self_name;
+            CompilerEnvironment::VarInfoPtr self_var = this->env.get_variable(self);
+            this->instruction_manager.add_to_ESI_val_address(self_var->position);
+            this->ident_type = &this->last_class_type;
+            var = this->fr_env.get_field(ident, this->last_class->ident);
+            this->instruction_manager.dereference_ESI();
+            this->instruction_manager.add_to_ESI(
+                    (Creator_x86::object_fields_offset + var->position)
+                    * Creator_x86::words_per_var);
+            this->ident_type = var->type;
+        } else {
+            // this block variable
+            this->ident_type = var->type;
+            this->instruction_manager.add_to_ESI_val_address(var->position);
+        }
+    } else if (check_is<TType*>(this->ident_type)) {
+        this->instruction_manager.dereference_ESI();
+        this->ident_type = &(this->literal_int);
+    } else {
+        this->instruction_manager.dereference_ESI();
+        Class* cls = dynamic_cast<Class*>(this->ident_type);
+        frontend::Environment::VarInfoPtr var = this->fr_env.get_field(
+                ident, cls->ident_);
+        this->instruction_manager.add_to_ESI(
+                (Creator_x86::object_fields_offset + var->position)
+                * Creator_x86::words_per_var);
+        this->ident_type = var->type;
+    }
+}
+
 void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 {
     visitIdent(singleident->ident_);
-
-    if (this->current_var_on_stack) {
-        CompilerEnvironment::VarInfoPtr v =
-                this->env.get_variable(singleident->ident_);
-        this->instruction_manager.add_to_ESI_val_address(v->position);
-        this->current_var_type = v->type;
-        this->current_var_on_stack = false;
-    } else {
-        this->instruction_manager.dereference_ESI();
-        if (check_is<Class*>(this->current_var_type)) {
-            frontend::Environment::VarInfoPtr field_info =
-                    this->fr_env.get_field(singleident->ident_,
-                    (dynamic_cast<Class*>(this->current_var_type))->ident_);
-            // XXX: change it
-            this->instruction_manager.add_to_ESI(field_info->position * Creator_x86::words_per_var);
-        } else if (check_is<TType*>(this->current_var_type)){
-            this->current_var_type = this->fr_env.global_int_type;
-        } else {
-            if (debug) std::cerr << "Wrong ident list!" << std::endl;
-        }
-        this->current_var_on_stack = false;
-    }
+    this->visit_ident(singleident->ident_)
 }
 
 void Creator_x86::visitArrayIdent(ArrayIdent * tableval)
 {
-    // XXX:
     this->instruction_manager.push_ESI();
-    std::string ecx_var_name(Creator_x86::named_temp_on_stack_prefix);
-    ecx_var_name += "foreach ECX";  // save ECX in case of neasted use
-    std::string esi_var_name(Creator_x86::named_temp_on_stack_prefix);
-    esi_var_name += "foreach ESI"; // IDENT reference
-    this->env.add_variable(this->fr_env.global_int_type, ecx_var_name); // loop cond
-    // In current version only one dimension arrays
-    // because in first value of array is length
-    this->instruction_manager.add_to_ESI(Creator_x86::words_per_var); // size of array
+
+    tableval->expr_->accept(this);
+
+    this->visit_ident(tableval->ident_);
+
+    // First element is size, add it:
+    this->instruction_manager.add_to_ESI(Creator_x86::words_per_var);
     this->instruction_manager.pop_add_to_ESI();
     this->instruction_manager.pop_ESI();
+    this->ident_type = dynamic_cast<TType*>(this->ident_type)->type_;
 }
 
 void Creator_x86::visitSelfIdent(SelfIdent *selfident)
 {
-    /* self should be always first if not - do nothing with rest values */
     std::string self = Creator_x86::self_name;
     CompilerEnvironment::VarInfoPtr v =
         this->env.get_variable(self);
     this->instruction_manager.add_to_ESI_val_address(v->position);
-    this->current_var_type = v->type;
-    this->current_var_on_stack = false;
+
+    this->ident_type = &this->last_class_type;
 }
 
 void Creator_x86::visitClass(Class *_class)
@@ -456,7 +466,6 @@ void Creator_x86::visitTType(TType *ttype)
 
 void Creator_x86::visitEVar(EVar *evar)
 {
-    this->current_var_on_stack = true;
     evar->liststructuredident_->accept(this);
     this->instruction_manager.dereference_ESI_to_stack();
     if (check_is<Bool*>(this->last_type)) {
@@ -588,27 +597,19 @@ void Creator_x86::visitERel(ERel *erel)
 {
     int this_last_f_label = this->last_false_label;
     int this_last_t_label = this->last_true_label;
-    int label_t = this->next_label++;
-    int label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
+    int label_t = this->last_true_label = this->next_label++;
+    int label_f = this->last_false_label = this->next_label++;
     erel->expr_1->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
-    label_t = this->next_label++;
-    label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
+
+    label_t = this->last_true_label = this->next_label++;
+    label_f = this->last_false_label = this->next_label++;
     erel->expr_2->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
 
-    if (check_is<Str*>(this->last_type)){
-        this->instruction_manager.compare_strings_on_stack();
-        // PUT 2 VALUES ON STACK IF EQUAL 0, 0, otherise 0, 1
-    }
-
     this->instruction_manager.cmp_stack();
     erel->relop_->accept(this);
-    // TODO: Optimize it!
+    // TODO: Jumps optimization;
     this->instruction_manager.jump_if(this->last_rel, this_last_t_label);
     this->instruction_manager.jump(this_last_f_label);
 
@@ -623,21 +624,17 @@ void Creator_x86::visitEAnd(EAnd *eand)
     int this_true_label = this->last_true_label;
     int this_false_label = this->last_false_label;
 
-    int label_t = this->next_label++;
-    int label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
+    int label_t = this->last_true_label = this->next_label++;
+    int label_f = this->last_false_label = this->next_label++;
     eand->expr_1->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
     this->instruction_manager.jump_if_0(this_false_label);
 
-    label_t = this->next_label++;
-    label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
+    label_t = this->last_true_label = this->next_label++;
+    label_f = this->last_false_label = this->next_label++;
     eand->expr_2->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
-
+    // TODO: Jumps optimization;
     this->instruction_manager.jump_if_0(this_false_label);
     this->instruction_manager.jump(this_true_label);
 
@@ -651,21 +648,17 @@ void Creator_x86::visitEOr(EOr *eor)
     int this_true_label = this->last_true_label;
     int this_false_label = this->last_false_label;
 
-    int label_t = this->next_label++;
-    int label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
+    int label_t = this->last_true_label = this->next_label++;
+    int label_f = this->last_false_label = this->next_label++;
     eor->expr_1->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
     this->instruction_manager.jump_if_not0(this_true_label);
 
-    label_t = this->next_label++;
-    label_f = this->next_label++;
-    this->last_true_label = label_t;
-    this->last_false_label = label_f;
+    label_t = this->last_true_label = this->next_label++;
+    label_f = this->last_false_label = this->next_label++;
     eor->expr_2->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
-
+    // TODO: Jumps optimization;
     this->instruction_manager.jump_if_not0(this_false_label);
     this->instruction_manager.jump(this_true_label);
 
@@ -775,6 +768,7 @@ void Creator_x86::visitListItem(ListItem* listitem)
 
 void Creator_x86::visitListStructuredIdent(ListStructuredIdent* liststructuredident)
 {
+    this->ident_type = 0;
     for (ListStructuredIdent::iterator i = liststructuredident->begin() ; i != liststructuredident->end() ; ++i)
     {
         (*i)->accept(this);
@@ -785,10 +779,8 @@ void Creator_x86::visitListExpr(ListExpr* listexpr)
 {
     for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
     {
-        int label_t = this->next_label++;
-        int label_f = this->next_label++;
-        this->last_true_label = label_t;
-        this->last_false_label = label_f;
+        int label_t = this->last_true_label = this->next_label++;
+        int label_f = this->last_false_label = this->next_label++;
         (*i)->accept(this);
         if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
     }

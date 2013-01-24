@@ -21,7 +21,7 @@ namespace backend
 class ASCreator
 {
 private:
-    InstructionManager* instruction_manager;
+    InstructionManager instruction_manager;
     Creator_x86 creator;
     std::string assembly_file_name;
     std::string original_file_name;
