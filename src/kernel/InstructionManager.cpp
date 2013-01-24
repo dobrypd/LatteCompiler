@@ -206,8 +206,10 @@ void InstructionManager::sub_on_stack()
 void InstructionManager::mul_on_stack()
 {
     Block::instr_ptr_t load(new instruction::Pop(arg(REGISTER, EAX)));
-    Block::instr_ptr_t mul(new instruction::Imul(arg(REGISTER, EAX), arg(MEMORY, ESP)));
-    this->add(load, mul);
+    Block::instr_ptr_t move(new instruction::Mov(arg(MEMORY, ESP), arg(REGISTER, ECX)));
+    Block::instr_ptr_t mul(new instruction::Imul(arg(REGISTER, EAX), arg(REGISTER, ECX)));
+    Block::instr_ptr_t move_result(new instruction::Mov(arg(REGISTER, ECX), arg(MEMORY, ESP)));
+    this->add(load, move, mul, move_result);
 }
 
 void InstructionManager::div_on_stack()

@@ -13,7 +13,8 @@ namespace backend
 {
 
 enum REGISTERS_T {
-    EAX=-1, EDX=-2, EBX=-3, ECX=-4, ESI=-5, EDI=-6, ESP=-7, EBP=-8
+    EAX=-1, EDX=-3, EBX=-5, ECX=-7, ESI=-9, EDI=-11, ESP=-13, EBP=-15
+    // It's little hack to use odd numbers (because as base I use only powers of 2)
 };
 
 enum ARG_TYPES_T {

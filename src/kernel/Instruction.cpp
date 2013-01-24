@@ -105,7 +105,7 @@ And::And(arg_t arg1, arg_t arg2) : Instruction("andl", 2, arg1, arg2) { }
 Or::Or(arg_t arg1, arg_t arg2) : Instruction("orl", 2, arg1, arg2) { }
 Xor::Xor(arg_t arg1, arg_t arg2) : Instruction("xorl", 2, arg1, arg2) { }
 Not::Not(arg_t arg) : Instruction("not", 1, arg) { }
-Neg::Neg(arg_t arg) : Instruction("neg", 1, arg) { }
+Neg::Neg(arg_t arg) : Instruction("negl", 1, arg) { }
 Sar::Sar(arg_t arg1, arg_t arg2) : Instruction("sarl", 2, arg1, arg2) { }
 Shl::Shl(arg_t arg1, arg_t arg2) : Instruction("shl", 2, arg1, arg2) { }
 Shr::Shr(arg_t arg1, arg_t arg2) : Instruction("shr", 2, arg1, arg2) { }
