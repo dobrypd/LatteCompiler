@@ -150,6 +150,12 @@ void InstructionManager::function_call(std::string ident)
     this->add(call);
 }
 
+void InstructionManager::method_call(std::string& cls_ident, std::string& method_ident,
+            int position)
+{
+    // XXX:
+}
+
 void InstructionManager::add_to_ESP(int value)
 {
     if ((debug) and (value == 0))

@@ -41,7 +41,7 @@ Creator_x86::Creator_x86(InstructionManager& instruction_manager,
         frontend::Environment& frontend_environment) :
         instruction_manager(instruction_manager),
         fr_env(frontend_environment),
-        next_label(1), last_class_type("null")
+        last_class_type("null"), next_label(1)
 {
 }
 
@@ -177,8 +177,8 @@ void Creator_x86::visitStmDecl(StmDecl *stmdecl)
 
 void Creator_x86::visitStmAss(StmAss *stmass)
 {
-    int label_t = this->last_true_label = label_t;
-    int label_f = this->last_false_label = label_f;
+    int label_t = this->last_true_label = this->next_label++;
+    int label_f = this->last_false_label = this->next_label++;
 
     stmass->expr_->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
@@ -410,7 +410,7 @@ void Creator_x86::visit_ident(std::string& ident)
 void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 {
     visitIdent(singleident->ident_);
-    this->visit_ident(singleident->ident_)
+    this->visit_ident(singleident->ident_);
 }
 
 void Creator_x86::visitArrayIdent(ArrayIdent * tableval)
@@ -515,6 +515,7 @@ void Creator_x86::method_call(std::string& cls_ident, std::string method_ident)
             this->fr_env.get_method(method_ident, cls_ident);
     // get vtable from object addresed in (ESI + vtable position).
     // call $(method_ident @ cls_ident) + fun->position
+    this->instruction_manager.method_call(cls_ident, method_ident, fun->position);
 }
 
 void Creator_x86::function_call(std::string& ident,
@@ -561,7 +562,7 @@ void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
     }
 
     // Do not accept method name.
-    SingleIdent* sid = dynamic_cast<Class*>(
+    SingleIdent* sid = dynamic_cast<SingleIdent*>(
             emethodapp->liststructuredident_->back());
 
     Class* cls_type = dynamic_cast<Class*>(this->ident_type);

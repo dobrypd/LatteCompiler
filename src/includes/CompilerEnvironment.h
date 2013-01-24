@@ -11,12 +11,13 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include "Absyn.H"
+#include "Environment.h"
 
 namespace backend
 {
 
 /*
- * This environment is dynamically cahnging while passing code.
+ * This environment is dynamically changing while passing code.
  */
 class CompilerEnvironment
 {
@@ -28,8 +29,6 @@ public:
 private:
     std::vector<MapPtr> variables;
     int varaibles_on_stack; // offset
-    std::vector<int> current_stack_size; // for every block
-    std::vector<int> variables_on_current_block;
 
     MapPtr var_tip();
 
@@ -47,9 +46,6 @@ public:
     VarInfoPtr get_variable(std::string& name);
 
     void new_fun();
-    void prev_fun();
-
-    static size_t type_sizeof(Type* type);
 };
 
 } /* namespace backend */

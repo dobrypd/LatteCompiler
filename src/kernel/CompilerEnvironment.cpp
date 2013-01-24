@@ -24,16 +24,14 @@ void CompilerEnvironment::prepare()
 {
     CompilerEnvironment::MapPtr empty(new CompilerEnvironment::MapType());
     this->variables.push_back(empty);
-    this->current_stack_size.push_back(0);
 }
 
 int CompilerEnvironment::back()
 {
+    int current_block_size = this->variables.back()->size();
     this->variables.pop_back();
-    int remove_variables = this->current_stack_size.back();
-    this->current_stack_size.pop_back();
-    this->varaibles_on_stack -= remove_variables;
-    return remove_variables;
+    this->varaibles_on_stack -= current_block_size;
+    return current_block_size;
 }
 
 void CompilerEnvironment::add_variable(Type *type, std::string name)
@@ -41,6 +39,7 @@ void CompilerEnvironment::add_variable(Type *type, std::string name)
     MapPtr tip = this->var_tip();
     VarInfoPtr new_variable(new CompilerEnvironment::var_info);
     new_variable->type = type;
+    new_variable->position = ++this->varaibles_on_stack;
     (*tip)[name] = new_variable;
 }
 
@@ -59,29 +58,6 @@ CompilerEnvironment::VarInfoPtr CompilerEnvironment::get_variable(std::string & 
 void CompilerEnvironment::new_fun()
 {
     this->varaibles_on_stack = 0;
-}
-
-void CompilerEnvironment::prev_fun()
-{
-    this->varaibles_on_stack = this->current_stack_size.back();
-}
-
-int CompilerEnvironment::stack_size()
-{
-    return this->varaibles_on_stack;
-}
-
-void CompilerEnvironment::add_obj(std::string obj_name, int fields)
-{
-}
-
-void CompilerEnvironment::add_array(Type *type, std::string name)
-{
-}
-
-size_t CompilerEnvironment::type_sizeof(Type *type)
-{
-    return 4;
 }
 
 } /* namespace backend */
