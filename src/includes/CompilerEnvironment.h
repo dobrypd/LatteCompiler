@@ -25,7 +25,6 @@ public:
     typedef struct {
         Type* type;
         int position; // Difference between current function and EBP.
-        bool on_stack; // Is simple type.
     } var_info;
     typedef boost::shared_ptr<var_info> VarInfoPtr;
     typedef std::map<std::string,VarInfoPtr> MapType;
