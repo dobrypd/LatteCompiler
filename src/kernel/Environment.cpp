@@ -16,6 +16,11 @@
 namespace frontend
 {
 
+// make space for pointer to vtable
+const int Environment::object_fields_offset  = 1;
+// make space for predefined methods
+const int Environment::object_methods_offset = 0;
+
 
 Environment::FunInfoPtr Environment::create_fun(Type* ret_type, ListArg* args)
 {
@@ -261,7 +266,7 @@ std::map<std::string,Environment::ClsInfoPtr>::iterator Environment::get_env_cls
 Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string & cls_name)
 {
     ClsInfoPtr cls = this->get_class(cls_name);
-    int position = 0;
+    int position = Environment::object_fields_offset;
     while (cls) {
         for(Environment::lat_class::fields_t::iterator it = cls->fields.begin();
                 it != cls->fields.end(); it++) {
@@ -279,7 +284,7 @@ Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string 
 Environment::FunInfoPtr Environment::get_method(std::string & ident, std::string & cls_name)
 {
     ClsInfoPtr cls = this->get_class(cls_name);
-    int position = 0;
+    int position = Environment::object_methods_offset;
     while (cls) {
         for(Environment::lat_class::methods_t::iterator it = cls->methods.begin();
                 it != cls->methods.end(); it++) {
@@ -298,7 +303,7 @@ int Environment::get_class_size(std::string & cls_name)
 {
     // All fields size in chain;
     ClsInfoPtr cls = this->get_class(cls_name);
-    int sum = 0;
+    int sum = Environment::object_fields_offset;
     while (cls) {
         sum += cls->fields.size();
         cls = cls->lat_cls_parent;

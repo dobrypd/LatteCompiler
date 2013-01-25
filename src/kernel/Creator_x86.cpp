@@ -34,7 +34,7 @@ const char* Creator_x86::named_temp_on_stack_prefix = "#_TEMP__ON__STACK_#";
 std::string Creator_x86::method_ident(std::string& class_name,
             std::string& method_name)
 {
-    return "_" + class_name + "@@" + method_name;
+    return "_" + class_name + "." + method_name;
 }
 
 Creator_x86::Creator_x86(InstructionManager& instruction_manager,
@@ -203,8 +203,9 @@ void Creator_x86::visitStmAssObj(StmAssObj* stmassobj)
     stmassobj->liststructuredident_->accept(this);
     stmassobj->type_->accept(this);
 
-    this->instruction_manager.alloc_object(this->fr_env.get_class_size(
-            (dynamic_cast<Class*>(stmassobj->type_))->ident_));
+    std::string& cls_ident = (dynamic_cast<Class*>(stmassobj->type_))->ident_;
+    this->instruction_manager.alloc_object(this->v_table_ident(cls_ident),
+            this->fr_env.get_class_size(cls_ident));
 
     this->instruction_manager.pop_to_addr_from_ESI();
 }
@@ -515,7 +516,9 @@ void Creator_x86::method_call(std::string& cls_ident, std::string method_ident)
             this->fr_env.get_method(method_ident, cls_ident);
     // get vtable from object addresed in (ESI + vtable position).
     // call $(method_ident @ cls_ident) + fun->position
-    this->instruction_manager.method_call(cls_ident, method_ident, fun->position);
+    // Arres to object is in ESI
+    this->instruction_manager.method_call(fun->position);
+
 }
 
 void Creator_x86::function_call(std::string& ident,

@@ -13,7 +13,9 @@ namespace backend
 {
 
 
-const char *Block::ident_prefix = "._L";
+const char * Block::ident_prefix = "._L";
+const char * Block::malloc_name = "malloc";
+
 Block::Block()
 {
 }
@@ -44,7 +46,7 @@ void Block::add(instr_ptr_t instruction)
 }
 
 
-InstructionManager::InstructionManager()
+InstructionManager::InstructionManager(): constat_strings_no(0)
 {
     block_ptr_t block_0(new Block(""));
     this->blocks.push_back(block_0);
@@ -125,9 +127,21 @@ InstructionManager::list_it_t InstructionManager::end()
 
 void InstructionManager::alloc_default(Type *type)
 {
-    // can be string
-    // XXX:
-    Block::instr_ptr_t instr(new instruction::Push(arg(CONSTANT_FIELD, 0)));
+    Block::instr_ptr_t instr;
+    if (check_is<Str*>(type)) {
+        std::map<std::string, int>::iterator it = this->constant_strings.find("");
+        int identifier = 0;
+        if (it == this->constant_strings.end()) {
+            this->constant_strings[""] = ++this->constat_strings_no;
+        } else {
+            identifier = it->second;
+        }
+        //  Meybe copy this.
+        instr = Block::instr_ptr_t(new instruction::Push(arg(CONSTANT_FIELD,
+                identifier, 1)));
+    } else {
+        instr = Block::instr_ptr_t(new instruction::Push(arg(CONSTANT_FIELD, 0)));
+    }
     this->add(instr);
 }
 
@@ -152,10 +166,15 @@ void InstructionManager::function_call(std::string ident)
     this->add(call);
 }
 
-void InstructionManager::method_call(std::string& cls_ident, std::string& method_ident,
-            int position)
+void InstructionManager::method_call(int position)
 {
-    // XXX:
+    // VTABLE IS AT FIRST POSITION IN OBJECT!
+    // CALCULATE ON EAX
+    Block::instr_ptr_t load_vtable_to_EAX(new instruction::Mov(arg(MEMORY, ESI), arg(REGISTER, EAX)));
+    Block::instr_ptr_t add_offset(new instruction::Add(arg(CONSTANT_FIELD, position * 4), arg(REGISTER, EAX)));
+    Block::instr_ptr_t dereference(new instruction::Mov(arg(MEMORY, EAX), arg(REGISTER, EAX)));
+    Block::instr_ptr_t call(new instruction::Call(arg(REGISTER, EAX)));
+    this->add(load_vtable_to_EAX, add_offset, dereference, call);
 }
 
 void InstructionManager::add_to_ESP(int value)
@@ -179,14 +198,15 @@ void InstructionManager::pop_to_EAX()
 // Got len on top of a stack. Remove from it.
 void InstructionManager::alloc_array()
 {
-    // XXX:
     // DO NOT FORGET ABOUT ARRAY SIZE
+    // XXX
 }
 
-void InstructionManager::alloc_object(int fields)
+void InstructionManager::alloc_object(std::string v_table_ident, int all_fields)
 {
-    // XXX:
-    // DO NOT FORGET ABOUT VTABLE (ON THE LAST POSITION)
+    // all_fields contains pointer to virtual table
+    // DO NOT FORGET ABOUT VTABLE (ON THE FIRST POSITION)
+    // XXX
 }
 
 void InstructionManager::add_on_stack()
@@ -236,9 +256,14 @@ void InstructionManager::mod_on_stack()
 
 int InstructionManager::cstr_add(std::string & str)
 {
-    int no = this->constant_strings.size();
-    this->constant_strings.push_back(str);
-    return no;
+    std::map<std::string, int>::iterator it = this->constant_strings.find("");
+    int identifier = 0;
+    if (it == this->constant_strings.end()) {
+        this->constant_strings[""] = ++this->constat_strings_no;
+    } else {
+        identifier = it->second;
+    }
+    return identifier;
 }
 
 void InstructionManager::add_const_string(std::string & str)

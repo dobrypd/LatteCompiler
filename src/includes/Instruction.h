@@ -214,6 +214,7 @@ private:
     std::string label;
 public:
     Call(std::string label);
+    Call(arg_t arg);
     std::string str() const;
 };
 

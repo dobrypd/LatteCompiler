@@ -115,6 +115,7 @@ ConditionJump::ConditionJump(std::string label, std::string condition_string)
     : Instruction("j"), label(label), condition_string(condition_string) { }
 Cmp::Cmp(arg_t arg1, arg_t arg2) : Instruction("cmp", 2, arg1, arg2) { }
 Call::Call(std::string label) : Instruction("call"), label(label) { }
+Call::Call(arg_t arg) : Instruction("call", 1, arg), label("") { }
 Ret::Ret() : Instruction("ret") { }
 
 std::string Jump::str() const {
@@ -126,7 +127,11 @@ std::string Loop::str() const {
 }
 
 std::string Call::str() const {
-    return (std::string(this->cstr) + " " + this->label);
+    if (arg1) {
+        return (std::string(this->cstr) + " *" + this->arg1->str());
+    } else {
+        return (std::string(this->cstr) + " " + this->label);
+    }
 }
 
 std::string ConditionJump::str() const {

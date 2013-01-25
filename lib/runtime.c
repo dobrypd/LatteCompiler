@@ -31,3 +31,14 @@ char* readString()
     getline(&line, &size, stdin);
     return line;
 }
+
+int compareStrings(const char* s1, const char* s2)
+{
+    return 0;
+}
+
+char* addStrings(const char* s1, const char* s2)
+{
+    return malloc(4);
+}
+

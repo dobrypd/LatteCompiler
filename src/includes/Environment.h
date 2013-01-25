@@ -87,6 +87,9 @@ private:
 
     FunInfoPtr create_fun(Type* ret_type, ListArg* args);
 
+    static const int object_fields_offset;  // make space for pointer to vtable
+    static const int object_methods_offset; // make space for predefined methods
+
 public:
     Void* global_void_type;
     Int* global_int_type;

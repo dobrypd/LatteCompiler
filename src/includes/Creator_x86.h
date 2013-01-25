@@ -61,14 +61,15 @@ private:
             frontend::Environment::FunInfoPtr fun, ListExpr * arguments);
     void method_call(std::string& cls_ident, std::string method_ident);
 
+    std::string method_ident(std::string& class_name,
+            std::string& method_name);
+    std::string v_table_ident(std::string& class_name);
+
     static const int words_per_var;
     static const int object_fields_offset;
     static const char* self_name;
     static const char* v_table_name;
     static const char* named_temp_on_stack_prefix;
-
-    static std::string method_ident(std::string& class_name,
-            std::string& method_name);
 
 public:
     Creator_x86(InstructionManager& instruction_manager,

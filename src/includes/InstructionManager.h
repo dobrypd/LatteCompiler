@@ -10,6 +10,7 @@
 
 #include <ostream>
 #include <list>
+#include <map>
 #include <boost/shared_ptr.hpp>
 #include "Absyn.H"
 #include "Instruction.h"
@@ -25,6 +26,7 @@ public:
     typedef std::list<instr_ptr_t>::iterator list_it_t;
 
     static const char* ident_prefix;
+    static const char* malloc_name;
 private:
     instructions_list_t i_list;
     std::string block_name;
@@ -51,7 +53,8 @@ public:
 
 private:
     blocks_list_t blocks;
-    std::vector<std::string> constant_strings;
+    std::map<std::string, int> constant_strings;
+    int constat_strings_no;
 
     int cstr_add(std::string& string);
 public:
@@ -87,8 +90,7 @@ public:
     void function_prologue();
     void function_epilogue();
     void function_call(std::string ident);
-    void method_call(std::string& cls_ident, std::string& method_ident,
-            int position);
+    void method_call(int position);
 
     // Op on reg:
     void pop_to_EAX();
@@ -99,7 +101,7 @@ public:
     // Allocating:
     void alloc_default(Type* type);
     void alloc_array(); // with size  of array on top of the stack, save ptr on EAX
-    void alloc_object(int fields);
+    void alloc_object(std::string v_table_ident, int all_fields);
 
     // Stack operations;
     void add_to_ESP(int value);  // value in baits (not bits)!
