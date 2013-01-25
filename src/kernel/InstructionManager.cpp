@@ -47,7 +47,7 @@ void Block::add(instr_ptr_t instruction)
 
 const char * InstructionManager::malloc_name = "malloc";
 
-InstructionManager::InstructionManager(): constat_strings_no(0)
+InstructionManager::InstructionManager(): constant_strings_no(0)
 {
     block_ptr_t block_0(new Block(""));
     this->blocks.push_back(block_0);
@@ -79,7 +79,7 @@ void InstructionManager::write_virtual_tables(std::ostream& stream)
 void InstructionManager::write_to_stream(std::ostream& stream)
 {
     this->write_constant_strings(stream);
-    stream << "\ttext." << std::endl;
+    stream << "\t.text" << std::endl;
     this->write_virtual_tables(stream);
     stream << ".globl main" << std::endl;
     stream << "\t.type main, @function" << std::endl;
@@ -101,7 +101,7 @@ void InstructionManager::write_to_stream(std::ostream& stream)
             } else  if (check_is<instruction::Call*>((*i_it).get())) {
                 stream << dynamic_cast<instruction::Call*>((*i_it).get())->str();
             } else  if (check_is<instruction::Mov*>((*i_it).get())) {
-                stream << dynamic_cast<instruction::Call*>((*i_it).get())->str();
+                stream << dynamic_cast<instruction::Mov*>((*i_it).get())->str();
             } else {
                 stream << (*i_it)->str();
             }
@@ -169,13 +169,14 @@ void InstructionManager::alloc_default(Type *type)
     Block::instr_ptr_t instr;
     if (check_is<Str*>(type)) {
         std::map<std::string, int>::iterator it = this->constant_strings.find("");
-        int identifier = 0;
+
+        int identifier = this->constant_strings_no;
         if (it == this->constant_strings.end()) {
-            this->constant_strings[""] = ++this->constat_strings_no;
+            this->constant_strings[""] = this->constant_strings_no++;
         } else {
             identifier = it->second;
         }
-        //  Meybe copy this.
+        //  Maybe copy this one.
         instr = Block::instr_ptr_t(new instruction::Push(arg(CONSTANT_FIELD,
                 identifier, 1)));
     } else {
@@ -218,9 +219,9 @@ void InstructionManager::method_call(int position)
 
 void InstructionManager::add_to_ESP(int value)
 {
-    if ((debug) and (value == 0))
-        std::cerr << "adding 0 to esp has no sense "
-        << __FILE__ << ":" << __LINE__ << std::endl;
+//    if ((debug) and (value == 0))
+//        std::cerr << "adding 0 to esp has no sense "
+//        << __FILE__ << ":" << __LINE__ << std::endl;
     Block::instr_ptr_t add(new instruction::Add(arg(CONSTANT_FIELD, value * 4), arg(REGISTER, ESP)));
     this->add(add);
 }
@@ -312,9 +313,9 @@ void InstructionManager::mod_on_stack()
 int InstructionManager::cstr_add(std::string & str)
 {
     std::map<std::string, int>::iterator it = this->constant_strings.find("");
-    int identifier = 0;
+    int identifier = this->constant_strings_no;
     if (it == this->constant_strings.end()) {
-        this->constant_strings[""] = ++this->constat_strings_no;
+        this->constant_strings[str] = this->constant_strings_no++;
     } else {
         identifier = it->second;
     }
@@ -325,6 +326,7 @@ void InstructionManager::add_const_string(std::string & str)
 {
     int id = this->cstr_add(str);
     Block::instr_ptr_t store(new instruction::Push(arg(CONSTANT_FIELD, id, 1)));
+    this->add(store);
 }
 
 void InstructionManager::jump(int id)

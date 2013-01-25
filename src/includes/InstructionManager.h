@@ -54,7 +54,7 @@ private:
     blocks_list_t blocks;
     std::map<std::string, int> constant_strings;
     std::map<std::string, boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > > virtual_tables;
-    int constat_strings_no;
+    int constant_strings_no;
 
     int cstr_add(std::string& string);
     void write_constant_strings(std::ostream& stream);

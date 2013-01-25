@@ -27,7 +27,7 @@ do
     BN=$(basename $i)
     DN=$(dirname $i)
     
-    $DN/a.out > $i.PROUT
+    a.out > $i.PROUT
     
     echo -en "\033[38m\033[33mChecking outputs for: \033[0m"$i"\n"
     OUT_FN="${i%.*}".output
@@ -43,7 +43,7 @@ do
         fi
     fi
     
-    rm $DN/a.out
+    rm a.out
 done
 
 

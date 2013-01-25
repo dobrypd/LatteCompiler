@@ -66,12 +66,13 @@ Instruction::Instruction(const char* cstr="bare_instruction", int args = 0,
         arg_t arg1 = arg_t(), arg_t arg2 = arg_t())
         : args(args), arg1(arg1), arg2(arg2), cstr(cstr)
 {
-    if ((debug) and (this->args == 2 )
-            and (this->arg1->type == this->arg2->type)
-            and (this->arg1->type == MEMORY)) {
-        std::cerr << "CANNOT USE INSTRUCTION WITH BOTH ARGUMENTS IN MEMORY!!!"
-                << std::endl;
-    }
+//    if (debug)
+//        if ((this->args == 2 )
+//            and (this->arg1->type == this->arg2->type)
+//            and (this->arg1->type == MEMORY)) {
+//        std::cerr << "CANNOT USE INSTRUCTION WITH BOTH ARGUMENTS IN MEMORY!!!"
+//                << std::endl;
+//    }
 }
 
 std::string Instruction::str() const
@@ -121,7 +122,7 @@ Ret::Ret() : Instruction("ret") { }
 
 
 std::string Mov::str() const {
-    if (label != "") {
+    if (label.empty()) {
         return std::string(this->cstr) + " " + this->arg1->str() + ", "
                         + this->arg2->str();
     } else {

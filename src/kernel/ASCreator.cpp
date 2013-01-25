@@ -45,8 +45,6 @@ void ASCreator::save_in_file()
 void ASCreator::write_file_prologue(std::ostream& stream)
 {
     stream << "\t.file \"" << this->original_file_name << "\"" << std::endl;
-    stream << "\t.text" << std::endl;
-    stream << ".globl main" << std::endl;
 }
 
 void ASCreator::write_file_epilogue(std::ostream& stream)
