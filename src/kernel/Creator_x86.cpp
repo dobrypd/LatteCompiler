@@ -37,6 +37,11 @@ std::string Creator_x86::method_ident(std::string& class_name,
     return "_" + class_name + "." + method_name;
 }
 
+std::string Creator_x86::v_table_ident(std::string& class_name)
+{
+    return "_VTABLE." + class_name;
+}
+
 Creator_x86::Creator_x86(InstructionManager& instruction_manager,
         frontend::Environment& frontend_environment) :
         instruction_manager(instruction_manager),
@@ -90,8 +95,9 @@ void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 
     visitIdent(clsdefnoinher->ident_);
 
-    // TODO: Create vtable and constructor
-    //this->instruction_manager.new_vtable(clsdefnoinher->ident_, cls);
+    this->instruction_manager.new_vtable(
+            this->v_table_ident(clsdefnoinher->ident_),
+            this->fr_env.get_class_methods_list(clsdefnoinher->ident_));
 
     clsdefnoinher->listclsdef_->accept(this);
 }
@@ -105,8 +111,9 @@ void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
     visitIdent(clsdefinher->ident_1);
     visitIdent(clsdefinher->ident_2);
 
-    // TODO: Create vtable and constructor
-    //this->instruction_manager.new_vtable(clsdefnoinher->ident_, cls);
+    this->instruction_manager.new_vtable(
+            this->v_table_ident(clsdefinher->ident_1),
+            this->fr_env.get_class_methods_list(clsdefinher->ident_1));
 
     clsdefinher->listclsdef_->accept(this);
 
@@ -367,8 +374,9 @@ void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)
     visitIdent(stminitobj->ident_);
     stminitobj->type_->accept(this);
     this->env.add_variable(this->declaration_type, stminitobj->ident_);
-    this->instruction_manager.alloc_object(this->fr_env.get_class_size(
-            (dynamic_cast<Class*>(stminitobj->type_))->ident_));
+    std::string& cls_ident = (dynamic_cast<Class*>(stminitobj->type_))->ident_;
+    this->instruction_manager.alloc_object(this->v_table_ident(cls_ident),
+            this->fr_env.get_class_size(cls_ident));
 }
 
 
@@ -527,6 +535,11 @@ void Creator_x86::function_call(std::string& ident,
     if (fun->position < 0) {
         arguments->accept(this);
         this->instruction_manager.function_call(ident);
+
+        // If extern remove arguments from stack
+        if (fun->is_extern) {
+            this->instruction_manager.add_to_ESP(fun->arguments.size());
+        }
     }
     else
     {

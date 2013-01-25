@@ -14,7 +14,6 @@ namespace backend
 
 
 const char * Block::ident_prefix = "._L";
-const char * Block::malloc_name = "malloc";
 
 Block::Block()
 {
@@ -46,6 +45,8 @@ void Block::add(instr_ptr_t instruction)
 }
 
 
+const char * InstructionManager::malloc_name = "malloc";
+
 InstructionManager::InstructionManager(): constat_strings_no(0)
 {
     block_ptr_t block_0(new Block(""));
@@ -69,6 +70,8 @@ void InstructionManager::write_to_stream(std::ostream& stream)
             } else  if (check_is<instruction::ConditionJump*>((*i_it).get())) {
                 stream << dynamic_cast<instruction::ConditionJump*>((*i_it).get())->str();
             } else  if (check_is<instruction::Call*>((*i_it).get())) {
+                stream << dynamic_cast<instruction::Call*>((*i_it).get())->str();
+            } else  if (check_is<instruction::Mov*>((*i_it).get())) {
                 stream << dynamic_cast<instruction::Call*>((*i_it).get())->str();
             } else {
                 stream << (*i_it)->str();
@@ -114,6 +117,13 @@ void InstructionManager::add(Block::instr_ptr_t i1, Block::instr_ptr_t i2, Block
     this->blocks.back()->add(i3);
     this->blocks.back()->add(i4);
 }
+
+void InstructionManager::new_vtable(std::string v_table_name,
+        boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > list_of_methods)
+{
+
+}
+
 
 InstructionManager::list_it_t InstructionManager::begin()
 {
@@ -199,14 +209,30 @@ void InstructionManager::pop_to_EAX()
 void InstructionManager::alloc_array()
 {
     // DO NOT FORGET ABOUT ARRAY SIZE
-    // XXX
+    Block::instr_ptr_t dubble_arr_size(new instruction::Push(arg(MEMORY, ESP)));
+    Block::instr_ptr_t add_arr_size(new instruction::Inc(arg(MEMORY, ESP)));
+    Block::instr_ptr_t mul_by_word_size(new instruction::Imul(arg(CONSTANT_FIELD, 4), arg(MEMORY, ESP)));
+    Block::instr_ptr_t call_malloc(new instruction::Call(InstructionManager::malloc_name));
+    // Assign size of array
+    // Remove this increased size
+    Block::instr_ptr_t remove_increased_size_from_stack(new instruction::Inc(arg(REGISTER, ESP)));
+    Block::instr_ptr_t get_size(new instruction::Pop(arg(MEMORY, EAX)));
+    Block::instr_ptr_t push_address(new instruction::Push(arg(REGISTER, EAX)));
+    this->add(dubble_arr_size, add_arr_size, mul_by_word_size, call_malloc);
+    this->add(remove_increased_size_from_stack, get_size, push_address);
 }
 
 void InstructionManager::alloc_object(std::string v_table_ident, int all_fields)
 {
-    // all_fields contains pointer to virtual table
-    // DO NOT FORGET ABOUT VTABLE (ON THE FIRST POSITION)
-    // XXX
+    // all_fields contains pointer to virtual table (this pointer is in FIRST field)
+    Block::instr_ptr_t obj_size_on_stack(new instruction::Push(arg(CONSTANT_FIELD, all_fields * 4)));
+    Block::instr_ptr_t call_malloc(new instruction::Call(InstructionManager::malloc_name));
+    Block::instr_ptr_t remove_size_from_stack(new instruction::Inc(arg(REGISTER, ESP)));
+    Block::instr_ptr_t push_address(new instruction::Push(arg(REGISTER, EAX)));
+    this->add(obj_size_on_stack, call_malloc, remove_size_from_stack, push_address);
+
+    // assign vtable to object (addres is in EAX)
+    Block::instr_ptr_t vtable(new instruction::Mov(v_table_ident, arg(MEMORY, EAX)));
 }
 
 void InstructionManager::add_on_stack()

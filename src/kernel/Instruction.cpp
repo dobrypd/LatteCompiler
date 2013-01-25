@@ -64,7 +64,7 @@ arg_t arg(int type, int base, int offset, int index, int mul) {
 
 Instruction::Instruction(const char* cstr="bare_instruction", int args = 0,
         arg_t arg1 = arg_t(), arg_t arg2 = arg_t())
-        : arg1(arg1), arg2(arg2), args(args), cstr(cstr)
+        : args(args), arg1(arg1), arg2(arg2), cstr(cstr)
 {
     if ((debug) and (this->args == 2 )
             and (this->arg1->type == this->arg2->type)
@@ -92,6 +92,7 @@ namespace instruction
 {
 
 Mov::Mov(arg_t arg1, arg_t arg2) : Instruction("movl", 2, arg1, arg2) { }
+Mov::Mov(std::string label, arg_t arg) : Instruction("mov", 1, arg), label(label) { }
 Push::Push(arg_t arg) : Instruction("pushl", 1, arg) { }
 Pop::Pop(arg_t arg) : Instruction("popl", 1, arg) { }
 Lea::Lea(arg_t arg1, arg_t arg2) : Instruction("lea", 2, arg1, arg2) { }
@@ -117,6 +118,16 @@ Cmp::Cmp(arg_t arg1, arg_t arg2) : Instruction("cmp", 2, arg1, arg2) { }
 Call::Call(std::string label) : Instruction("call"), label(label) { }
 Call::Call(arg_t arg) : Instruction("call", 1, arg), label("") { }
 Ret::Ret() : Instruction("ret") { }
+
+
+std::string Mov::str() const {
+    if (label != "") {
+        return std::string(this->cstr) + " " + this->arg1->str() + ", "
+                        + this->arg2->str();
+    } else {
+        return (std::string(this->cstr) + " $" + this->label + this->arg1->str());
+    }
+}
 
 std::string Jump::str() const {
     return (std::string(this->cstr) + " " + this->label);

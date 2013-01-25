@@ -50,11 +50,12 @@ arg_t arg(int type = 0, int base = 0, int offset = 0, int index = 0,
 class Instruction
 {
 private:
-    arg_t arg1;
-    arg_t arg2;
     int args;
 
 public:
+    arg_t arg1;
+    arg_t arg2;
+
     const char* cstr;
 
     Instruction(const char* cstr, int args, arg_t arg1, arg_t arg2);
@@ -68,8 +69,12 @@ namespace instruction
 
 class Mov : public Instruction
 {
+private:
+    std::string label;
 public:
     Mov(arg_t arg1, arg_t arg2);
+    Mov(std::string label, arg_t arg2); // Load static (vtable)
+    std::string str() const;
 };
 
 class Push : public Instruction

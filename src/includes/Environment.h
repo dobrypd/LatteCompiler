@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <list>
 #include <boost/shared_ptr.hpp>
 #include "Absyn.H"
 
@@ -131,6 +132,7 @@ public:
     std::map<std::string, FunInfoPtr>::iterator get_env_f_end();
     std::map<std::string, ClsInfoPtr>::iterator get_env_cls_begin();
     std::map<std::string, ClsInfoPtr>::iterator get_env_cls_end();
+    boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > get_class_methods_list(std::string& cls_name);
 
     int get_class_size(std::string& cls_name);
 };

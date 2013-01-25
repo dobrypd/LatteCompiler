@@ -263,6 +263,22 @@ std::map<std::string,Environment::ClsInfoPtr>::iterator Environment::get_env_cls
     return this->env_cls.end();
 }
 
+boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > Environment::get_class_methods_list(std::string& cls_name)
+{
+//    std::list<boost::shared_ptr<std::string *>> list;
+//
+//    ClsInfoPtr cls = this->get_class(cls_name);
+//    while (cls) {
+//        for(Environment::lat_class::methods_t::iterator it = cls->methods.begin();
+//                it != cls->methods.end(); it++) {
+//            list.push_back(boost::shared_ptr<std::string *>(new std::string(it->first)));
+//        }
+//        cls = cls->lat_cls_parent;
+//    }
+//
+//    return list;
+}
+
 Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string & cls_name)
 {
     ClsInfoPtr cls = this->get_class(cls_name);
