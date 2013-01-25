@@ -53,10 +53,12 @@ public:
 private:
     blocks_list_t blocks;
     std::map<std::string, int> constant_strings;
-    std::map<std::string, boost::shared_ptr<std::list<boost::shared_ptr<std::string *> > > > virtual_tables;
+    std::map<std::string, boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > > virtual_tables;
     int constat_strings_no;
 
     int cstr_add(std::string& string);
+    void write_constant_strings(std::ostream& stream);
+    void write_virtual_tables(std::ostream& stream);
 
     static const char* malloc_name;
 public:
@@ -71,11 +73,15 @@ public:
     void new_function_block(std::string name); // as new block but with where call can applicate
     void add(Block::instr_ptr_t instruction);
     void add(Block::instr_ptr_t i1, Block::instr_ptr_t i2);
-    void add(Block::instr_ptr_t i1, Block::instr_ptr_t i2, Block::instr_ptr_t i3);
-    void add(Block::instr_ptr_t i1, Block::instr_ptr_t i2, Block::instr_ptr_t i3, Block::instr_ptr_t i4);
+    void add(Block::instr_ptr_t i1, Block::instr_ptr_t i2,
+            Block::instr_ptr_t i3);
+    void add(Block::instr_ptr_t i1, Block::instr_ptr_t i2,
+            Block::instr_ptr_t i3, Block::instr_ptr_t i4);
 
     // Statics
-    void new_vtable(std::string v_table_name, boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > list_of_methods);
+    void new_vtable(std::string v_table_name,
+            boost::shared_ptr<std::list<boost::shared_ptr<std::string> > >
+            list_of_methods);
 
     // Bigger fragments/ syscals
     void compare_strings_on_stack();

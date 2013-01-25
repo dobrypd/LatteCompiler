@@ -53,8 +53,37 @@ InstructionManager::InstructionManager(): constat_strings_no(0)
     this->blocks.push_back(block_0);
 }
 
+
+void InstructionManager::write_constant_strings(std::ostream& stream)
+{
+    stream << "\t.section .rodata" << std::endl;
+    for (std::map<std::string, int>::iterator
+            it = this->constant_strings.begin();
+            it != this->constant_strings.end(); it++) {
+        stream << "C" << it->second << ":" << std::endl;
+        stream << "\t.string \"" << it->first << "\"" << std::endl;
+    }
+}
+
+void InstructionManager::write_virtual_tables(std::ostream& stream)
+{
+    for (std::map<std::string, boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > >::iterator
+            it = this->virtual_tables.begin();
+            it != this->virtual_tables.end(); it++) {
+        stream << it->first << ":" << std::endl;
+
+    }
+}
+
+
 void InstructionManager::write_to_stream(std::ostream& stream)
 {
+    this->write_constant_strings(stream);
+    stream << "\ttext." << std::endl;
+    this->write_virtual_tables(stream);
+    stream << ".globl main" << std::endl;
+    stream << "\t.type main, @function" << std::endl;
+
     for (list_it_t it = this->blocks.begin(); it != this->blocks.end(); it++)
     {
         if ((*it)->get_name() != "")
@@ -121,7 +150,7 @@ void InstructionManager::add(Block::instr_ptr_t i1, Block::instr_ptr_t i2, Block
 void InstructionManager::new_vtable(std::string v_table_name,
         boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > list_of_methods)
 {
-
+    this->virtual_tables[v_table_name] = list_of_methods;
 }
 
 
