@@ -13,6 +13,7 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include "Absyn.H"
+#include "Environment.h"
 #include "Instruction.h"
 
 namespace backend
@@ -53,7 +54,7 @@ public:
 private:
     blocks_list_t blocks;
     std::map<std::string, int> constant_strings;
-    std::map<std::string, boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > > virtual_tables;
+    std::map<std::string, frontend::Environment::MethodsPtr> virtual_tables;
     int constant_strings_no;
 
     int cstr_add(std::string& string);
@@ -80,8 +81,7 @@ public:
 
     // Statics
     void new_vtable(std::string class_name,
-            boost::shared_ptr<std::list<boost::shared_ptr<std::string> > >
-            list_of_methods);
+            frontend::Environment::MethodsPtr list_of_methods);
 
     // Bigger fragments/ syscals
     void compare_strings_on_stack();

@@ -8,6 +8,7 @@
 #include "Absyn.H"
 #include "global.h"
 #include "InstructionManager.h"
+#include "Environment.h"
 #include "Creator_x86.h"
 
 namespace backend
@@ -68,14 +69,14 @@ void InstructionManager::write_constant_strings(std::ostream& stream)
 
 void InstructionManager::write_virtual_tables(std::ostream& stream)
 {
-    for (std::map<std::string, boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > >::iterator
+    for (std::map<std::string, frontend::Environment::MethodsPtr>::iterator
             it = this->virtual_tables.begin();
             it != this->virtual_tables.end(); it++) {
         stream << Creator_x86::v_table_ident(it->first) << ":" << std::endl;
-        for (std::list<boost::shared_ptr<std::string> >::iterator
+        for (std::vector<frontend::Environment::PairOfStrPtr>::iterator
                 methods_it = it->second->begin();
                 methods_it != it->second->end(); methods_it++) {
-            stream << "\t.long " << Creator_x86::method_ident(it->first, **methods_it) << std::endl;
+            stream << "\t.long " << Creator_x86::method_ident(*(methods_it->first), *(methods_it->second)) << std::endl;
         }
     }
 }
@@ -152,8 +153,7 @@ void InstructionManager::add(Block::instr_ptr_t i1, Block::instr_ptr_t i2, Block
     this->blocks.back()->add(i4);
 }
 
-void InstructionManager::new_vtable(std::string class_name,
-        boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > list_of_methods)
+void InstructionManager::new_vtable(std::string class_name, frontend::Environment::MethodsPtr list_of_methods)
 {
     this->virtual_tables[class_name] = list_of_methods;
 }

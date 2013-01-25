@@ -4,6 +4,8 @@
  *
  */
 
+#include <list>
+#include <set>
 #include <map>
 #include <vector>
 #include <iostream>
@@ -130,7 +132,7 @@ void Environment::back()
     }
 }
 
-void Environment::add_variable(Type *t, std::string & ident)
+void Environment::add_variable(Type *t, std::string ident)
 {
     MapPtr tip = this->env_v_tip();
     VarInfoPtr new_variable(new Environment::var_info);
@@ -174,9 +176,9 @@ void Environment::add_class(std::string ident, std::string extends_ident)
 void Environment::add_method_to_cls(std::string & class_name, MethodDef *method_definition)
 {
     Environment::ClsInfoPtr this_class = this->get_class(class_name);
-    this_class->methods.push_back(std::make_pair(method_definition->ident_,
+    this_class->methods[method_definition->ident_] =
             this->create_fun(method_definition->type_,
-                    method_definition->listarg_)));
+                    method_definition->listarg_);
 }
 
 void Environment::add_field_to_cls(std::string & class_name, Type *type, std::string & ident)
@@ -184,7 +186,7 @@ void Environment::add_field_to_cls(std::string & class_name, Type *type, std::st
     Environment::ClsInfoPtr this_class = this->get_class(class_name);
     Environment::VarInfoPtr new_variable(new Environment::var_info);
     new_variable->type = type;
-    this_class->fields.push_back(std::make_pair(ident, new_variable));
+    this_class->fields[ident] = new_variable;
 }
 
 bool Environment::can_add_function(std::string & ident) const
@@ -263,36 +265,92 @@ std::map<std::string,Environment::ClsInfoPtr>::iterator Environment::get_env_cls
     return this->env_cls.end();
 }
 
-boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > Environment::get_class_methods_list(std::string& cls_name)
+Environment::MethodsPtr Environment::get_class_methods_list(std::string& cls_name)
 {
-    boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > methods(new std::list<boost::shared_ptr<std::string> >);
-
+    std::set<std::string> already_added;
+    Environment::MethodsPtr methods(new std::vector<PairOfStrPtr>);
     ClsInfoPtr cls = this->get_class(cls_name);
+    std::list<ClsInfoPtr> inheritance_chain;
     while (cls) {
-        for(Environment::lat_class::methods_t::iterator it = cls->methods.begin();
-                it != cls->methods.end(); it++) {
-            methods->push_back(boost::shared_ptr<std::string>(new std::string(it->first)));
-        }
+        inheritance_chain.push_back(cls);
         cls = cls->lat_cls_parent;
+    }
+    for (std::list<ClsInfoPtr>::iterator it = inheritance_chain.begin();
+            it != inheritance_chain.end(); it++) {
+        for(Environment::lat_class::methods_t::iterator
+                m_it = (*it)->methods.begin(); m_it != (*it)->methods.end(); m_it++) {
+            FunInfoPtr fun = m_it->second;
+            int position_on_vector = fun->position - Environment::object_methods_offset;
+            StringPtr cls_name_ptr(new std::string((*it)->ident));
+            StringPtr function_ident_ptr(new std::string(m_it->first));
+
+            PairOfStrPtr new_function(
+                    std::make_pair( cls_name_ptr, function_ident_ptr)
+            );
+            if (methods->size() <= (unsigned)position_on_vector)
+                methods->resize(position_on_vector + 1);
+            (*methods)[position_on_vector] = new_function;  // maybe function will be overriden
+        }
     }
 
     return methods;
 }
 
-Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string & cls_name)
-{
-    ClsInfoPtr cls = this->get_class(cls_name);
-    int position = Environment::object_fields_offset;
-    while (cls) {
-        for(Environment::lat_class::fields_t::iterator it = cls->fields.begin();
-                it != cls->fields.end(); it++) {
-            if (it->first == ident) {
-                it->second->position = position;
-                return it->second;
+void Environment::set_class_positions() {
+    typedef std::map<std::string, Environment::ClsInfoPtr>::iterator it_t;
+    for (it_t it = this->get_env_cls_begin(); it != this->get_env_cls_end(); it++) {
+        ClsInfoPtr cls = it->second;
+        // first:MOST BASE CLASS -> ... -> THIS_CLASS:back
+        std::list<ClsInfoPtr> inheritance_chain;
+        while (cls) {
+            inheritance_chain.push_front(cls);
+            cls = cls->lat_cls_parent;
+        }
+        // FIELDS
+        int position = Environment::object_fields_offset;
+        for (std::list<ClsInfoPtr>::iterator it = inheritance_chain.begin();
+                it != inheritance_chain.end(); it++) {
+            for(Environment::lat_class::fields_t::iterator
+                    f_it = (*it)->fields.begin(); f_it != (*it)->fields.end(); f_it++) {
+                f_it->second->position = position;
             }
             position++;
         }
+
+        // METHODS
+        position = Environment::object_methods_offset;
+        std::map<std::string, FunInfoPtr> already_added;
+        for (std::list<ClsInfoPtr>::iterator it = inheritance_chain.begin();
+                it != inheritance_chain.end(); it++) {
+            for(Environment::lat_class::methods_t::iterator
+                    m_it = (*it)->methods.begin(); m_it != (*it)->methods.end(); m_it++) {
+                FunInfoPtr fun = m_it->second;
+                std::map<std::string, FunInfoPtr>::iterator pos = already_added.find(m_it->first);
+                if (pos != already_added.end()) {
+                    fun->position = pos->second->position;
+                } else {
+                    // New function
+                    fun->position = position;
+                    position++;
+                    already_added[m_it->first] = fun;
+                }
+            }
+        }
+    }
+}
+
+Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string & cls_name)
+{
+    ClsInfoPtr cls = this->get_class(cls_name);
+    std::list<ClsInfoPtr> inheritance_chain;
+    while (cls) {
+        inheritance_chain.push_front(cls);
         cls = cls->lat_cls_parent;
+    }
+    for (std::list<ClsInfoPtr>::iterator it = inheritance_chain.begin();
+            it != inheritance_chain.end(); it++) {
+        lat_class::fields_t::iterator var_it = (*it)->fields.find(ident);
+        if (var_it != (*it)->fields.end()) return var_it->second;
     }
     return Environment::VarInfoPtr();
 }
@@ -300,17 +358,16 @@ Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string 
 Environment::FunInfoPtr Environment::get_method(std::string & ident, std::string & cls_name)
 {
     ClsInfoPtr cls = this->get_class(cls_name);
-    int position = Environment::object_methods_offset;
+    Environment::FunInfoPtr fun;
+    std::list<ClsInfoPtr> inheritance_chain;
     while (cls) {
-        for(Environment::lat_class::methods_t::iterator it = cls->methods.begin();
-                it != cls->methods.end(); it++) {
-            if (it->first == ident) {
-                it->second->position = position;
-                return it->second;
-            }
-            position++;
-        }
+        inheritance_chain.push_back(cls);
         cls = cls->lat_cls_parent;
+    }
+    for (std::list<ClsInfoPtr>::iterator it = inheritance_chain.begin();
+            it != inheritance_chain.end(); it++) {
+        lat_class::methods_t::iterator fun_it = (*it)->methods.find(ident);
+        if (fun_it != (*it)->methods.end()) return fun_it->second;
     }
     return Environment::FunInfoPtr();
 }

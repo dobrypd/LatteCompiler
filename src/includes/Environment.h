@@ -25,10 +25,7 @@ public:
         Type* type;
         int position;  // assigned in time of searching.
     };
-
     typedef boost::shared_ptr<var_info> VarInfoPtr;
-    typedef std::map<std::string, VarInfoPtr> MapType;
-    typedef boost::shared_ptr<MapType> MapPtr;
 
     typedef struct
     {
@@ -37,15 +34,14 @@ public:
         std::vector<VarInfoPtr> arguments;
         int position;  // assigned in time of searching.
     } fun_info;
-
     typedef boost::shared_ptr<fun_info> FunInfoPtr;
 
     // Classes
     struct lat_class
     {
         // Vector because position is important.
-        typedef std::vector<std::pair<std::string, FunInfoPtr> > methods_t;
-        typedef std::vector<std::pair<std::string, VarInfoPtr> > fields_t;
+        typedef std::map<std::string, FunInfoPtr> methods_t;
+        typedef std::map<std::string, VarInfoPtr> fields_t;
 
         methods_t methods;
         fields_t fields;
@@ -54,8 +50,13 @@ public:
 
         boost::shared_ptr<Environment::lat_class> lat_cls_parent;
     };
-
     typedef boost::shared_ptr<Environment::lat_class> ClsInfoPtr;
+
+    typedef std::map<std::string, VarInfoPtr> MapType;
+    typedef boost::shared_ptr<MapType> MapPtr;
+    typedef boost::shared_ptr<std::string> StringPtr;
+    typedef std::pair<StringPtr, StringPtr> PairOfStrPtr;
+    typedef boost::shared_ptr<std::vector<PairOfStrPtr > > MethodsPtr;
 
 private:
 
@@ -103,7 +104,7 @@ public:
     void prepare();
     void back();
 
-    void add_variable(Type* t, std::string& ident);
+    void add_variable(Type* t, std::string ident);
     void add_function(FnDef* function_definition, bool is_extern);
     void add_class(std::string ident);
     void add_class(std::string ident, std::string extends_ident);
@@ -132,9 +133,10 @@ public:
     std::map<std::string, FunInfoPtr>::iterator get_env_f_end();
     std::map<std::string, ClsInfoPtr>::iterator get_env_cls_begin();
     std::map<std::string, ClsInfoPtr>::iterator get_env_cls_end();
-    boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > get_class_methods_list(std::string& cls_name);
+    MethodsPtr get_class_methods_list(std::string& cls_name); // TODO:
 
     int get_class_size(std::string& cls_name);
+    void set_class_positions();
 };
 
 } /* namespace frontend */

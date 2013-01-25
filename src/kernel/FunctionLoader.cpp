@@ -45,6 +45,9 @@ void FunctionLoader::check(Visitable* v)
         return;
     }
 
+    // Sort methods and fields in proper order.
+    this->env.set_class_positions();
+
     if (debug)
     {
         // Log what was added and checked.
@@ -69,7 +72,7 @@ void FunctionLoader::check(Visitable* v)
                 it++) {
             std::cout << "\t" << it->first << " {" << std::endl;
             std::cout << "\t\tFields:" << std::endl;
-            for(std::vector<std::pair<std::string, Environment::VarInfoPtr> >::iterator it_fields =
+            for(Environment::lat_class::fields_t::iterator it_fields =
                     it->second->fields.begin();
                     it_fields != it->second->fields.end(); it_fields++){
                 std::cout << "\t\t\t";
@@ -78,7 +81,7 @@ void FunctionLoader::check(Visitable* v)
                 std::cout << std::endl;
             }
             std::cout << "\t\tMethods:" << std::endl;
-            for(std::vector<std::pair<std::string, Environment::FunInfoPtr> >::iterator it_method =
+            for(Environment::lat_class::methods_t::iterator it_method =
                     it->second->methods.begin();
                     it_method != it->second->methods.end(); it_method++){
                 std::cout << "\t\t\t";
