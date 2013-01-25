@@ -61,10 +61,6 @@ private:
             frontend::Environment::FunInfoPtr fun, ListExpr * arguments);
     void method_call(std::string& cls_ident, std::string method_ident);
 
-    std::string method_ident(std::string& class_name,
-            std::string& method_name);
-    std::string v_table_ident(std::string& class_name);
-
     static const int words_per_var;
     static const int object_fields_offset;
     static const char* self_name;
@@ -74,6 +70,10 @@ private:
 public:
     Creator_x86(InstructionManager& instruction_manager,
             frontend::Environment& fr_env);
+
+    static std::string method_ident(std::string class_name,
+            std::string method_name);
+    static std::string v_table_ident(std::string class_name);
 
 
     void visitProg(Prog* p);

@@ -8,6 +8,7 @@
 #include "Absyn.H"
 #include "global.h"
 #include "InstructionManager.h"
+#include "Creator_x86.h"
 
 namespace backend
 {
@@ -70,8 +71,12 @@ void InstructionManager::write_virtual_tables(std::ostream& stream)
     for (std::map<std::string, boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > >::iterator
             it = this->virtual_tables.begin();
             it != this->virtual_tables.end(); it++) {
-        stream << it->first << ":" << std::endl;
-
+        stream << Creator_x86::v_table_ident(it->first) << ":" << std::endl;
+        for (std::list<boost::shared_ptr<std::string> >::iterator
+                methods_it = it->second->begin();
+                methods_it != it->second->end(); methods_it++) {
+            stream << "\t.long " << Creator_x86::method_ident(it->first, **methods_it) << std::endl;
+        }
     }
 }
 
@@ -147,10 +152,10 @@ void InstructionManager::add(Block::instr_ptr_t i1, Block::instr_ptr_t i2, Block
     this->blocks.back()->add(i4);
 }
 
-void InstructionManager::new_vtable(std::string v_table_name,
+void InstructionManager::new_vtable(std::string class_name,
         boost::shared_ptr<std::list<boost::shared_ptr<std::string> > > list_of_methods)
 {
-    this->virtual_tables[v_table_name] = list_of_methods;
+    this->virtual_tables[class_name] = list_of_methods;
 }
 
 
@@ -252,7 +257,7 @@ void InstructionManager::alloc_array()
     this->add(remove_increased_size_from_stack, get_size, push_address);
 }
 
-void InstructionManager::alloc_object(std::string v_table_ident, int all_fields)
+void InstructionManager::alloc_object(std::string class_name, int all_fields)
 {
     // all_fields contains pointer to virtual table (this pointer is in FIRST field)
     Block::instr_ptr_t obj_size_on_stack(new instruction::Push(arg(CONSTANT_FIELD, all_fields * 4)));
@@ -262,7 +267,7 @@ void InstructionManager::alloc_object(std::string v_table_ident, int all_fields)
     this->add(obj_size_on_stack, call_malloc, remove_size_from_stack, push_address);
 
     // assign vtable to object (addres is in EAX)
-    Block::instr_ptr_t vtable(new instruction::Mov(v_table_ident, arg(MEMORY, EAX)));
+    Block::instr_ptr_t vtable(new instruction::Mov(class_name, arg(MEMORY, EAX)));
 }
 
 void InstructionManager::add_on_stack()

@@ -79,7 +79,7 @@ public:
             Block::instr_ptr_t i3, Block::instr_ptr_t i4);
 
     // Statics
-    void new_vtable(std::string v_table_name,
+    void new_vtable(std::string class_name,
             boost::shared_ptr<std::list<boost::shared_ptr<std::string> > >
             list_of_methods);
 
@@ -112,7 +112,7 @@ public:
     // Allocating:
     void alloc_default(Type* type);
     void alloc_array(); // with size  of array on top of the stack, save ptr on EAX
-    void alloc_object(std::string v_table_ident, int all_fields);
+    void alloc_object(std::string class_name, int all_fields);
 
     // Stack operations;
     void add_to_ESP(int value);  // value in baits (not bits)!

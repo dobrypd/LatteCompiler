@@ -31,13 +31,13 @@ const char* Creator_x86::self_name = "self";
 const char* Creator_x86::v_table_name = "__vtable_ptr";
 const char* Creator_x86::named_temp_on_stack_prefix = "#_TEMP__ON__STACK_#";
 
-std::string Creator_x86::method_ident(std::string& class_name,
-            std::string& method_name)
+std::string Creator_x86::method_ident(std::string class_name,
+            std::string method_name)
 {
     return "_" + class_name + "." + method_name;
 }
 
-std::string Creator_x86::v_table_ident(std::string& class_name)
+std::string Creator_x86::v_table_ident(std::string class_name)
 {
     return "_VTABLE." + class_name;
 }
@@ -95,8 +95,7 @@ void Creator_x86::visitClsDefNoInher(ClsDefNoInher *clsdefnoinher)
 
     visitIdent(clsdefnoinher->ident_);
 
-    this->instruction_manager.new_vtable(
-            this->v_table_ident(clsdefnoinher->ident_),
+    this->instruction_manager.new_vtable(clsdefnoinher->ident_,
             this->fr_env.get_class_methods_list(clsdefnoinher->ident_));
 
     clsdefnoinher->listclsdef_->accept(this);
@@ -111,8 +110,7 @@ void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
     visitIdent(clsdefinher->ident_1);
     visitIdent(clsdefinher->ident_2);
 
-    this->instruction_manager.new_vtable(
-            this->v_table_ident(clsdefinher->ident_1),
+    this->instruction_manager.new_vtable(clsdefinher->ident_1,
             this->fr_env.get_class_methods_list(clsdefinher->ident_1));
 
     clsdefinher->listclsdef_->accept(this);
@@ -211,7 +209,7 @@ void Creator_x86::visitStmAssObj(StmAssObj* stmassobj)
     stmassobj->type_->accept(this);
 
     std::string& cls_ident = (dynamic_cast<Class*>(stmassobj->type_))->ident_;
-    this->instruction_manager.alloc_object(this->v_table_ident(cls_ident),
+    this->instruction_manager.alloc_object(cls_ident,
             this->fr_env.get_class_size(cls_ident));
 
     this->instruction_manager.pop_to_addr_from_ESI();
@@ -375,7 +373,7 @@ void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)
     stminitobj->type_->accept(this);
     this->env.add_variable(this->declaration_type, stminitobj->ident_);
     std::string& cls_ident = (dynamic_cast<Class*>(stminitobj->type_))->ident_;
-    this->instruction_manager.alloc_object(this->v_table_ident(cls_ident),
+    this->instruction_manager.alloc_object(cls_ident,
             this->fr_env.get_class_size(cls_ident));
 }
 
