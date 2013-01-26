@@ -96,7 +96,7 @@ public:
     void jump_if_0(int label_id);
     void jump_if_not0(int label_id);
     void cmp_stack();
-    void loop(int label_id);
+    void foreach_jump(int counter_var_pos, int label);
 
     // Funciton:
     void function_prologue();
@@ -106,7 +106,8 @@ public:
 
     // Op on reg:
     void pop_to_EAX();
-    void dereference_from_ESI_to_ECX_minus_1();
+    //void dereference_from_ESI_to_ECX_minus_1();
+    void dereference_from_ESI_to_var(int varpos);
     void push_ECX();
     void pop_ECX();
 

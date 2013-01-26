@@ -511,19 +511,28 @@ void InstructionManager::concat_str_on_stack()
 
 }
 
-void InstructionManager::loop(int label_id)
+void InstructionManager::foreach_jump(int counter_var_pos, int label)
 {
-    Block::instr_ptr_t loop(new instruction::Loop(Block::ident_prefix + int2str(label_id)));
-    this->add(loop);
+    // counter_info - 1
+    // if counter_info > 0 : jump start
+    Block::instr_ptr_t dec(new instruction::Dec(arg(MEMORY, EBP, -4 * counter_var_pos)));
+    Block::instr_ptr_t mov_counter(new instruction::Mov(arg(MEMORY, EBP, -4 * counter_var_pos), arg(REGISTER, EAX)));
+    Block::instr_ptr_t compare(new instruction::Cmp(arg(CONSTANT_FIELD, 0), arg(REGISTER, EAX)));
+    this->add(dec, mov_counter, compare);
+    this->jump_if(InstructionManager::GTH, label);
 }
 
-void InstructionManager::dereference_from_ESI_to_ECX_minus_1()
+void InstructionManager::dereference_from_ESI_to_var(int varpos)
 {
     Block::instr_ptr_t load_array_len(new instruction::Mov(arg(MEMORY, ESI), arg(REGISTER, ECX)));
     //Block::instr_ptr_t deref(new instruction::Mov(arg(MEMORY, ECX), arg(REGISTER, ECX)));
-    Block::instr_ptr_t decrease(new instruction::Dec(arg(REGISTER, ECX)));
-    this->add(load_array_len, decrease);
+    //Block::instr_ptr_t decrease(new instruction::Dec(arg(REGISTER, ECX)));
+    Block::instr_ptr_t store_in_var(new instruction::Mov(arg(REGISTER, ECX), arg(MEMORY, EBP, -4 * varpos)));
+    //this->add(load_array_len, deref, decrease, store_in_var);
+    this->add(load_array_len, store_in_var);
 }
+
+
 
 void InstructionManager::push_ECX()
 {
@@ -568,11 +577,13 @@ void InstructionManager::dereference_var_to_var(int var_1_pos, int var_2_pos)
     Block::instr_ptr_t mov1(
         new instruction::Mov(
                 arg(MEMORY, EBP, -4 * var_1_pos), arg(REGISTER, EAX)));
-    //Block::instr_ptr_t deref(new instruction::Mov(arg(MEMORY, EAX), arg(REGISTER, EAX)));
+    Block::instr_ptr_t deref(
+            new instruction::Mov(
+                    arg(MEMORY, EAX), arg(REGISTER, EAX)));
     Block::instr_ptr_t mov2(
         new instruction::Mov(
                 arg(REGISTER, EAX), arg(MEMORY, EBP, -4 * var_2_pos)));
-    this->add(mov1, mov2);
+    this->add(mov1, deref, mov2);
 }
 
 void InstructionManager::var_to_ECX(int var_pos)

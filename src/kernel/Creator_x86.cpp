@@ -294,23 +294,27 @@ void Creator_x86::visitStmForeach(StmForeach *stmforeach)
     visitIdent(stmforeach->ident_);
 
     this->env.prepare();
-    std::string ecx_var_name(Creator_x86::named_temp_on_stack_prefix);
-    ecx_var_name += "foreach ECX";  // save ECX in case of neasted use
+    std::string counter_name(Creator_x86::named_temp_on_stack_prefix);
+    counter_name += "foreach counter";
     std::string esi_var_name(Creator_x86::named_temp_on_stack_prefix);
-    esi_var_name += "foreach ESI"; // IDENT reference
+    esi_var_name += "foreach ESI array ident"; // IDENT reference
 
     // loop cond
-    this->instruction_manager.push_ECX();
-    this->env.add_variable(this->fr_env.global_int_type, ecx_var_name);
+    this->instruction_manager.push_literal(0);
+    this->env.add_variable(this->fr_env.global_int_type, counter_name);
+    CompilerEnvironment::VarInfoPtr counter_info = this->env.get_variable(
+                counter_name);
 
     // ptr to array
     stmforeach->liststructuredident_->accept(this);
     this->instruction_manager.dereference_ESI();
     this->instruction_manager.push_ESI();
     this->env.add_variable(this->fr_env.global_int_type, esi_var_name);
+    CompilerEnvironment::VarInfoPtr array_info = this->env.get_variable(
+            esi_var_name);
 
-    // size of array - 1 (iterations)
-    this->instruction_manager.dereference_from_ESI_to_ECX_minus_1();
+    // size of array
+    this->instruction_manager.dereference_from_ESI_to_var(counter_info->position);
 
     // default value as variable from array (make place holder on stack)
     this->instruction_manager.push_literal(0);
@@ -318,18 +322,13 @@ void Creator_x86::visitStmForeach(StmForeach *stmforeach)
     CompilerEnvironment::VarInfoPtr foreach_var_info = this->env.get_variable(
                         stmforeach->ident_);
 
+
     this->instruction_manager.new_block(start);
-    CompilerEnvironment::VarInfoPtr var_info = this->env.get_variable(
-            esi_var_name);
-    // in first iteration will omit size of array
-    this->instruction_manager.add_to_var(var_info->position, 4);
-    this->instruction_manager.dereference_var_to_var(var_info->position,
+    this->instruction_manager.add_to_var(array_info->position, 4);
+    this->instruction_manager.dereference_var_to_var(array_info->position,
             foreach_var_info->position);
     stmforeach->stmt_->accept(this);
-    this->instruction_manager.loop(start);
-
-    this->instruction_manager.var_to_ECX(
-            this->env.get_variable(ecx_var_name)->position);
+    this->instruction_manager.foreach_jump(counter_info->position, start);
 
     int diff = this->env.back();
     this->instruction_manager.add_to_ESP(diff);
@@ -427,16 +426,19 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 
 void Creator_x86::visitArrayIdent(ArrayIdent * tableval)
 {
-    Type* array_ident_type = this->ident_type;
     this->instruction_manager.push_ESI();
+    Type* array_ident_type = this->ident_type;
     tableval->expr_->accept(this);
-    this->ident_type = array_ident_type;
     this->instruction_manager.pop_stack_snd_to_ESI();
+    this->ident_type = array_ident_type;
 
     this->visit_ident(tableval->ident_);
 
+    this->instruction_manager.dereference_ESI();
+
     this->instruction_manager.add_to_ESI(Creator_x86::words_per_var);
     this->instruction_manager.pop_add_to_ESI();
+
     this->ident_type = dynamic_cast<TType*>(this->ident_type)->type_;
 }
 
