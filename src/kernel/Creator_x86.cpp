@@ -709,7 +709,7 @@ void Creator_x86::visitEOr(EOr *eor)
     eor->expr_2->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
     // TODO: Jumps optimization;
-    this->instruction_manager.jump_if_not0(this_false_label);
+    this->instruction_manager.jump_if_0(this_false_label);
     this->instruction_manager.jump(this_true_label);
 
     this->last_true_label = this_true_label;

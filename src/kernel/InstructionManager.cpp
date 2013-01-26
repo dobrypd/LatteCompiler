@@ -296,24 +296,28 @@ void InstructionManager::mul_on_stack()
 
 void InstructionManager::div_on_stack()
 {
-    Block::instr_ptr_t load1(new instruction::Pop(arg(REGISTER, EAX)));
-    Block::instr_ptr_t load2(new instruction::Pop(arg(REGISTER, EDX)));
+    // a / b
+    Block::instr_ptr_t loadb(new instruction::Pop(arg(REGISTER, ECX))); // b
+    Block::instr_ptr_t loada(new instruction::Pop(arg(REGISTER, EAX))); // a
     Block::instr_ptr_t cpy(new instruction::Mov(arg(REGISTER, EAX), arg(REGISTER, EDX)));
     Block::instr_ptr_t sign(new instruction::Sar(arg(CONSTANT_FIELD, 31), arg(REGISTER, EDX)));
-    Block::instr_ptr_t div(new instruction::Idiv(arg(MEMORY, ESP)));
-    this->add(load1, load2, cpy, sign);
-    this->add(div);
+    Block::instr_ptr_t div(new instruction::Idiv(arg(REGISTER, ECX)));
+    Block::instr_ptr_t store_result(new instruction::Push(arg(REGISTER, EAX)));
+    this->add(loadb, loada, cpy, sign);
+    this->add(div, store_result);
 }
 
 void InstructionManager::mod_on_stack()
 {
-    Block::instr_ptr_t load(new instruction::Pop(arg(REGISTER, EAX)));
+    // a % b
+    Block::instr_ptr_t loadb(new instruction::Pop(arg(REGISTER, ECX))); // b
+    Block::instr_ptr_t loada(new instruction::Pop(arg(REGISTER, EAX))); // a
     Block::instr_ptr_t cpy(new instruction::Mov(arg(REGISTER, EAX), arg(REGISTER, EDX)));
     Block::instr_ptr_t sign(new instruction::Sar(arg(CONSTANT_FIELD, 31), arg(REGISTER, EDX)));
-    Block::instr_ptr_t div(new instruction::Idiv(arg(MEMORY, ESP)));
-    Block::instr_ptr_t store_result(new instruction::Mov(arg(REGISTER, EAX), arg(MEMORY, ESP)));
-    this->add(load, cpy, sign, div);
-    this->add(store_result);
+    Block::instr_ptr_t div(new instruction::Idiv(arg(REGISTER, ECX)));
+    Block::instr_ptr_t store_result(new instruction::Push(arg(REGISTER, EDX)));
+    this->add(loadb, loada, cpy, sign);
+    this->add(div, store_result);
 }
 
 int InstructionManager::cstr_add(std::string & str)
@@ -445,7 +449,6 @@ void InstructionManager::jump_if(cmp_val_t type, int label_id)
 
 void InstructionManager::jump_if_0(int label_id)
 {
-    //Block::instr_ptr_t decrease_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
     Block::instr_ptr_t pop(new instruction::Pop(arg(REGISTER, EAX)));
     Block::instr_ptr_t instr(new instruction::Cmp(arg(CONSTANT_FIELD, 0), arg(REGISTER, EAX)));
     this->add(pop, instr);
@@ -454,9 +457,8 @@ void InstructionManager::jump_if_0(int label_id)
 
 void InstructionManager::jump_if_not0(int label_id)
 {
-    //Block::instr_ptr_t decrease_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
     Block::instr_ptr_t pop(new instruction::Pop(arg(REGISTER, EAX)));
-    Block::instr_ptr_t instr(new instruction::Cmp(arg(CONSTANT_FIELD, 0), arg(MEMORY, ESP, -4)));
+    Block::instr_ptr_t instr(new instruction::Cmp(arg(CONSTANT_FIELD, 0), arg(REGISTER, EAX)));
     this->add(pop, instr);
     this->jump_if(InstructionManager::NE, label_id);
 }

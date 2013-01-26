@@ -1018,7 +1018,7 @@ void ASTChecker::visitEOr(EOr* eor)
     this->check_type(0, type1, 0, type2, eor->line_number);
     if ((!(check_is<Bool *>(type1))) || (!(check_is<Bool *>(type2))))
     {
-        std::string msg = "|| should be only applied to booleans and numbers not [";
+        std::string msg = "|| should be only applied to booleans not [";
         msg += type_pretty_print(type1);
         msg += ", ";
         msg += type_pretty_print(type2);

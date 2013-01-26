@@ -1,0 +1,10 @@
+//OR
+
+int main() {
+    if (false || true) {
+        printString("good");
+    } else {
+        printString("not good");
+    }
+    return 0;
+}
