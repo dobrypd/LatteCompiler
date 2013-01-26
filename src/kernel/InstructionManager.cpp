@@ -325,14 +325,11 @@ void InstructionManager::mod_on_stack()
 
 int InstructionManager::cstr_add(std::string & str)
 {
-    if (debug) std::cout << "adding constant string " << str << " ";
     std::map<std::string, int>::iterator it = this->constant_strings.find(str);
     int identifier = this->constant_strings_no;
     if (it == this->constant_strings.end()) {
-        if (debug) std::cout << "and it's new" << std::endl;
         this->constant_strings[str] = this->constant_strings_no++;
     } else {
-        if (debug) std::cout << "and already exists on position " << it->second << std::endl;
         identifier = it->second;
     }
     return identifier;
@@ -484,6 +481,11 @@ void InstructionManager::cmp_stack()
 void InstructionManager::concat_str_on_stack()
 {
     // call concatenating function
+    Block::instr_ptr_t pop1(new instruction::Pop(arg(REGISTER, EDX)));
+    Block::instr_ptr_t pop2(new instruction::Pop(arg(REGISTER, ECX)));
+    Block::instr_ptr_t push1(new instruction::Push(arg(REGISTER, EDX)));
+    Block::instr_ptr_t push2(new instruction::Push(arg(REGISTER, ECX)));
+    this->add(pop1, pop2, push1, push2);
     Block::instr_ptr_t call_concatingfunction(new instruction::Call(InstructionManager::add_strings));
     Block::instr_ptr_t remove_args(new instruction::Add(arg(CONSTANT_FIELD, 8), arg(REGISTER, ESP)));
     Block::instr_ptr_t push_result(new instruction::Push(arg(REGISTER, EAX)));

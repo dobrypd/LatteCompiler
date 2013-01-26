@@ -3,7 +3,7 @@
 echo "Run only from scripts directory"
 
 # FLAG, 1 if you dont want program outputs
-DELETE_OUTPUTS=1
+DELETE_OUTPUTS=0
 # FLAG IF want Latte to show debug informations
 DEBUG_OUT=0
 
@@ -19,15 +19,15 @@ do
     echo -en "\033[38m\033[32mLatte runned on file : \033[0m"$i"\n"
     if [ $DEBUG_OUT == 0 ]
     then
-        $LATTE $i 2> /dev/null
+        $LATTE $i -o${PROJECT_DIR}a.out 2> /dev/null
     else
-        $LATTE $i
+        $LATTE $i -o${PROJECT_DIR}a.out 
     fi
     
     BN=$(basename $i)
     DN=$(dirname $i)
     
-    a.out > $i.PROUT
+    ${PROJECT_DIR}a.out > $i.PROUT
     
     echo -en "\033[38m\033[33mChecking outputs for: \033[0m"$i"\n"
     OUT_FN="${i%.*}".output
@@ -43,7 +43,7 @@ do
         fi
     fi
     
-    rm a.out
+    rm ${PROJECT_DIR}a.out
 done
 
 
