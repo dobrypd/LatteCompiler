@@ -34,12 +34,16 @@ int CompilerEnvironment::back()
     return current_block_size;
 }
 
-void CompilerEnvironment::add_variable(Type *type, std::string name)
+void CompilerEnvironment::add_variable(Type *type, std::string name, bool is_argument)
 {
     MapPtr tip = this->var_tip();
     VarInfoPtr new_variable(new CompilerEnvironment::var_info);
     new_variable->type = type;
-    new_variable->position = ++this->varaibles_on_stack;
+    if (is_argument){
+        new_variable->position = -(++this->varaibles_on_stack) - 1; // -1 because of Return address
+    } else {
+        new_variable->position = ++this->varaibles_on_stack;
+    }
     (*tip)[name] = new_variable;
 }
 

@@ -1,0 +1,11 @@
+int f(int a, int b, int c){
+    printInt(a);
+    printInt(b);
+    printInt(c);
+    return 123;
+}
+
+int main(){
+    f(1, 2, 3);
+    return 0;
+}

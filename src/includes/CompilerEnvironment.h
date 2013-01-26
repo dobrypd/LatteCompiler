@@ -40,7 +40,7 @@ public:
 
     int stack_size();
 
-    void add_variable(Type* type, std::string name);
+    void add_variable(Type* type, std::string name, bool is_argument=false);
     void add_vtable();
 
     VarInfoPtr get_variable(std::string& name);

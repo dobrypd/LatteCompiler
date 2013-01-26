@@ -81,6 +81,7 @@ void Creator_x86::visitFnDef(FnDef *fndef)
     fndef->type_->accept(this);
     visitIdent(fndef->ident_);
     fndef->listarg_->accept(this);
+    this->env.new_fun();  // To reset position size to 0!
     fndef->blk_->accept(this);
     if (check_is<Void*>(fndef->type_))
         this->instruction_manager.function_epilogue(); // TODO: want it?
@@ -119,7 +120,7 @@ void Creator_x86::visitClsDefInher(ClsDefInher *clsdefinher)
 
 void Creator_x86::visitArgument(Argument *argument)
 {
-    this->env.add_variable(argument->type_, argument->ident_);
+    this->env.add_variable(argument->type_, argument->ident_, true);
 
     argument->type_->accept(this);
     visitIdent(argument->ident_);
@@ -133,12 +134,13 @@ void Creator_x86::visitMethodDef(MethodDef *methoddef)
     this->env.prepare();
     this->env.new_fun();
     // pointer to vtable'll be in in object - (get it by self!).
-    this->env.add_variable(&(this->last_class_type), Creator_x86::self_name);
+    this->env.add_variable(&(this->last_class_type), Creator_x86::self_name, true);
 
     methoddef->type_->accept(this);
     visitIdent(methoddef->ident_);
     // Add arguments.
     methoddef->listarg_->accept(this);
+    this->env.new_fun();  // To reset position size to 0!
 
     // Code block.
     methoddef->blk_->accept(this);
@@ -825,7 +827,7 @@ void Creator_x86::visitListStructuredIdent(ListStructuredIdent* liststructuredid
 
 void Creator_x86::visitListExpr(ListExpr* listexpr)
 {
-    for (ListExpr::iterator i = listexpr->begin() ; i != listexpr->end() ; ++i)
+    for (ListExpr::reverse_iterator i = listexpr->rbegin() ; i != listexpr->rend() ; ++i)
     {
         int label_t = this->last_true_label = this->next_label++;
         int label_f = this->last_false_label = this->next_label++;
