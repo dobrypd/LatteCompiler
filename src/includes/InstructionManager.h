@@ -62,6 +62,7 @@ private:
     void write_virtual_tables(std::ostream& stream);
 
     static const char* malloc_name;
+    static const char* add_strings;
 public:
     InstructionManager();
 

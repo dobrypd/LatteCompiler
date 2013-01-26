@@ -48,6 +48,8 @@ void Block::add(instr_ptr_t instruction)
 
 
 const char * InstructionManager::malloc_name = "malloc";
+// Add strings from runtime
+const char * InstructionManager::add_strings = "addStrings_name_with_name_mangling_5594478149272763309697";
 
 InstructionManager::InstructionManager(): constant_strings_no(0)
 {
@@ -477,6 +479,8 @@ void InstructionManager::cmp_stack()
 
 void InstructionManager::concat_str_on_stack()
 {
+    // call concatenating function
+
 }
 
 void InstructionManager::loop(int label_id)
