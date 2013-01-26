@@ -123,6 +123,7 @@ public:
     void push_ESI();
     void pop_ESI();
     void push_EAX();
+    void pop_stack_snd_to_ESI();
 
     // Incrementation
     void increment_in_ESI(int inc_by); // inc in address in ESI

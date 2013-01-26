@@ -115,7 +115,7 @@ Jump::Jump(std::string label) : Instruction("jmp"), label(label) { }
 Loop::Loop(std::string label) : Instruction("loop"), label(label) { }
 ConditionJump::ConditionJump(std::string label, std::string condition_string)
     : Instruction("j"), label(label), condition_string(condition_string) { }
-Cmp::Cmp(arg_t arg1, arg_t arg2) : Instruction("cmp", 2, arg1, arg2) { }
+Cmp::Cmp(arg_t arg1, arg_t arg2) : Instruction("cmpl", 2, arg1, arg2) { }
 Call::Call(std::string label) : Instruction("call"), label(label) { }
 Call::Call(arg_t arg) : Instruction("call", 1, arg), label("") { }
 Ret::Ret() : Instruction("ret") { }

@@ -423,15 +423,15 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 void Creator_x86::visitArrayIdent(ArrayIdent * tableval)
 {
     this->instruction_manager.push_ESI();
-
     tableval->expr_->accept(this);
+
+    this->instruction_manager.pop_stack_snd_to_ESI();
 
     this->visit_ident(tableval->ident_);
 
     // First element is size, add it:
     this->instruction_manager.add_to_ESI(Creator_x86::words_per_var);
     this->instruction_manager.pop_add_to_ESI();
-    this->instruction_manager.pop_ESI();
     this->ident_type = dynamic_cast<TType*>(this->ident_type)->type_;
 }
 
@@ -533,11 +533,7 @@ void Creator_x86::function_call(std::string& ident,
     if (fun->position < 0) {
         arguments->accept(this);
         this->instruction_manager.function_call(ident);
-
-        // If extern remove arguments from stack
-        if (fun->is_extern) {
-            this->instruction_manager.add_to_ESP(fun->arguments.size());
-        }
+        this->instruction_manager.add_to_ESP(fun->arguments.size());
     }
     else
     {
@@ -547,6 +543,7 @@ void Creator_x86::function_call(std::string& ident,
         this->instruction_manager.push_ESI();  //SELF
         arguments->accept(this);
         this->method_call(this->last_class_type.ident_, ident);
+        this->instruction_manager.add_to_ESP(1 + arguments->size());
     }
 
 }
@@ -563,7 +560,8 @@ void Creator_x86::visitEApp(EApp *eapp)
 
     this->last_type = fun->ret_type;
     this->e_was_rel = false;
-    this->instruction_manager.push_EAX();
+    if (!check_is<Void*>(fun->ret_type))
+        this->instruction_manager.push_EAX();
 }
 
 void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
@@ -587,10 +585,12 @@ void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
     this->instruction_manager.push_ESI();  // object
     emethodapp->listexpr_->accept(this);  // arguments
     this->method_call(cls_type->ident_, sid->ident_);
+    this->instruction_manager.add_to_ESP(1 + emethodapp->listexpr_->size());
 
     this->last_type = fun->ret_type;
     this->e_was_rel = false;
-    this->instruction_manager.push_EAX();
+    if (!check_is<Void*>(fun->ret_type))
+        this->instruction_manager.push_EAX();
 }
 
 void Creator_x86::visitEString(EString *estring)

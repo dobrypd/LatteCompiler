@@ -58,7 +58,8 @@ InstructionManager::InstructionManager(): constant_strings_no(0)
 
 void InstructionManager::write_constant_strings(std::ostream& stream)
 {
-    stream << "\t.section .rodata" << std::endl;
+    if (this->constant_strings.size() > 0)
+        stream << "\t.section .rodata" << std::endl;
     for (std::map<std::string, int>::iterator
             it = this->constant_strings.begin();
             it != this->constant_strings.end(); it++) {
@@ -222,12 +223,12 @@ void InstructionManager::method_call(int position)
     this->add(load_vtable_to_EAX, add_offset, dereference, call);
 }
 
-void InstructionManager::add_to_ESP(int value)
+void InstructionManager::add_to_ESP(int variables)
 {
 //    if ((debug) and (value == 0))
 //        std::cerr << "adding 0 to esp has no sense "
 //        << __FILE__ << ":" << __LINE__ << std::endl;
-    Block::instr_ptr_t add(new instruction::Add(arg(CONSTANT_FIELD, value * 4), arg(REGISTER, ESP)));
+    Block::instr_ptr_t add(new instruction::Add(arg(CONSTANT_FIELD, variables * 4), arg(REGISTER, ESP)));
     this->add(add);
 }
 
@@ -444,27 +445,32 @@ void InstructionManager::jump_if(cmp_val_t type, int label_id)
 
 void InstructionManager::jump_if_0(int label_id)
 {
-    Block::instr_ptr_t decrease_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
-    Block::instr_ptr_t instr(new instruction::Cmp(arg(MEMORY, ESP, 4), arg(CONSTANT_FIELD, 0)));
-    this->add(decrease_stack, instr);
+    //Block::instr_ptr_t decrease_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
+    Block::instr_ptr_t pop(new instruction::Pop(arg(REGISTER, EAX)));
+    Block::instr_ptr_t instr(new instruction::Cmp(arg(CONSTANT_FIELD, 0), arg(REGISTER, EAX)));
+    this->add(pop, instr);
     this->jump_if(InstructionManager::EQU, label_id);
 }
 
 void InstructionManager::jump_if_not0(int label_id)
 {
-    Block::instr_ptr_t decrease_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
-    Block::instr_ptr_t instr(new instruction::Cmp(arg(MEMORY, ESP), arg(CONSTANT_FIELD, 0)));
-    this->add(decrease_stack, instr);
+    //Block::instr_ptr_t decrease_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
+    Block::instr_ptr_t pop(new instruction::Pop(arg(REGISTER, EAX)));
+    Block::instr_ptr_t instr(new instruction::Cmp(arg(CONSTANT_FIELD, 0), arg(MEMORY, ESP, -4)));
+    this->add(pop, instr);
     this->jump_if(InstructionManager::NE, label_id);
 }
 
 void InstructionManager::cmp_stack()
 {
-    // USE EAX
-    Block::instr_ptr_t decrease_stack(new instruction::Add(arg(CONSTANT_FIELD, 8), arg(REGISTER, ESP)));
-    Block::instr_ptr_t store(new instruction::Mov(arg(MEMORY, ESP, 8), arg(REGISTER, EAX)));
-    Block::instr_ptr_t cmp(new instruction::Cmp(arg(MEMORY, ESP, 4), arg(REGISTER, EAX)));
-    this->add(decrease_stack, store, cmp);
+    // USE EDX and ECX
+    //Block::instr_ptr_t decrease_stack(new instruction::Add(arg(CONSTANT_FIELD, 8), arg(REGISTER, ESP)));
+    //Block::instr_ptr_t store(new instruction::Mov(arg(MEMORY, ESP, -8), arg(REGISTER, EAX)));
+    Block::instr_ptr_t pop1(new instruction::Pop(arg(REGISTER, EDX)));
+    Block::instr_ptr_t pop2(new instruction::Pop(arg(REGISTER, ECX)));
+    //Block::instr_ptr_t cmp(new instruction::Cmp(arg(REGISTER, EAX), arg(MEMORY, ESP, -4))); // XXX: check it
+    Block::instr_ptr_t cmp(new instruction::Cmp(arg(REGISTER, EDX), arg(REGISTER, ECX)));
+    this->add(pop1, pop2, cmp);
 }
 
 void InstructionManager::concat_str_on_stack()
@@ -512,6 +518,14 @@ void InstructionManager::push_EAX()
 {
     Block::instr_ptr_t instr(new instruction::Push(arg(REGISTER, EAX)));
     this->add(instr);
+}
+
+void InstructionManager::pop_stack_snd_to_ESI()
+{
+    Block::instr_ptr_t PopFST(new instruction::Pop(arg(REGISTER, EAX)));
+    Block::instr_ptr_t PopSND(new instruction::Pop(arg(REGISTER, ESI)));
+    Block::instr_ptr_t PushFST(new instruction::Push(arg(REGISTER, EAX)));
+    this->add(PopFST, PopSND, PushFST);
 }
 
 void InstructionManager::dereference_var_to_var(int var_1_pos, int var_2_pos)

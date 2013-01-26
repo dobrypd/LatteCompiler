@@ -272,7 +272,7 @@ Environment::MethodsPtr Environment::get_class_methods_list(std::string& cls_nam
     ClsInfoPtr cls = this->get_class(cls_name);
     std::list<ClsInfoPtr> inheritance_chain;
     while (cls) {
-        inheritance_chain.push_back(cls);
+        inheritance_chain.push_front(cls);
         cls = cls->lat_cls_parent;
     }
     for (std::list<ClsInfoPtr>::iterator it = inheritance_chain.begin();

@@ -1,22 +1,22 @@
 /* Test boolean operators */
 
 int main () {
-  int x = 4;
-  if (3 <= x && 4 != 2 && true) {
-    printBool(true);
-  } else {
-    printString("apa");
-  }
+  //int x = 4;
+  //if (3 <= x && 4 != 2 && true) {
+  //  printBool(true);
+  //} else {
+  //  printString("apa");
+  //}
 
-  printBool(true == true || dontCallMe(1));
+  //printBool(true == true || dontCallMe(1));
   printBool(4 < -5 && dontCallMe(2));
 
-  printBool(4 == x && true == !false && true);
+  //printBool(4 == x && true == !false && true);
 
-  printBool(implies(false,false));
-  printBool(implies(false,true));
-  printBool(implies(true,false));
-  printBool(implies(true,true));
+  //printBool(implies(false,false));
+  //printBool(implies(false,true));
+  //printBool(implies(true,false));
+  //printBool(implies(true,true));
   return 0 ;
 
 }
