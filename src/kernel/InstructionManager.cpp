@@ -283,6 +283,7 @@ void InstructionManager::add_on_stack()
 void InstructionManager::sub_on_stack()
 {
     Block::instr_ptr_t load(new instruction::Pop(arg(REGISTER, EAX)));
+    // TODO:
     Block::instr_ptr_t sub(new instruction::Sub(arg(REGISTER, EAX), arg(MEMORY, ESP)));
     this->add(load, sub);
 }
@@ -484,7 +485,9 @@ void InstructionManager::concat_str_on_stack()
 {
     // call concatenating function
     Block::instr_ptr_t call_concatingfunction(new instruction::Call(InstructionManager::add_strings));
-    this->add(call_concatingfunction);
+    Block::instr_ptr_t remove_args(new instruction::Add(arg(CONSTANT_FIELD, 8), arg(REGISTER, ESP)));
+    Block::instr_ptr_t push_result(new instruction::Push(arg(REGISTER, EAX)));
+    this->add(call_concatingfunction, remove_args, push_result);
 
 }
 

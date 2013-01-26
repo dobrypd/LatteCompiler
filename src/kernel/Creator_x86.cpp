@@ -637,10 +637,11 @@ void Creator_x86::visitEAdd(EAdd *eadd)
 {
     eadd->expr_1->accept(this);
     eadd->expr_2->accept(this);
-    if (check_is<Str *>(this->last_type))
+    if (check_is<Str *>(this->last_type)) {
         this->instruction_manager.concat_str_on_stack();
-    else
+    } else {
         eadd->addop_->accept(this);
+    }
 }
 
 void Creator_x86::visitERel(ERel *erel)

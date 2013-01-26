@@ -1,0 +1,14 @@
+int main() {
+	printString (repStr("=",60));
+        return 0 ;
+}
+
+string repStr(string s, int n) {
+  string r = "";
+  int i = 0;
+  while(i<n) {
+    r = r + s;
+    i++;
+  }
+ return r;
+}
