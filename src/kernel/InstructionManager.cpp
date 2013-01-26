@@ -324,11 +324,14 @@ void InstructionManager::mod_on_stack()
 
 int InstructionManager::cstr_add(std::string & str)
 {
-    std::map<std::string, int>::iterator it = this->constant_strings.find("");
+    if (debug) std::cout << "adding constant string " << str << " ";
+    std::map<std::string, int>::iterator it = this->constant_strings.find(str);
     int identifier = this->constant_strings_no;
     if (it == this->constant_strings.end()) {
+        if (debug) std::cout << "and it's new" << std::endl;
         this->constant_strings[str] = this->constant_strings_no++;
     } else {
+        if (debug) std::cout << "and already exists on position " << it->second << std::endl;
         identifier = it->second;
     }
     return identifier;
@@ -480,6 +483,8 @@ void InstructionManager::cmp_stack()
 void InstructionManager::concat_str_on_stack()
 {
     // call concatenating function
+    Block::instr_ptr_t call_concatingfunction(new instruction::Call(InstructionManager::add_strings));
+    this->add(call_concatingfunction);
 
 }
 
