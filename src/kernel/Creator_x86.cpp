@@ -367,6 +367,7 @@ void Creator_x86::visitStmInitArray(StmInitArray *stminitarray)
     stminitarray->expr_->accept(this);
     this->env.add_variable(this->declaration_type, stminitarray->ident_);
     this->instruction_manager.alloc_array();
+
 }
 
 void Creator_x86::visitStmInitObj(StmInitObj *stminitobj)
@@ -424,14 +425,14 @@ void Creator_x86::visitSingleIdent(SingleIdent* singleident)
 
 void Creator_x86::visitArrayIdent(ArrayIdent * tableval)
 {
+    Type* array_ident_type = this->ident_type;
     this->instruction_manager.push_ESI();
     tableval->expr_->accept(this);
-
+    this->ident_type = array_ident_type;
     this->instruction_manager.pop_stack_snd_to_ESI();
 
     this->visit_ident(tableval->ident_);
 
-    // First element is size, add it:
     this->instruction_manager.add_to_ESI(Creator_x86::words_per_var);
     this->instruction_manager.pop_add_to_ESI();
     this->ident_type = dynamic_cast<TType*>(this->ident_type)->type_;

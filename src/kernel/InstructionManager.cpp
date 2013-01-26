@@ -246,18 +246,34 @@ void InstructionManager::pop_to_EAX()
 // Got len on top of a stack. Remove from it.
 void InstructionManager::alloc_array()
 {
+
+    // Mov stack top to  EAX
+    // EAX + 1
+    // // EAX * 4
+    // push EAX
+    // call
+    // pop / not used /
+    // pop EBX (size)
+    // move EBX to addr
+    // push EAX // alloc returned address
+
+
     // DO NOT FORGET ABOUT ARRAY SIZE
-    Block::instr_ptr_t dubble_arr_size(new instruction::Push(arg(MEMORY, ESP)));
-    Block::instr_ptr_t add_arr_size(new instruction::Inc(arg(MEMORY, ESP)));
-    Block::instr_ptr_t mul_by_word_size(new instruction::Imul(arg(CONSTANT_FIELD, 4), arg(MEMORY, ESP)));
+    Block::instr_ptr_t size_to_EAX(new instruction::Mov(arg(MEMORY, ESP), arg(REGISTER, EAX)));
+    Block::instr_ptr_t add_arr_size1(new instruction::Inc(arg(REGISTER, EAX)));
+    //Block::instr_ptr_t mul_by_word_size(new instruction::Imul(arg(CONSTANT_FIELD, 4), arg(REGISTER, EAX)));
+    Block::instr_ptr_t push_argument(new instruction::Push(arg(REGISTER, EAX)));
     Block::instr_ptr_t call_malloc(new instruction::Call(InstructionManager::malloc_name));
+    //this->add(size_to_EAX, add_arr_size1, mul_by_word_size, push_argument);
+    this->add(size_to_EAX, add_arr_size1, push_argument);
+    this->add(call_malloc);
     // Assign size of array
     // Remove this increased size
-    Block::instr_ptr_t remove_increased_size_from_stack(new instruction::Inc(arg(REGISTER, ESP)));
-    Block::instr_ptr_t get_size(new instruction::Pop(arg(MEMORY, EAX)));
-    Block::instr_ptr_t push_address(new instruction::Push(arg(REGISTER, EAX)));
-    this->add(dubble_arr_size, add_arr_size, mul_by_word_size, call_malloc);
-    this->add(remove_increased_size_from_stack, get_size, push_address);
+    Block::instr_ptr_t remove_increased_size_from_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
+    Block::instr_ptr_t get_size(new instruction::Pop(arg(REGISTER, EBX)));
+    Block::instr_ptr_t add_address(new instruction::Mov(arg(REGISTER, EBX), arg(MEMORY, EAX)));
+    Block::instr_ptr_t push_addr(new instruction::Push(arg(REGISTER, EAX)));
+    this->add(remove_increased_size_from_stack, get_size, add_address, push_addr);
 }
 
 void InstructionManager::alloc_object(std::string class_name, int all_fields)
@@ -350,9 +366,11 @@ void InstructionManager::jump(int id)
 
 void InstructionManager::pop_add_to_ESI()
 {
-    Block::instr_ptr_t add(new instruction::Add(arg(MEMORY, ESP), arg(REGISTER, ESI)));
-    Block::instr_ptr_t pop_stack(new instruction::Inc(arg(REGISTER, ESP)));
-    this->add(add, pop_stack);
+    Block::instr_ptr_t pop(new instruction::Pop(arg(REGISTER, EAX)));
+    Block::instr_ptr_t load_cnst(new instruction::Mov(arg(CONSTANT_FIELD, 4), arg(REGISTER, ECX)));
+    Block::instr_ptr_t mul(new instruction::Imul(arg(REGISTER, ECX), arg(REGISTER, EAX)));
+    Block::instr_ptr_t add(new instruction::Add(arg(REGISTER, EAX), arg(REGISTER, ESI)));
+    this->add(pop, load_cnst, mul, add);
 }
 
 void InstructionManager::dereference_ESI_to_stack()
@@ -406,7 +424,7 @@ void InstructionManager::dereference_ESI()
 
 void InstructionManager::add_to_ESI(int value)
 {
-    Block::instr_ptr_t instr(new instruction::Mov(arg(CONSTANT_FIELD, value), arg(REGISTER, ESI)));
+    Block::instr_ptr_t instr(new instruction::Add(arg(CONSTANT_FIELD, value), arg(REGISTER, ESI)));
     this->add(instr);
 }
 

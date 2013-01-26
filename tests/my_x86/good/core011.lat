@@ -1,0 +1,14 @@
+int main()
+{
+    int[] a = new int[1000];
+    int x = 123;
+    printInt(a[6]);
+    printInt(x);
+    printInt(a[10]);
+    printInt(x);
+    printInt(a.length);
+    for(int x :a) {
+        printInt(x);
+    }
+    return 0;
+}
