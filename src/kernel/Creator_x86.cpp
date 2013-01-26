@@ -305,6 +305,7 @@ void Creator_x86::visitStmForeach(StmForeach *stmforeach)
 
     // ptr to array
     stmforeach->liststructuredident_->accept(this);
+    this->instruction_manager.dereference_ESI();
     this->instruction_manager.push_ESI();
     this->env.add_variable(this->fr_env.global_int_type, esi_var_name);
 
@@ -321,7 +322,7 @@ void Creator_x86::visitStmForeach(StmForeach *stmforeach)
     CompilerEnvironment::VarInfoPtr var_info = this->env.get_variable(
             esi_var_name);
     // in first iteration will omit size of array
-    this->instruction_manager.add_to_var(var_info->position, 1);
+    this->instruction_manager.add_to_var(var_info->position, 4);
     this->instruction_manager.dereference_var_to_var(var_info->position,
             foreach_var_info->position);
     stmforeach->stmt_->accept(this);
@@ -330,7 +331,8 @@ void Creator_x86::visitStmForeach(StmForeach *stmforeach)
     this->instruction_manager.var_to_ECX(
             this->env.get_variable(ecx_var_name)->position);
 
-    this->env.back();
+    int diff = this->env.back();
+    this->instruction_manager.add_to_ESP(diff);
 
 }
 

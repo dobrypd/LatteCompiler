@@ -520,6 +520,7 @@ void InstructionManager::loop(int label_id)
 void InstructionManager::dereference_from_ESI_to_ECX_minus_1()
 {
     Block::instr_ptr_t load_array_len(new instruction::Mov(arg(MEMORY, ESI), arg(REGISTER, ECX)));
+    //Block::instr_ptr_t deref(new instruction::Mov(arg(MEMORY, ECX), arg(REGISTER, ECX)));
     Block::instr_ptr_t decrease(new instruction::Dec(arg(REGISTER, ECX)));
     this->add(load_array_len, decrease);
 }
@@ -567,6 +568,7 @@ void InstructionManager::dereference_var_to_var(int var_1_pos, int var_2_pos)
     Block::instr_ptr_t mov1(
         new instruction::Mov(
                 arg(MEMORY, EBP, -4 * var_1_pos), arg(REGISTER, EAX)));
+    //Block::instr_ptr_t deref(new instruction::Mov(arg(MEMORY, EAX), arg(REGISTER, EAX)));
     Block::instr_ptr_t mov2(
         new instruction::Mov(
                 arg(REGISTER, EAX), arg(MEMORY, EBP, -4 * var_2_pos)));
