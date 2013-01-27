@@ -1,0 +1,14 @@
+boolean f() {
+    return false;
+}
+
+
+
+int main() {
+    if (f()) {
+        printString("True");
+    } else {
+        printString("False");
+    }
+    return 0;
+}

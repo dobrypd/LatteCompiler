@@ -393,10 +393,12 @@ void Creator_x86::visit_ident(std::string& ident)
             this->instruction_manager.add_to_ESI_val_address(self_var->position);
             this->ident_type = &this->last_class_type;
             var = this->fr_env.get_field(ident, this->last_class->ident);
+
             this->instruction_manager.dereference_ESI();
             this->instruction_manager.add_to_ESI(
-                    (Creator_x86::object_fields_offset + var->position)
-                    * Creator_x86::words_per_var);
+                    (var->position * Creator_x86::words_per_var));
+
+
             this->ident_type = var->type;
         } else {
             // this block variable
@@ -412,8 +414,7 @@ void Creator_x86::visit_ident(std::string& ident)
         frontend::Environment::VarInfoPtr var = this->fr_env.get_field(
                 ident, cls->ident_);
         this->instruction_manager.add_to_ESI(
-                (Creator_x86::object_fields_offset + var->position)
-                * Creator_x86::words_per_var);
+                (var->position * Creator_x86::words_per_var));
         this->ident_type = var->type;
     }
 }
@@ -558,6 +559,9 @@ void Creator_x86::function_call(std::string& ident,
 
 void Creator_x86::visitEApp(EApp *eapp)
 {
+    int last_t = this->last_true_label;
+    int last_f = this->last_false_label;
+
     visitIdent(eapp->ident_);
     frontend::Environment::FunInfoPtr fun;
     if (this->last_class)
@@ -566,14 +570,29 @@ void Creator_x86::visitEApp(EApp *eapp)
 
     this->function_call(eapp->ident_, fun, eapp->listexpr_);
 
+
     this->last_type = fun->ret_type;
-    this->e_was_rel = false;
+
+    this->last_true_label = last_t;
+    this->last_false_label = last_f;
     if (!check_is<Void*>(fun->ret_type))
         this->instruction_manager.push_EAX();
+
+
+    if (check_is<Bool*>(this->last_type)) {
+        this->instruction_manager.jump_if_0(this->last_false_label);
+        this->instruction_manager.jump(this->last_true_label);
+        this->e_was_rel = true;
+    } else {
+        this->e_was_rel = false;
+    }
 }
 
 void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
 {
+    int last_t = this->last_true_label;
+    int last_f = this->last_false_label;
+
     emethodapp->listexpr_->accept(this);  // arguments
     this->ident_type = 0;
     for (ListStructuredIdent::iterator
@@ -597,9 +616,18 @@ void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
     this->instruction_manager.add_to_ESP(1 + emethodapp->listexpr_->size());
 
     this->last_type = fun->ret_type;
-    this->e_was_rel = false;
     if (!check_is<Void*>(fun->ret_type))
         this->instruction_manager.push_EAX();
+
+    this->last_true_label = last_t;
+    this->last_false_label = last_f;
+    if (check_is<Bool*>(this->last_type)) {
+        this->instruction_manager.jump_if_0(this->last_false_label);
+        this->instruction_manager.jump(this->last_true_label);
+        this->e_was_rel = true;
+    } else {
+        this->e_was_rel = false;
+    }
 }
 
 void Creator_x86::visitEString(EString *estring)

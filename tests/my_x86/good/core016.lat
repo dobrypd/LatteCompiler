@@ -1,0 +1,47 @@
+class Point2 {
+  int x;
+  int y;
+
+  void move (int dx, int dy) {
+      printString("moving by");
+      printInt(dx);
+      printInt(dy);
+      printString("moving from");
+      printInt(x);
+      printInt(y);
+     x = x + dx;
+     y = y + dy;
+     printString("to");
+     printInt(x);
+     printInt(y);
+  }
+
+  int getX () { return x; }
+
+  int getY () { return y; }
+}
+
+class Point3 extends Point2 {
+  int z;
+
+  void moveZ (int dz) {
+    z = z + dz;
+  }
+
+  int getZ () { return z; }
+
+}
+
+
+
+
+int main () {
+  Point2 p = new Point3;
+
+  p.move(2,4);
+  p.move(3,5);
+ 
+  printInt(p.getY());  
+  return 0;
+
+}

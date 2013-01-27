@@ -47,7 +47,7 @@ void Block::add(instr_ptr_t instruction)
 }
 
 
-const char * InstructionManager::malloc_name = "malloc";
+const char * InstructionManager::calloc_name = "calloc";
 // Add strings from runtime
 const char * InstructionManager::add_strings = "addStrings_name_with_name_mangling_5594478149272763309697";
 
@@ -261,15 +261,15 @@ void InstructionManager::alloc_array()
     // DO NOT FORGET ABOUT ARRAY SIZE
     Block::instr_ptr_t size_to_EAX(new instruction::Mov(arg(MEMORY, ESP), arg(REGISTER, EAX)));
     Block::instr_ptr_t add_arr_size1(new instruction::Inc(arg(REGISTER, EAX)));
-    Block::instr_ptr_t mul_by_word_size(new instruction::Imul(arg(CONSTANT_FIELD, 4), arg(REGISTER, EAX)));
+    Block::instr_ptr_t mul_by_word_size(new instruction::Push(arg(CONSTANT_FIELD, 4)));
     Block::instr_ptr_t push_argument(new instruction::Push(arg(REGISTER, EAX)));
-    Block::instr_ptr_t call_malloc(new instruction::Call(InstructionManager::malloc_name));
+    Block::instr_ptr_t call_malloc(new instruction::Call(InstructionManager::calloc_name));
     //this->add(size_to_EAX, add_arr_size1, mul_by_word_size, push_argument);
     this->add(size_to_EAX, add_arr_size1, mul_by_word_size, push_argument);
     this->add(call_malloc);
     // Assign size of array
     // Remove this increased size
-    Block::instr_ptr_t remove_increased_size_from_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
+    Block::instr_ptr_t remove_increased_size_from_stack(new instruction::Add(arg(CONSTANT_FIELD, 8), arg(REGISTER, ESP)));
     Block::instr_ptr_t get_size(new instruction::Pop(arg(REGISTER, EBX)));
     Block::instr_ptr_t add_address(new instruction::Mov(arg(REGISTER, EBX), arg(MEMORY, EAX)));
     Block::instr_ptr_t push_addr(new instruction::Push(arg(REGISTER, EAX)));
@@ -279,11 +279,13 @@ void InstructionManager::alloc_array()
 void InstructionManager::alloc_object(std::string class_name, int all_fields)
 {
     // all_fields contains pointer to virtual table (this pointer is in FIRST field)
-    Block::instr_ptr_t obj_size_on_stack(new instruction::Push(arg(CONSTANT_FIELD, all_fields * 4)));
-    Block::instr_ptr_t call_malloc(new instruction::Call(InstructionManager::malloc_name));
-    Block::instr_ptr_t remove_size_from_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
+    Block::instr_ptr_t const_size_to_stack(new instruction::Push(arg(CONSTANT_FIELD, 4)));
+    Block::instr_ptr_t obj_size_on_stack(new instruction::Push(arg(CONSTANT_FIELD, all_fields)));
+    Block::instr_ptr_t call_malloc(new instruction::Call(InstructionManager::calloc_name));
+    Block::instr_ptr_t remove_size_from_stack(new instruction::Add(arg(CONSTANT_FIELD, 8), arg(REGISTER, ESP)));
     Block::instr_ptr_t push_address(new instruction::Push(arg(REGISTER, EAX)));
-    this->add(obj_size_on_stack, call_malloc, remove_size_from_stack, push_address);
+    this->add(const_size_to_stack, obj_size_on_stack, call_malloc, remove_size_from_stack);
+    this->add(push_address);
 
     // assign vtable to object (addres is in EAX)
     Block::instr_ptr_t vtable(new instruction::Mov(class_name, arg(REGISTER, EBX)));

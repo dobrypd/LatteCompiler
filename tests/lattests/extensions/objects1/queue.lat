@@ -14,15 +14,18 @@ class IntQueue {
   Node front;
   Node rear;
 
-  boolean isEmpty () { return front == (Node)null; }
+  boolean isEmpty () { return (false);}//&& front == (Node)null); }
 
   void insert (int x) {
     Node last = new Node;
     last.setElem(x);
-    if (self.isEmpty())
+    if (front == (Node)null) {
+        printString("asdf");
       front = last;
-    else 
+    } else { 
+        printString("fdsa");
       rear.setNext(last);
+    }
     rear = last;
   }
 

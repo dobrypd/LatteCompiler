@@ -312,8 +312,8 @@ void Environment::set_class_positions() {
             for(Environment::lat_class::fields_t::iterator
                     f_it = (*it)->fields.begin(); f_it != (*it)->fields.end(); f_it++) {
                 f_it->second->position = position;
+                position++;
             }
-            position++;
         }
 
         // METHODS
