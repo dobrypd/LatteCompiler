@@ -200,6 +200,12 @@ void InstructionManager::function_prologue()
     this->add(push, new_ebp);
 }
 
+void InstructionManager::align_stack()
+{
+    Block::instr_ptr_t andl(new instruction::And(arg(CONSTANT_FIELD, -16), arg(REGISTER, ESP)));
+    this->add(andl);
+}
+
 void InstructionManager::function_epilogue()
 {
     Block::instr_ptr_t restore_esp(new instruction::Mov(arg(REGISTER, EBP), arg(REGISTER, ESP)));

@@ -76,6 +76,9 @@ void Creator_x86::visitFnDef(FnDef *fndef)
     this->last_class = ClsInfoPtr();
     this->instruction_manager.new_function_block(fndef->ident_);
     this->instruction_manager.function_prologue();
+    if (fndef->ident_ == "main") {
+        //this->instruction_manager.align_stack();
+    }
     this->env.prepare();
     this->env.new_fun();
     fndef->type_->accept(this);
