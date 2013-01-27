@@ -33,16 +33,16 @@ Używane narzędzia i biblioteki:
 Do budowania parsera korzystam z narzędzia `bnfc`.
 Oprócz standardowych bibliotek (stl) korzystam z boost'a (shared pointery).
 
-Do zamiany kodu asemblera na program wykonywalny używam `gcc`.
-Do linkowania `ld`.
+Do zamiany kodu asemblera na program wykonywalny oraz do linkowania używam `gcc`.
 
 Predefiniowane funkcje znajdują się w katalogu `lib` w pliku
-`runtime.c`, skompilowane `runtime.o`. 
+`runtime.c`, skompilowane `runtime.o`.
 
 Zaimplementowane rozszerzenia:
 ------------------------------
 
-Zaimplementowałem tablice oraz obiekty (wraz z metodami wirtualnymi).
+ * tablice
+ * struktury, obiekty wraz z metodami wirtualnymi
 
 Struktura karalogów:
 --------------------
