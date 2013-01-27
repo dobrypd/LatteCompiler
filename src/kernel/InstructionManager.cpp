@@ -46,7 +46,7 @@ void Block::add(instr_ptr_t instruction)
     this->i_list.push_back(instruction);
 }
 
-
+// I'm using calloc because it zeroes allocated memory.
 const char * InstructionManager::calloc_name = "calloc";
 // Add strings from runtime
 const char * InstructionManager::add_strings = "addStrings_name_with_name_mangling_5594478149272763309697";
@@ -249,7 +249,7 @@ void InstructionManager::alloc_array()
 
     // Mov stack top to  EAX
     // EAX + 1
-    // EAX * 4
+    // push size
     // push EAX
     // call
     // pop / not used /
@@ -303,7 +303,6 @@ void InstructionManager::add_on_stack()
 void InstructionManager::sub_on_stack()
 {
     Block::instr_ptr_t load(new instruction::Pop(arg(REGISTER, EAX)));
-    // TODO:
     Block::instr_ptr_t sub(new instruction::Sub(arg(REGISTER, EAX), arg(MEMORY, ESP)));
     this->add(load, sub);
 }
@@ -490,12 +489,8 @@ void InstructionManager::jump_if_not0(int label_id)
 
 void InstructionManager::cmp_stack()
 {
-    // USE EDX and ECX
-    //Block::instr_ptr_t decrease_stack(new instruction::Add(arg(CONSTANT_FIELD, 8), arg(REGISTER, ESP)));
-    //Block::instr_ptr_t store(new instruction::Mov(arg(MEMORY, ESP, -8), arg(REGISTER, EAX)));
     Block::instr_ptr_t pop1(new instruction::Pop(arg(REGISTER, EDX)));
     Block::instr_ptr_t pop2(new instruction::Pop(arg(REGISTER, ECX)));
-    //Block::instr_ptr_t cmp(new instruction::Cmp(arg(REGISTER, EAX), arg(MEMORY, ESP, -4))); // XXX: check it
     Block::instr_ptr_t cmp(new instruction::Cmp(arg(REGISTER, EDX), arg(REGISTER, ECX)));
     this->add(pop1, pop2, cmp);
 }
@@ -529,10 +524,7 @@ void InstructionManager::foreach_jump(int counter_var_pos, int label)
 void InstructionManager::dereference_from_ESI_to_var(int varpos)
 {
     Block::instr_ptr_t load_array_len(new instruction::Mov(arg(MEMORY, ESI), arg(REGISTER, ECX)));
-    //Block::instr_ptr_t deref(new instruction::Mov(arg(MEMORY, ECX), arg(REGISTER, ECX)));
-    //Block::instr_ptr_t decrease(new instruction::Dec(arg(REGISTER, ECX)));
     Block::instr_ptr_t store_in_var(new instruction::Mov(arg(REGISTER, ECX), arg(MEMORY, EBP, -4 * varpos)));
-    //this->add(load_array_len, deref, decrease, store_in_var);
     this->add(load_array_len, store_in_var);
 }
 

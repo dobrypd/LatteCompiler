@@ -11,6 +11,8 @@ GRAMMAR_SUFIX=
 
 OBJECTS:=$(patsubst $(SRC)/kernel/%.cpp,$(BIN)/%.o,$(wildcard $(SRC)/kernel/*.cpp))
 
+RUNTIME_OBJ:=$(LIB)/runtime.o
+
 OPTDBG= -O2 -DNDEBUG
 ifeq ($(debug), 1)
 	OPTDBG= -g
@@ -23,7 +25,7 @@ CC=g++
 CFLAGS=-Wall -c $(OPTDBG) -D_ARCH_$(ARCH)
 LFLAGS=-Wall $(OPTDBG)
 
-all : $(GRAMMAR_BIN)/Parser.C $(PROJECT)
+all : $(GRAMMAR_BIN)/Parser.C $(PROJECT) $(RUNTIME_OBJ)
 
 $(GRAMMAR_BIN)/Parser.C: $(GRAMMAR)/$(PROJECT).cf
 	@echo -en "\033[38m\033[32mCompiling grammar...\033[0m\n"
@@ -36,6 +38,9 @@ $(GRAMMAR_BIN)/Parser.C: $(GRAMMAR)/$(PROJECT).cf
 	@$(MAKE) -C $(GRAMMAR_BIN) Parser.C
 	$(SCRIPTS)/fix_grammar.sh
 	@$(MAKE) -C $(GRAMMAR_BIN) $(GRAMMAR_OBJ)
+	
+$(RUNTIME_OBJ): $(LIB)/runtime.c
+	@$(MAKE) -C $(LIB)
 
 
 $(PROJECT): $(OBJECTS)
@@ -57,6 +62,7 @@ clean:
 	find $(ROOT) -iname "*.bak" | xargs rm -f
 	find $(ROOT) -iname "*.swp" | xargs rm -f
 	find $(ROOT) -iname "*~" | xargs rm -f
+	@$(MAKE) -C $(LIB) clean
 
 distclean: clean
 	rm -f $(BIN)/$(PROJECT)

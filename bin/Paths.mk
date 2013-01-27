@@ -9,3 +9,4 @@ GRAMMAR=$(SRC)/grammar
 GRAMMAR_BIN=$(BIN)/grammar
 TESTS=$(ROOT)/tests
 SCRIPTS=$(ROOT)/scripts
+LIB=$(ROOT)/lib

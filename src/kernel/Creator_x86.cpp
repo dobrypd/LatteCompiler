@@ -84,7 +84,7 @@ void Creator_x86::visitFnDef(FnDef *fndef)
     this->env.new_fun();  // To reset position size to 0!
     fndef->blk_->accept(this);
     if (check_is<Void*>(fndef->type_))
-        this->instruction_manager.function_epilogue(); // TODO: want it?
+        this->instruction_manager.function_epilogue();
     this->env.back(); // ESP will be changed by EBP
 }
 
@@ -248,7 +248,7 @@ void Creator_x86::visitStmCond(StmCond *stmcond)
 {
     int label_t = this->last_true_label = this->next_label++;
     int label_f = this->last_false_label = this->next_label++;
-    stmcond->expr_->accept(this);  // TODO: cond jumps optimization
+    stmcond->expr_->accept(this);
 
     this->instruction_manager.new_block(label_t);
     stmcond->stmt_->accept(this);
@@ -260,7 +260,7 @@ void Creator_x86::visitStmCondElse(StmCondElse *stmcondelse)
     int label_t = this->last_true_label = this->next_label++;
     int label_f = this->last_false_label =this->next_label++;
     int label_end = this->next_label++;
-    stmcondelse->expr_->accept(this);  // TODO: cond jumps optimization
+    stmcondelse->expr_->accept(this);
 
     this->instruction_manager.new_block(label_t);
     stmcondelse->stmt_1->accept(this);
@@ -695,7 +695,6 @@ void Creator_x86::visitERel(ERel *erel)
 
     this->instruction_manager.cmp_stack();
     erel->relop_->accept(this);
-    // TODO: Jumps optimization;
     this->instruction_manager.jump_if(this->last_rel, this_last_t_label);
     this->instruction_manager.jump(this_last_f_label);
 
@@ -720,7 +719,6 @@ void Creator_x86::visitEAnd(EAnd *eand)
     label_f = this->last_false_label = this->next_label++;
     eand->expr_2->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
-    // TODO: Jumps optimization;
     this->instruction_manager.jump_if_0(this_false_label);
     this->instruction_manager.jump(this_true_label);
 
@@ -744,7 +742,6 @@ void Creator_x86::visitEOr(EOr *eor)
     label_f = this->last_false_label = this->next_label++;
     eor->expr_2->accept(this);
     if (this->e_was_rel) this->bool_expr_to_stack(label_t, label_f);
-    // TODO: Jumps optimization;
     this->instruction_manager.jump_if_0(this_false_label);
     this->instruction_manager.jump(this_true_label);
 
