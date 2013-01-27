@@ -267,11 +267,11 @@ void InstructionManager::alloc_array()
     // DO NOT FORGET ABOUT ARRAY SIZE
     Block::instr_ptr_t size_to_EAX(new instruction::Mov(arg(MEMORY, ESP), arg(REGISTER, EAX)));
     Block::instr_ptr_t add_arr_size1(new instruction::Inc(arg(REGISTER, EAX)));
-    //Block::instr_ptr_t mul_by_word_size(new instruction::Imul(arg(CONSTANT_FIELD, 4), arg(REGISTER, EAX)));
+    Block::instr_ptr_t mul_by_word_size(new instruction::Imul(arg(CONSTANT_FIELD, 4), arg(REGISTER, EAX)));
     Block::instr_ptr_t push_argument(new instruction::Push(arg(REGISTER, EAX)));
     Block::instr_ptr_t call_malloc(new instruction::Call(InstructionManager::malloc_name));
     //this->add(size_to_EAX, add_arr_size1, mul_by_word_size, push_argument);
-    this->add(size_to_EAX, add_arr_size1, push_argument);
+    this->add(size_to_EAX, add_arr_size1, mul_by_word_size, push_argument);
     this->add(call_malloc);
     // Assign size of array
     // Remove this increased size
