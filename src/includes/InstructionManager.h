@@ -103,7 +103,6 @@ public:
     void function_epilogue();
     void function_call(std::string ident);
     void method_call(int position);
-    void align_stack();
 
     // Op on reg:
     void pop_to_EAX();

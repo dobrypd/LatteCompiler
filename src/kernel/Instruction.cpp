@@ -5,6 +5,7 @@
  */
 
 #include <sstream>
+#include "Creator_x86.h"
 #include "global.h"
 #include "Instruction.h"
 
@@ -126,7 +127,7 @@ std::string Mov::str() const {
         return std::string(this->cstr) + " " + this->arg1->str() + ", "
                         + this->arg2->str();
     } else {
-        return (std::string(this->cstr) + " $" + this->label + this->arg1->str());
+        return (std::string(this->cstr) + " $" + Creator_x86::v_table_ident(this->label) + ", " + this->arg1->str());
     }
 }
 

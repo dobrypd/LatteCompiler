@@ -1,0 +1,20 @@
+class A {
+    int a;
+    A b;
+    int g(A a) {
+        b = a;
+        printInt(a.a);
+        return 0;
+    }
+}
+int main()
+{
+    A a = new A;
+    A b = new A;
+    a.a = 12;
+    b.a = 10;
+    a.g(b);
+    a.g(b);
+    printInt(a.b.a);
+    return 0;
+}

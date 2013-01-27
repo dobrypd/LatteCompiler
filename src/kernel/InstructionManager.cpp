@@ -200,12 +200,6 @@ void InstructionManager::function_prologue()
     this->add(push, new_ebp);
 }
 
-void InstructionManager::align_stack()
-{
-    Block::instr_ptr_t andl(new instruction::And(arg(CONSTANT_FIELD, -16), arg(REGISTER, ESP)));
-    this->add(andl);
-}
-
 void InstructionManager::function_epilogue()
 {
     Block::instr_ptr_t restore_esp(new instruction::Mov(arg(REGISTER, EBP), arg(REGISTER, ESP)));
@@ -255,7 +249,7 @@ void InstructionManager::alloc_array()
 
     // Mov stack top to  EAX
     // EAX + 1
-    // // EAX * 4
+    // EAX * 4
     // push EAX
     // call
     // pop / not used /
@@ -287,12 +281,14 @@ void InstructionManager::alloc_object(std::string class_name, int all_fields)
     // all_fields contains pointer to virtual table (this pointer is in FIRST field)
     Block::instr_ptr_t obj_size_on_stack(new instruction::Push(arg(CONSTANT_FIELD, all_fields * 4)));
     Block::instr_ptr_t call_malloc(new instruction::Call(InstructionManager::malloc_name));
-    Block::instr_ptr_t remove_size_from_stack(new instruction::Inc(arg(REGISTER, ESP)));
+    Block::instr_ptr_t remove_size_from_stack(new instruction::Add(arg(CONSTANT_FIELD, 4), arg(REGISTER, ESP)));
     Block::instr_ptr_t push_address(new instruction::Push(arg(REGISTER, EAX)));
     this->add(obj_size_on_stack, call_malloc, remove_size_from_stack, push_address);
 
     // assign vtable to object (addres is in EAX)
-    Block::instr_ptr_t vtable(new instruction::Mov(class_name, arg(MEMORY, EAX)));
+    Block::instr_ptr_t vtable(new instruction::Mov(class_name, arg(REGISTER, EBX)));
+    Block::instr_ptr_t save(new instruction::Mov(arg(REGISTER, EBX), arg(MEMORY, EAX)));
+    this->add(vtable, save);
 }
 
 void InstructionManager::add_on_stack()

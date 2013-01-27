@@ -76,9 +76,6 @@ void Creator_x86::visitFnDef(FnDef *fndef)
     this->last_class = ClsInfoPtr();
     this->instruction_manager.new_function_block(fndef->ident_);
     this->instruction_manager.function_prologue();
-    if (fndef->ident_ == "main") {
-        //this->instruction_manager.align_stack();
-    }
     this->env.prepare();
     this->env.new_fun();
     fndef->type_->accept(this);
@@ -547,11 +544,12 @@ void Creator_x86::function_call(std::string& ident,
     }
     else
     {
+        arguments->accept(this);
         std::string self = Creator_x86::self_name;
         CompilerEnvironment::VarInfoPtr v = this->env.get_variable(self);
         this->instruction_manager.add_to_ESI_val_address(v->position);
-        this->instruction_manager.push_ESI();  //SELF
-        arguments->accept(this);
+        this->instruction_manager.dereference_ESI();
+        this->instruction_manager.push_ESI();  // SELF
         this->method_call(this->last_class_type.ident_, ident);
         this->instruction_manager.add_to_ESP(1 + arguments->size());
     }
@@ -576,6 +574,7 @@ void Creator_x86::visitEApp(EApp *eapp)
 
 void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
 {
+    emethodapp->listexpr_->accept(this);  // arguments
     this->ident_type = 0;
     for (ListStructuredIdent::iterator
             i = emethodapp->liststructuredident_->begin();
@@ -583,6 +582,8 @@ void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
     {
         (*i)->accept(this);
     }
+    this->instruction_manager.dereference_ESI();
+    this->instruction_manager.push_ESI();  // SELF
 
     // Do not accept method name.
     SingleIdent* sid = dynamic_cast<SingleIdent*>(
@@ -592,8 +593,6 @@ void Creator_x86::visitEMethodApp(EMethodApp *emethodapp)
     frontend::Environment::FunInfoPtr fun = this->fr_env.get_method(sid->ident_,
                 cls_type->ident_);
 
-    this->instruction_manager.push_ESI();  // object
-    emethodapp->listexpr_->accept(this);  // arguments
     this->method_call(cls_type->ident_, sid->ident_);
     this->instruction_manager.add_to_ESP(1 + emethodapp->listexpr_->size());
 

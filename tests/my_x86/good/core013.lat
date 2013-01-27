@@ -1,0 +1,45 @@
+class A {
+    int a;
+    int b;
+
+    int f(int a, int b, int c)
+    {
+        printString("Funciton f from A loaded with args:");
+        printInt(a);
+        printInt(b);
+        printInt(c);
+        self.a = a+1;
+        self.b = b*2;
+        return a+b+c;
+    }
+
+    void g()
+    {
+        printString("Function g from A loaded");
+    }
+}
+
+class B extends A {
+    int f(int a, int b, int c)
+    {
+        printString("Functions f from B loaded with args:");
+        printInt(a);
+        printInt(b);
+        printInt(c);
+        return a*b*c;
+    }
+}
+
+int main() {
+    A a = new A;
+    A b = new B;
+
+    printString("Load function f from A");
+    a.f(10, 20, 30);
+    printString("Load function f from B");
+    b.f(1, 2, 3);
+    printString("Load function g from B");
+    b.g();
+    
+    return 0;
+}

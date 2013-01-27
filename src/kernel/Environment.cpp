@@ -267,7 +267,6 @@ std::map<std::string,Environment::ClsInfoPtr>::iterator Environment::get_env_cls
 
 Environment::MethodsPtr Environment::get_class_methods_list(std::string& cls_name)
 {
-    std::set<std::string> already_added;
     Environment::MethodsPtr methods(new std::vector<PairOfStrPtr>);
     ClsInfoPtr cls = this->get_class(cls_name);
     std::list<ClsInfoPtr> inheritance_chain;
@@ -357,6 +356,7 @@ Environment::VarInfoPtr Environment::get_field(std::string & ident, std::string 
 
 Environment::FunInfoPtr Environment::get_method(std::string & ident, std::string & cls_name)
 {
+    //if (debug) std::cout << "get method " << ident << " from class: " << cls_name << std::endl;
     ClsInfoPtr cls = this->get_class(cls_name);
     Environment::FunInfoPtr fun;
     std::list<ClsInfoPtr> inheritance_chain;
@@ -366,6 +366,7 @@ Environment::FunInfoPtr Environment::get_method(std::string & ident, std::string
     }
     for (std::list<ClsInfoPtr>::iterator it = inheritance_chain.begin();
             it != inheritance_chain.end(); it++) {
+        //if (debug) std::cout << "\tsearching in " << (*it)->ident << std::endl;
         lat_class::methods_t::iterator fun_it = (*it)->methods.find(ident);
         if (fun_it != (*it)->methods.end()) return fun_it->second;
     }
