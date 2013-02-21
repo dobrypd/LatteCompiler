@@ -32,7 +32,7 @@ Structure of directories:
  * `/src/includes/` headers,
  * `/bin/` built elements,
  * `/scripts/` scripts, ie testing,
- * `/testy/` tests,
+ * `/tests/` tests,
 
  
 Latte language characteristic:
