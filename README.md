@@ -17,7 +17,7 @@ With debug output:
 Running:
 -------------
 
-`$ ./latc_x86 nazwa_pliku`
+`$ ./latc_x86 file_name`
 
 Run:
 
