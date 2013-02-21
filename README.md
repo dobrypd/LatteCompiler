@@ -5,53 +5,40 @@ Author Piotr Dobrowolski
 
 pd291528@students.mimuw.edu.pl
 
-Kompilacja:
+Compilation:
 -----------
-
-W katalogu głównym wywołanie:
 
 `$ make`
 
-Jeżeli razem z debugowym outputem:
+With debug output:
 
 `$ make debug=1`
 
-Uruchamianie:
+Running:
 -------------
-
-W katalogu głównym:
 
 `$ ./latc_x86 nazwa_pliku`
 
-Uruchom:
+Run:
 
-`$ ./latc_x86 -h` żeby uzyskać więcej informacji.
+`$ ./latc_x86 -h` for more help.
 
-Używane narzędzia i biblioteki:
--------------------------------
-
-Do budowania parsera korzystam z narzędzia `bnfc`.
-Oprócz standardowych bibliotek (stl) korzystam z boost'a (shared pointery).
-
-Do zamiany kodu asemblera na program wykonywalny oraz do linkowania używam `gcc`.
-
-Predefiniowane funkcje znajdują się w katalogu `lib` w pliku
-`runtime.c`, skompilowane `runtime.o`.
-
-Zaimplementowane rozszerzenia:
-------------------------------
-
- * tablice
- * struktury, obiekty wraz z metodami wirtualnymi
-
-Struktura karalogów:
+Structure of directories:
 --------------------
 
- * `/src/` źródła,
- * `/src/grammar` gramatyka bnfc,
- * `/src/kernel/` pliki cpp,
- * `/src/includes/` nagłówki,
- * `/bin/` elementy zbudowane,
- * `/scripts/` skrypty, np. do testowania,
- * `/testy/` testy,
-  
+ * `/src/` sources,
+ * `/src/grammar` bnfc grammar,
+ * `/src/kernel/` cpp files,
+ * `/src/includes/` headers,
+ * `/bin/` built elements,
+ * `/scripts/` scripts, ie testing,
+ * `/testy/` tests,
+
+ 
+Latte language characteristic:
+---------------
+
+Latte is quite simmilar to Java. Best way to know basic structure is to
+read tests (`/tests/lattests`). Otherwise you can compile whole project
+go to `/bin/grammar` and `make` to create grammar documentation.
+
